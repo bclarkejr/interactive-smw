@@ -30,8 +30,6 @@ def load_season(path: Path) -> Season:
     missing = [k for k in _REQUIRED if k not in raw]
     if missing:
         raise ValueError(f"{path}: missing required key(s): {', '.join(missing)}")
-    if raw["window_start"] > raw["window_end"]:
-        raise ValueError(f"{path}: window_start is after window_end")
     unknown = set(raw) - {f.name for f in fields(Season)}
     if unknown:
         raise ValueError(f"{path}: unknown key(s): {', '.join(sorted(unknown))}")
@@ -46,6 +44,8 @@ def _validate(s: Season, where: str) -> None:
     for name in ("window_start", "window_end"):
         if not isinstance(getattr(s, name), date):
             raise ValueError(f"{where}: {name} must be a date")
+    if s.window_start > s.window_end:
+        raise ValueError(f"{where}: window_start is after window_end")
     for name in ("year", "seed"):
         if not isinstance(getattr(s, name), int) or isinstance(getattr(s, name), bool):
             raise ValueError(f"{where}: {name} must be an integer")
