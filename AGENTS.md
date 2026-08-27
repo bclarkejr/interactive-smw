@@ -3,15 +3,10 @@
 Summer Movie Wager — Python ≥3.11 static-site generator (batch pipeline, static HTML output). This repo also serves as a learning ground for a fully agentic coding workflow (see CONTRIBUTING.md).
 
 ## Deterministic checks (must pass before any review round)
-> STACK NOT YET CONFIRMED — replace this section once it is.
-> Planned (superpowers/plans/2026-08-15-standalone-rebuild.md, Task 1): pyproject.toml + pytest; `uv` is available locally; ruff/mypy not yet decided.
-- Install: TODO (e.g. `uv sync` / `npm ci`)
-- Test: TODO (e.g. `uv run pytest` / `npm test`)
-- Lint: TODO (e.g. `uv run ruff check .` / `npm run lint`)
-- Types/Build: TODO (e.g. `uv run mypy .` / `npm run build`)
-> While these are TODO, agents must report "deterministic checks not
-> yet configured" in every review summary — never skip silently and
-> never invent commands.
+- Install: `uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -e '.[dev]'`
+- Test: `.venv/bin/pytest`
+- Lint: not configured
+- Types/Build: not configured
 
 ## Conventions
 - Reproducible output: identical inputs must produce byte-identical HTML across builds; nothing reads wall-clock time except an explicitly passed `--date`.
