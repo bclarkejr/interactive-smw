@@ -55,3 +55,19 @@ the script's stdout/stderr to `round-N.log`.
 
 - After fixes: 165 passed. Real build (`out/`) unchanged.
 
+## Round 3 (cap) — 2026-08-26 22:56 EDT
+
+- Reviewed head: `4f08a84` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking) · raw: `round-3.json`
+- Deterministic checks before review: 165 passed.
+- **Hard cap of 3 rounds reached — loop stopped. Nothing below has been changed in code.**
+  Each finding is assessed here for the user to decide; `4f08a84` is the last reviewed commit.
+
+| # | Sev | File | Finding (verbatim summary) | My assessment |
+|---|-----|------|----------------------------|---------------|
+| 1 | med | `smw/render/build.py:99` | `chart_floor(raw)` runs before `windowed()` enforces Guard A; an empty parse dies with `min() arg is an empty sequence` instead of the Guard A message | **Agree.** Real, ~2-line fix: call `windowed(raw, season)` (or check `raw`) before `chart_floor`. Recommend fixing. |
+| 2 | med | `smw/render/build.py:158` | `refresh_dates` is read from the box-office history *before* today's rows are appended, so a degraded *production* refresh still doesn't get its gap; my round-2 test passed only because today's date also appears in the page header | **Agree — and the reviewer is right that my test was weak.** Fix: add `today.isoformat()` to `refresh_dates` on non-local runs (or append box-office rows before rendering) and assert on the SVG/table rather than the whole page. Recommend fixing. |
+| 3 | med | `smw/__main__.py:8` | `--date` defaults to `date.today()`, so the same inputs built on different days differ; README's production command omits `--date` | **Disputed / judgment call.** The plan (Task 19) explicitly specifies "`--date` defaults to the real today; every other date in the system flows from this argument", and spec §1.3 allows wall-clock only via `--date` — the CLI boundary supplying a default is the intended operator convenience; the pipeline itself is reproducible given `today`. Reviewer's reading is stricter but defensible: making `--date` required is a one-line change plus README edits. User's call. |
+
+### Where things stand
+- Reviewed/approved SHA: **none** — the branch was never approved. Last reviewed commit `4f08a84`.
+- Suggested next step: apply #1 and #2 (both small), decide #3, checkpoint, run `/cross-review superpowers/specs/2026-08-15-standalone-rebuild-spec.md` once more.
