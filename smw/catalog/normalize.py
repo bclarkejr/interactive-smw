@@ -87,3 +87,74 @@ def load_preopening(path: Path) -> dict[str, PreopeningEstimate]:
             raise ValueError(f"{path}: '{title}' has unknown key(s): {', '.join(sorted(unknown))}")
         out[title] = PreopeningEstimate(**fields_)
     return out
+
+
+@dataclass(frozen=True)
+class Film:
+    title: str
+    release_date: date
+    status: str          # pre_release | in_theaters | closed
+    category: str        # wide | animated_family
+    cumulative_gross: float
+    estimate: "PreopeningEstimate | None"
+
+
+def build_films(
+    season: Season,
+    groups: list[Group],
+    chart_rows: list[ChartRow],
+    grosses: dict[str, float],
+    carried: set[str],
+    overrides: dict[str, Override],
+    preopening: dict[str, PreopeningEstimate],
+    today: date,
+) -> list[Film]:
+    chart_by_title = {r.title: r for r in chart_rows}
+
+    # §6.2 candidate set: rosters ∪ estimate keys ∪ top chart contenders ∪ carried.
+    candidates: set[str] = set()
+    for g in groups:
+        for p in g.players.values():
+            candidates.update(canonical(t, overrides) for t in p.ranked + p.dark_horses)
+    candidates.update(canonical(t, overrides) for t in preopening)
+    top_chart = sorted(chart_rows, key=lambda r: -r.gross)[: season.chart_contenders]
+    candidates.update(r.title for r in top_chart)
+    candidates.update(carried)
+
+    pre_canon = {canonical(t, overrides): e for t, e in preopening.items()}
+
+    films: list[Film] = []
+    for title in sorted(candidates):
+        ov = overrides.get(title)
+        est = pre_canon.get(title)
+        gross = grosses.get(title, 0.0)
+        row = chart_by_title.get(title)
+
+        # Release-date precedence: override → chart → estimates → today (if grossing) → window_end.
+        if ov and ov.release_date:
+            release = ov.release_date
+        elif row:
+            release = row.release_date
+        elif est and est.release_date:
+            release = est.release_date
+        elif gross > 0:
+            release = today
+        else:
+            release = season.window_end
+
+        # Status inference, in spec order.
+        if ov and ov.status:
+            status = ov.status
+        elif release > today:
+            status = "pre_release"
+        elif gross > 0 and title not in chart_by_title:
+            status = "closed"
+        elif gross > 0:
+            status = "in_theaters"
+        else:
+            status = "pre_release"
+
+        category = ov.category if ov and ov.category else "wide"
+        films.append(Film(title=title, release_date=release, status=status,
+                          category=category, cumulative_gross=gross, estimate=est))
+    return films
