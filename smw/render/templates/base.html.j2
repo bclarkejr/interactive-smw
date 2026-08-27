@@ -3,32 +3,44 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ title }} · {{ display_name }}</title>
+<title>{{ title }} · Summer Movie Wager {{ year }} · {{ display_name }}</title>
 <script>{{ theme_js }}</script>
 <style>{{ css }}</style>
-{% block head_extra %}{% endblock %}
 </head>
 <body>
-<div class="shell{% if wide_shell %} wide{% endif %}">
-<header>
-  <div class="masthead">
-    <h1>{{ display_name }}</h1>
-    <p class="season-line">{{ season_label }} · {{ window_label }} · refreshed {{ refreshed }}</p>
-    <button id="theme-toggle" type="button" aria-label="Toggle light/dark theme">◐</button>
+<div class="wrap">
+
+<header class="site">
+  <div>
+    <h1>🍿 Summer Movie Wager</h1>
+    <div class="sub">Wager window: {{ window_label }} &nbsp;·&nbsp; <span class="small">Refreshed {{ refreshed }}</span>
+      <label class="vh" for="yearSelect">Season</label>
+      <select id="yearSelect" class="sel" onchange="location.href=this.value">
+        {%- for o in year_options %}<option value="{{ o.value }}"{% if o.selected %} selected{% endif %}>{{ o.label }}</option>{% endfor -%}
+      </select>
+      <label class="vh" for="groupSelect">Group</label>
+      <select id="groupSelect" class="sel" onchange="location.href=this.value">
+        {%- for o in group_options %}<option value="{{ o.value }}"{% if o.selected %} selected{% endif %}>{{ o.label }}</option>{% endfor -%}
+      </select>
+    </div>
   </div>
-  <nav aria-label="Site">
-    {% for href, label, key in nav -%}
-    <a class="pill{% if key == active %} current{% endif %}" href="{{ href }}"
-       {% if key == active %}aria-current="page"{% endif %}>{{ label }}</a>
-    {% endfor -%}
-  </nav>
+  <button id="themeToggle" type="button" aria-label="Toggle color theme">◐ Theme</button>
 </header>
-<main>
+
+<nav class="pills" aria-label="Site">
+  {% for href, label, key in nav -%}
+  <a href="{{ href }}"{% if key == active %} aria-current="page"{% endif %}>{{ label }}</a>
+  {% endfor -%}
+</nav>
+
 {% block content %}{% endblock %}
-</main>
-<footer>
-  <a href="data.json">data.json</a> · <a href="rules.html">Scoring rules</a>
+
+<footer class="site">
+  Raw numbers: <a href="data.json">data.json</a> &nbsp;·&nbsp;
+  <a href="rules.html">Scoring rules</a> &nbsp;·&nbsp;
+  <span class="small">{{ forecast_note }}</span>
 </footer>
+
 </div>
 </body>
 </html>

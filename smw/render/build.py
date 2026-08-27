@@ -13,7 +13,7 @@ from smw.ingest.boxoffice import chart_floor, fetch_chart, parse_chart, windowed
 from smw.model.project import MovieCatalog, build_catalog
 from smw.model.simulate import MIN_FILMS_FOR_TOP_TEN, SimResult, simulate
 from smw.render.chart import build_history_data
-from smw.render.page import (base_context, build_scenarios_view, build_whatif_data,
+from smw.render.page import (Site, base_context, build_scenarios_view, build_whatif_data,
                              make_env, render_history, render_leaderboard,
                              render_redirect, render_rules, render_scenarios,
                              render_whatif)
@@ -118,15 +118,17 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
         raise ValueError(f"{seasons_root}: no seasons found (an empty site is an error)")
     loaded = [load_season_dir(p) for p in season_dirs]  # dir name == year, so sorted by year
     env = make_env()
+    years = tuple((s.year, s.default_group) for s, _ in sorted(loaded, key=lambda x: -x[0].year))
     for season_dir, (season, groups) in zip(season_dirs, loaded):
         _build_season(env, season_dir, out_dir / str(season.year), season, groups,
-                      today, local)
+                      years, today, local)
     newest, _ = loaded[-1]
     render_redirect(env, out_dir, f"{newest.year}/{newest.default_group}/index.html")
 
 
 def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
-                  groups: list[Group], today: date, local: bool) -> None:
+                  groups: list[Group], years: tuple[tuple[int, str], ...],
+                  today: date, local: bool) -> None:
     overrides = load_overrides(season_dir / "movies_overrides.yaml")
     groups = [canonical_group(g, overrides) for g in groups]  # §6.5 point 2
     preopening = load_preopening(season_dir / "preopening_projections.yaml")
@@ -176,6 +178,15 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
                   f"({MIN_FILMS_FOR_TOP_TEN if final else season.min_projections_for_forecast}"
                   " required for a meaningful top-ten ranking)")
 
+    site = Site(
+        years=years,
+        groups=tuple((g.group_id, g.display_name)
+                     for g in sorted(groups, key=lambda g: (g.display_name, g.group_id))),
+        forecast_note=(f"Forecast: {season.monte_carlo_trials:,} seeded Monte Carlo seasons "
+                       f"over {non_zero} projected films." if forecastable
+                       else f"Forecast: unavailable — {reason}."),
+    )
+
     # Date axis = every production refresh (box-office history), so a degraded
     # refresh shows as a gap in each line rather than vanishing (§12.4).
     refresh_dates = {d.isoformat() for obs in history.values() for d, _ in obs}
@@ -187,23 +198,23 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
         sim = simulate(season, group, catalog) if forecastable else None
         current_points = {u: score_player(group.players[u], actual_top)
                           for u in group.players}
-        ctx = base_context(season, group, "leaderboard", today)
         view = build_leaderboard_view(season, group, catalog, sim, current_points,
                                       actual_top, reason, today)
-        render_leaderboard(env, group_out, ctx, view)
-        render_whatif(env, group_out, {**ctx, "active": "whatif"},
+        ctx = lambda page: base_context(season, group, page, today, site)  # noqa: E731
+        render_leaderboard(env, group_out, ctx("leaderboard"), view)
+        render_whatif(env, group_out, ctx("whatif"),
                       build_whatif_data(season, group, catalog, sim) if sim else None,
                       reason)
-        render_scenarios(env, group_out, {**ctx, "active": "scenarios"},
+        render_scenarios(env, group_out, ctx("scenarios"),
                          build_scenarios_view(group, sim) if sim else None, reason)
         forecast_path = season_dir / "forecast_history" / f"{group.group_id}.jsonl"
         if not local and sim is not None:
             # Appended before the history page renders so the page includes this refresh.
             forecast_path.parent.mkdir(exist_ok=True)
             append_forecast_history(forecast_path, sim, today)
-        render_history(env, group_out, {**ctx, "active": "history"},
+        render_history(env, group_out, ctx("history"),
                        build_history_data(_load_forecast_rows(forecast_path), refresh_dates))
-        render_rules(env, group_out, {**ctx, "active": "rules"})
+        render_rules(env, group_out, ctx("rules"))
         (group_out / "data.json").write_text(json.dumps(
             build_data_json(season, group, catalog, sim, current_points,
                             non_zero, reason, today),

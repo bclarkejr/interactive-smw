@@ -1,6 +1,7 @@
 """Jinja environment, shared context, page writer (spec §11.4, §13.1–13.2).
 The render layer MUST NOT sort, rank, or compute — view models arrive finished."""
 import json
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
@@ -24,6 +25,13 @@ NAV = [
     ("scenarios.html", "🔮 Winning Scenarios", "scenarios"),
     ("history.html", "📈 Odds Over Time", "history"),
 ]
+PAGES = {  # active key → (filename, page title)
+    "leaderboard": ("index.html", "Leaderboard"),
+    "whatif": ("whatif.html", "What If?"),
+    "scenarios": ("scenarios.html", "Winning Scenarios"),
+    "history": ("history.html", "Odds Over Time"),
+    "rules": ("rules.html", "Scoring rules"),
+}
 
 
 def json_embed(obj) -> Markup:
@@ -53,7 +61,21 @@ def make_env() -> Environment:
     return env
 
 
-def base_context(season: Season, group: Group, active: str, today: date) -> dict:
+@dataclass(frozen=True)
+class Site:
+    """Cross-season / cross-group facts a page needs for its masthead (spec §4)."""
+    years: tuple[tuple[int, str], ...]     # (year, default_group_id), newest first
+    groups: tuple[tuple[str, str], ...]    # (group_id, display_name), by display_name
+    forecast_note: str
+
+
+def base_context(season: Season, group: Group, active: str, today: date,
+                 site: Site | None = None) -> dict:
+    if site is None:  # single-page renders (tests): one year, one group
+        site = Site(((season.year, group.group_id),),
+                    ((group.group_id, group.display_name),),
+                    "Forecast: unavailable — no forecast.")
+    filename = PAGES[active][0]
     return {
         # Repo-controlled build assets, inlined verbatim; everything external
         # still flows through autoescape.
@@ -62,13 +84,24 @@ def base_context(season: Season, group: Group, active: str, today: date) -> dict
         "nav": NAV,
         "active": active,
         "display_name": group.display_name,
-        "season_label": f"Summer {season.year}",
+        "year": season.year,
         "window_label": (
             f"{season.window_start.strftime('%b %-d')} – "
             f"{season.window_end.strftime('%b %-d, %Y')}"
         ),
-        "refreshed": today.isoformat(),
-        "wide_shell": False,
+        "window_and": (
+            f"{season.window_start.strftime('%b %-d')} and "
+            f"{season.window_end.strftime('%b %-d, %Y')}"
+        ),
+        "refreshed": today.strftime("%b %-d, %Y"),
+        "trials": f"{season.monte_carlo_trials:,}",
+        "year_options": [
+            {"value": f"../../{y}/{g}/index.html", "label": str(y), "selected": y == season.year}
+            for y, g in site.years],
+        "group_options": [
+            {"value": f"../{gid}/{filename}", "label": name, "selected": gid == group.group_id}
+            for gid, name in sorted(site.groups, key=lambda t: (t[1], t[0]))],
+        "forecast_note": site.forecast_note,
     }
 
 
@@ -94,7 +127,7 @@ def render_rules(env: Environment, out_dir: Path, ctx: dict) -> None:
 
 def render_leaderboard(env: Environment, out_dir: Path, ctx: dict, view) -> None:
     write_page(env, "index.html.j2", out_dir, "index.html",
-               {**ctx, "title": "Leaderboard", "wide_shell": True, "view": view})
+               {**ctx, "title": "Leaderboard", "view": view})
 
 
 def build_whatif_data(season: Season, group: Group,

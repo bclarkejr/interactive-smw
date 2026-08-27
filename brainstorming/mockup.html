@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Summer Movie Wager 2026 — Mockup</title>
+<script>
+/* Theme resolution runs in the head, before body paint (spec §13.2). */
+(function(){try{var t=localStorage.getItem('smw-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
+<style>
+/* ---------- tokens: light on :root; dark via toggle attr AND os pref (spec §13.2) ---------- */
+:root{
+  --bg:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,.10);
+  --affirm:#006300; --neg:#b3261e; --accent:#2a78d6; --pill:#eceae4; --hl:#fdf6e3;
+  --s-bclarke:#2a78d6; --s-brettfern:#eb6834; --s-carleigh:#1baf7a;
+  --s-dmartin:#eda100; --s-emsullivan:#e87ba4; --s-vivrad:#008300;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10);
+  --affirm:#0ca30c; --neg:#e66767; --accent:#3987e5; --pill:#26262a; --hl:#26231a;
+  --s-bclarke:#3987e5; --s-brettfern:#d95926; --s-carleigh:#199e70;
+  --s-dmartin:#c98500; --s-emsullivan:#d55181; --s-vivrad:#008300;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10);
+    --affirm:#0ca30c; --neg:#e66767; --accent:#3987e5; --pill:#26262a; --hl:#26231a;
+    --s-bclarke:#3987e5; --s-brettfern:#d95926; --s-carleigh:#199e70;
+    --s-dmartin:#c98500; --s-emsullivan:#d55181; --s-vivrad:#008300;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px 60px}
+a{color:var(--accent)}
+h1{font-size:1.5rem;margin:.2rem 0 0}
+h2{font-size:1.12rem;margin:2.2rem 0 .7rem}
+.sub{color:var(--ink2)}
+.small{font-size:.85rem;color:var(--muted)}
+
+.mocknote{background:var(--hl);border:1px solid var(--border);border-radius:8px;
+  padding:8px 14px;margin:16px 0;font-size:.85rem;color:var(--ink2)}
+
+header.site{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-top:26px}
+#themeToggle{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:6px 12px;cursor:pointer;color:var(--ink);font-size:.85rem}
+
+/* ---------- nav pills (§11.2) ---------- */
+nav.pills{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+nav.pills a{background:var(--pill);color:var(--ink);text-decoration:none;border-radius:999px;
+  padding:7px 16px;font-size:.9rem;border:1px solid transparent}
+nav.pills a[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+nav.pills a:hover:not([aria-current]){border-color:var(--border)}
+
+/* ---------- tables ---------- */
+.scroller{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:6px 10px;text-align:right;white-space:nowrap;
+  font-variant-numeric:tabular-nums;border-bottom:1px solid var(--grid)}
+th{color:var(--ink2);font-weight:600}
+thead th{position:sticky;top:0;background:var(--surface);z-index:2}
+td.t,th.t{text-align:left}
+tr.divider td{border-bottom:2px dashed var(--baseline);color:var(--muted);
+  text-align:center;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;padding:3px}
+tfoot td{font-weight:700;border-top:2px solid var(--baseline);border-bottom:none}
+tfoot tr.odds td{font-weight:400;color:var(--ink2)}
+.pos{color:var(--affirm);font-weight:600}
+.zero{color:var(--muted)}
+.dash{color:var(--muted)}
+.up{color:var(--affirm)} .down{color:var(--neg)}
+.badge{display:inline-block;font-size:.72rem;border:1px solid var(--border);border-radius:999px;
+  padding:1px 8px;color:var(--ink2);background:var(--pill)}
+.hlcol{background:var(--hl)}
+.crown::after{content:" 👑"}
+
+/* ---------- accordions ---------- */
+details.acc{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  margin:8px 0;padding:0 14px}
+details.acc summary{cursor:pointer;padding:10px 0;font-weight:600}
+details.acc summary .stats{font-weight:400;color:var(--ink2);font-size:.86rem}
+details.acc[open]{padding-bottom:12px}
+
+/* ---------- what-if (§12.2) ---------- */
+.wi{display:grid;grid-template-columns:minmax(340px,1fr) minmax(280px,340px);gap:22px;align-items:start}
+ol.wi-list{list-style:none;counter-reset:slot;margin:0;padding:0}
+ol.wi-list li{counter-increment:slot;display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:6px 10px;margin:5px 0;cursor:grab}
+ol.wi-list li::before{content:counter(slot);min-width:1.7em;text-align:right;
+  color:var(--ink2);font-variant-numeric:tabular-nums;font-weight:600}
+ol.wi-list li:nth-child(10){border-bottom:3px dashed var(--baseline);position:relative;margin-bottom:22px}
+ol.wi-list li:nth-child(10)::after{content:"— top-10 cutoff —";position:absolute;left:0;right:0;
+  bottom:-20px;text-align:center;font-size:.72rem;color:var(--muted);letter-spacing:.08em}
+ol.wi-list li:nth-child(n+11){opacity:.55}
+ol.wi-list li .film{flex:1}
+ol.wi-list li.dragging{opacity:.4}
+.mv{display:flex;gap:4px}
+.mv button{background:var(--pill);color:var(--ink);border:1px solid var(--border);border-radius:6px;
+  width:26px;height:24px;cursor:pointer;line-height:1}
+.wi-panel{position:sticky;top:14px;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px}
+.wi-panel h3{margin:0 0 8px;font-size:1rem}
+.wi-panel table{font-size:.86rem}
+#wiReset{margin-top:10px;background:var(--pill);color:var(--ink);border:1px solid var(--border);
+  border-radius:8px;padding:6px 14px;cursor:pointer}
+
+/* ---------- scenarios (§12.3) ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.tabs button{background:var(--pill);color:var(--ink);border:1px solid var(--border);
+  border-radius:999px;padding:7px 14px;cursor:pointer;font-size:.88rem}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:600}
+.tabs button:disabled{opacity:.45;cursor:not-allowed}
+.caption{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;margin:10px 0;font-size:.92rem}
+td.mid{color:var(--muted)}
+
+/* ---------- history chart (§12.4) ---------- */
+.chartbox{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+svg text{font:11px system-ui,-apple-system,"Segoe UI",sans-serif;fill:var(--muted)}
+svg text.dl{font-size:12px;font-weight:600;fill:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:.86rem;color:var(--ink2)}
+.legend .sw,.dlsw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:baseline}
+#tipbox{position:fixed;pointer-events:none;background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;font-size:.8rem;display:none;z-index:9;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+
+/* ---------- locked / rules ---------- */
+.locked{text-align:center;color:var(--ink2);padding:70px 20px;background:var(--surface);
+  border:1px solid var(--border);border-radius:10px}
+footer.site{margin-top:48px;border-top:1px solid var(--grid);padding-top:14px;font-size:.85rem;color:var(--ink2)}
+.page{display:none}.page.active{display:block}
+@media(max-width:700px){
+  body{font-size:14px}
+  th,td{padding:4px 7px}
+  .wi{grid-template-columns:1fr}
+  .wi-panel{position:static}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <div>
+    <h1>🍿 Summer Movie Wager 2026</h1>
+    <div class="sub">Wager window: May 1 – Sep 7, 2026 &nbsp;·&nbsp; <span class="small">Refreshed Aug 15, 2026</span></div>
+  </div>
+  <button id="themeToggle" aria-label="Toggle color theme">◐ Theme</button>
+</header>
+
+<div class="mocknote"><strong>Mockup.</strong> Sample data, single file. The real build ships five
+separate static pages (<code>index / whatif / scenarios / history / rules</code>) — the nav below
+switches sections here to simulate that. All points shown are genuinely computed from the sample
+picks and finish orders, so every column sums.</div>
+
+<nav class="pills" aria-label="Site">
+  <a href="#leaderboard" data-page="leaderboard" aria-current="page">🏆 Leaderboard</a>
+  <a href="#whatif" data-page="whatif">🎬 What If?</a>
+  <a href="#scenarios" data-page="scenarios">🔮 Winning Scenarios</a>
+  <a href="#history" data-page="history">📈 Odds Over Time</a>
+</nav>
+
+<!-- ============================= LEADERBOARD ============================= -->
+<section id="leaderboard" class="page active">
+
+  <h2>🏆 Projected Standings</h2>
+  <div class="scroller"><table id="matrix"></table></div>
+  <p class="small">Rows: top 15 films by projected median in-window gross. Cells are each film's
+  projected points for that player; grey 0 = on their roster but outside the projected top ten,
+  — = not picked. Columns are ordered by simulated median points.</p>
+
+  <h2>📋 All Players' Lists</h2>
+  <div class="scroller"><table id="lists"></table></div>
+
+  <h2>👤 Per-Player Detail</h2>
+  <div id="detail"></div>
+
+  <h2>🎞️ Films</h2>
+  <details class="acc"><summary>Show all tracked films <span class="stats">(17 films · projections, ranges, provenance)</span></summary>
+    <div class="scroller" style="border:none"><table id="films"></table></div>
+  </details>
+
+</section>
+
+<!-- ============================= WHAT IF? ============================= -->
+<section id="whatif" class="page">
+  <h2>🎬 What If? sandbox</h2>
+  <p class="sub">Drag the films into any finish order — or use the ▲▼ buttons — and watch every
+  player's score recompute.</p>
+  <div class="wi">
+    <div>
+      <ol class="wi-list" id="wiList"></ol>
+      <p class="small">Films outside the projected top 15 can't be dragged in and score 0.</p>
+    </div>
+    <div class="wi-panel">
+      <h3>If it ends this way…</h3>
+      <div aria-live="polite"><table id="wiStandings"></table></div>
+      <button id="wiReset">↺ Reset to projected order</button>
+    </div>
+  </div>
+  <h2>Points by film, for this order</h2>
+  <div class="scroller"><table id="wiGrid"></table></div>
+</section>
+
+<!-- ============================= SCENARIOS ============================= -->
+<section id="scenarios" class="page">
+  <h2>🔮 Winning Scenarios</h2>
+  <p class="sub">Pick a player to see the single most-likely top-10 box-office finish order that
+  crowns them champion — and exactly how everyone's predictions score against it. Grayed-out
+  players have no realistic path to winning.</p>
+  <div class="tabs" id="scTabs"></div>
+  <div class="caption" id="scCaption"></div>
+  <div class="scroller"><table id="scGrid"></table></div>
+</section>
+
+<!-- ============================= HISTORY ============================= -->
+<section id="history" class="page">
+  <h2>📈 Odds Over Time</h2>
+  <p class="sub">Each player's win probability at every production refresh. A break in a line
+  means no forecast was produced that week.</p>
+  <div class="chartbox">
+    <svg id="chart" viewBox="0 0 920 360" width="100%" role="img"
+      aria-label="Line chart of win probability by refresh date for six players"></svg>
+    <div class="legend" id="chLegend"></div>
+  </div>
+  <details class="acc"><summary>Data table <span class="stats">(accessible fallback)</span></summary>
+    <div class="scroller" style="border:none"><table id="chTable"></table></div>
+  </details>
+  <div id="tipbox"></div>
+</section>
+
+<!-- ============================= RULES ============================= -->
+<section id="rules" class="page">
+  <h2>📜 Scoring rules</h2>
+  <p>Before the window opens, each player locks <strong>10 ranked picks</strong> — the films they
+  believe will gross the most at the domestic box office between <strong>May 1 and Sep 7,
+  2026</strong>, in predicted finish order — plus <strong>3 dark horses</strong>, unordered.
+  All 13 titles must be distinct. Only films released inside the window count, and only money
+  earned through Labor Day counts.</p>
+  <div class="scroller"><table>
+    <thead><tr><th class="t">Ranked pick, vs. the actual top ten</th><th>Points</th></tr></thead>
+    <tbody>
+      <tr><td class="t">Exact match at position 1 or position 10</td><td class="pos">13</td></tr>
+      <tr><td class="t">Exact match at positions 2–9</td><td class="pos">10</td></tr>
+      <tr><td class="t">In the top ten, off by exactly 1 position</td><td class="pos">7</td></tr>
+      <tr><td class="t">In the top ten, off by exactly 2 positions</td><td class="pos">5</td></tr>
+      <tr><td class="t">In the top ten, off by 3 or more positions</td><td class="pos">3</td></tr>
+      <tr><td class="t">Not in the top ten</td><td class="zero">0</td></tr>
+      <tr><td class="t">🐴 Dark horse anywhere in the top ten</td><td class="pos">1</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">Maximum possible score: 13 + 10×8 + 13 + 3 = <strong>109</strong>.
+  Highest total wins; there is no tiebreaker — tied players share the placement.</p>
+</section>
+
+<footer class="site">
+  Raw numbers: <a href="data.json">data.json</a> &nbsp;·&nbsp;
+  <a href="#rules" data-page="rules">Scoring rules</a> &nbsp;·&nbsp;
+  <span class="small">Forecast: 10,000 seeded Monte Carlo seasons over 37 projected films.</span>
+</footer>
+
+</div>
+
+<script>
+"use strict";
+/* ================= sample data (would come from the pipeline / data.json) ================= */
+const FILMS = [ // ordered by projected median in-window gross, desc. $ in millions.
+  {t:"Toy Story 5",                          median:498, floor:431, sigma:0.10, rel:"Jun 19", status:"in theaters", src:"decay model", cum:431},
+  {t:"Spider-Man: Brand New Day",            median:465, floor:402, sigma:0.23, rel:"Jul 31", status:"in theaters", src:"decay model", cum:402},
+  {t:"Star Wars: The Mandalorian and Grogu", median:355, floor:349, sigma:0.10, rel:"May 22", status:"in theaters", src:"decay model", cum:349},
+  {t:"The Odyssey",                          median:301, floor:214, sigma:0.17, rel:"Jul 17", status:"in theaters", src:"decay model", cum:214},
+  {t:"Supergirl",                            median:242, floor:238, sigma:0.10, rel:"Jun 26", status:"in theaters", src:"decay model", cum:238},
+  {t:"Moana",                                median:228, floor:221, sigma:0.13, rel:"Jul 10", status:"in theaters", src:"decay model", cum:221},
+  {t:"Minions & Monsters",                   median:215, floor:209, sigma:0.10, rel:"Jul 1",  status:"in theaters", src:"decay model", cum:209},
+  {t:"The Devil Wears Prada 2",              median:188, floor:188, sigma:0,    rel:"May 1",  status:"closed",      src:"final gross", cum:188},
+  {t:"Mortal Kombat II",                     median:142, floor:142, sigma:0,    rel:"May 15", status:"closed",      src:"final gross", cum:142},
+  {t:"Young Washington",                     median:96,  floor:92,  sigma:0.10, rel:"Jul 4",  status:"in theaters", src:"decay model", cum:92},
+  {t:"Evil Dead Burn",                       median:84,  floor:79,  sigma:0.20, rel:"Jul 24", status:"in theaters", src:"decay model", cum:79},
+  {t:"Scary Movie",                          median:77,  floor:77,  sigma:0,    rel:"Jun 12", status:"closed",      src:"final gross", cum:77},
+  {t:"Backrooms",                            median:61,  floor:61,  sigma:0,    rel:"May 8",  status:"closed",      src:"final gross", cum:61},
+  {t:"The Bride!",                           median:54,  floor:0,   sigma:0.30, rel:"Aug 28", status:"pre-release", src:"analyst estimate", cum:0},
+  {t:"Masters of the Universe",              median:48,  floor:48,  sigma:0,    rel:"Jun 5",  status:"closed",      src:"final gross", cum:48},
+  {t:"Disclosure Day",                       median:0,   floor:0,   sigma:0,    rel:"Sep 4",  status:"no projection", src:"no analyst entry", cum:0},
+  {t:"Practical Magic 2",                    median:0,   floor:0,   sigma:0,    rel:"Sep 18", status:"won't score", src:"release after window", cum:0},
+];
+const CATALOG = FILMS.map(f=>f.t);
+const PROJ_TOP15 = CATALOG.slice(0,15);
+const PROJ_TOP10 = CATALOG.slice(0,10);
+const CURRENT_TOP10 = ["Toy Story 5","Spider-Man: Brand New Day","Star Wars: The Mandalorian and Grogu",
+  "Supergirl","Moana","The Odyssey","Minions & Monsters","The Devil Wears Prada 2",
+  "Mortal Kombat II","Young Washington"]; // by cumulative gross to date, desc
+
+const ROSTERS = {
+  bclarke:{ranked:["Toy Story 5","Spider-Man: Brand New Day","Minions & Monsters","The Devil Wears Prada 2","The Odyssey","Moana","Star Wars: The Mandalorian and Grogu","Supergirl","Disclosure Day","Mortal Kombat II"],dh:["Backrooms","Scary Movie","Evil Dead Burn"]},
+  brettfern:{ranked:["Spider-Man: Brand New Day","Toy Story 5","The Odyssey","Star Wars: The Mandalorian and Grogu","Supergirl","Mortal Kombat II","Moana","Evil Dead Burn","The Devil Wears Prada 2","Backrooms"],dh:["Young Washington","Scary Movie","Minions & Monsters"]},
+  carleigh:{ranked:["Toy Story 5","Star Wars: The Mandalorian and Grogu","Moana","Spider-Man: Brand New Day","Minions & Monsters","The Devil Wears Prada 2","Supergirl","The Odyssey","Scary Movie","Evil Dead Burn"],dh:["Mortal Kombat II","The Bride!","Practical Magic 2"]},
+  dmartin:{ranked:["Toy Story 5","Spider-Man: Brand New Day","The Odyssey","Star Wars: The Mandalorian and Grogu","Minions & Monsters","Young Washington","Scary Movie","Supergirl","Moana","The Devil Wears Prada 2"],dh:["Evil Dead Burn","Backrooms","Mortal Kombat II"]},
+  emsullivan:{ranked:["Toy Story 5","Star Wars: The Mandalorian and Grogu","Spider-Man: Brand New Day","The Odyssey","Moana","Supergirl","The Devil Wears Prada 2","Minions & Monsters","Young Washington","Scary Movie"],dh:["Evil Dead Burn","Backrooms","Mortal Kombat II"]},
+  vivrad:{ranked:["Spider-Man: Brand New Day","Star Wars: The Mandalorian and Grogu","Toy Story 5","Supergirl","The Odyssey","Disclosure Day","Mortal Kombat II","Moana","Backrooms","Young Washington"],dh:["The Devil Wears Prada 2","Minions & Monsters","The Bride!"]},
+};
+// simulated summary stats (fabricated for the mockup; the sim produces these)
+const SIM = {
+  cols:["emsullivan","bclarke","vivrad","brettfern","dmartin","carleigh"], // by simulated median, desc
+  median:{emsullivan:72,bclarke:58,vivrad:57,brettfern:56,dmartin:55,carleigh:46},
+  p10:{emsullivan:63,bclarke:49,vivrad:47,brettfern:47,dmartin:45,carleigh:38},
+  p90:{emsullivan:79,bclarke:68,vivrad:67,brettfern:65,dmartin:64,carleigh:55},
+  win:{emsullivan:64.2,bclarke:12.8,vivrad:10.9,brettfern:6.4,dmartin:4.9,carleigh:0.0},
+};
+const SCENARIOS = { // medoid winning trial per player; null = never wins in any trial
+  emsullivan:{order:["Toy Story 5","Spider-Man: Brand New Day","Star Wars: The Mandalorian and Grogu","The Odyssey","Supergirl","Moana","Minions & Monsters","The Devil Wears Prada 2","Mortal Kombat II","Young Washington"]},
+  bclarke:{order:["Toy Story 5","Spider-Man: Brand New Day","Star Wars: The Mandalorian and Grogu","Supergirl","The Odyssey","Moana","Minions & Monsters","The Devil Wears Prada 2","Mortal Kombat II","Evil Dead Burn"]},
+  vivrad:{order:["Spider-Man: Brand New Day","Toy Story 5","Star Wars: The Mandalorian and Grogu","Supergirl","The Odyssey","Moana","Minions & Monsters","The Devil Wears Prada 2","Mortal Kombat II","Young Washington"]},
+  brettfern:{order:["Spider-Man: Brand New Day","Toy Story 5","The Odyssey","Star Wars: The Mandalorian and Grogu","Supergirl","Moana","Minions & Monsters","The Devil Wears Prada 2","Mortal Kombat II","Young Washington"]},
+  dmartin:{order:["Toy Story 5","Spider-Man: Brand New Day","The Odyssey","Star Wars: The Mandalorian and Grogu","Supergirl","Minions & Monsters","Moana","The Devil Wears Prada 2","Mortal Kombat II","Young Washington"]},
+  carleigh:null,
+};
+const HISTORY = { // win prob %, one value-or-null per refresh date; series keyed alphabetically
+  dates:["Jun 1","Jun 8","Jun 15","Jun 22","Jun 29","Jul 6","Jul 13","Jul 20","Jul 27","Aug 3","Aug 10","Aug 15"],
+  series:{
+    bclarke:   [18,16,15,null,17,15,18,16,15,14,13,12.8],
+    brettfern: [18,17,15,null,13,12,11,10, 9, 8, 7, 6.4],
+    carleigh:  [14,12,11,null, 8, 7, 6, 4, 2, 1,0.4, 0.0],
+    dmartin:   [16,15,14,null,12,11,10, 9, 8, 6, 5, 4.9],
+    emsullivan:[18,22,25,null,31,38,35,44,52,58,61,64.2],
+    vivrad:    [12,14,16,null,18,16,17,14,12,11,11,10.9],
+  }
+};
+const PLAYERS_ALPHA = Object.keys(ROSTERS); // alphabetical — stable color binding (§12.4)
+
+/* ================= scoring (§2) ================= */
+function rankedPts(pred, act){
+  if(act==null) return 0;
+  const d=Math.abs(pred-act);
+  if(d===0) return (act===1||act===10)?13:10;
+  if(d===1) return 7;
+  if(d===2) return 5;
+  return 3;
+}
+// breakdown[i] = points the film finishing at position i+1 contributes to this player (§2.5)
+function breakdown(picks, order){
+  const pos=new Map(order.map((t,i)=>[t,i+1]));
+  const b=order.map(()=>0);
+  picks.ranked.forEach((t,i)=>{const p=pos.get(t); if(p) b[p-1]+=rankedPts(i+1,p);});
+  picks.dh.forEach(t=>{const p=pos.get(t); if(p) b[p-1]+=1;});
+  return b;
+}
+const total=(picks,order)=>breakdown(picks,order).reduce((a,b)=>a+b,0);
+const PROJ_PTS=Object.fromEntries(PLAYERS_ALPHA.map(p=>[p,total(ROSTERS[p],PROJ_TOP10)]));
+const CURR_PTS=Object.fromEntries(PLAYERS_ALPHA.map(p=>[p,total(ROSTERS[p],CURRENT_TOP10)]));
+
+/* ================= helpers ================= */
+const $=(s)=>document.querySelector(s);
+const money=(m)=>m>=1000?"$"+(m/1000).toFixed(2)+"B":"$"+m.toFixed(1)+"M";
+const Z80=1.2816;
+const band=(f)=>{ if(f.median<=0) return "—";
+  const rem=Math.max(0,f.median-f.floor);
+  if(rem===0&&f.sigma===0) return money(f.floor)+" (final)";
+  return money(f.floor+rem*Math.exp(-Z80*f.sigma))+" – "+money(f.floor+rem*Math.exp(Z80*f.sigma));
+};
+function cellHtml(pts,picked){
+  if(!picked) return '<td class="dash">—</td>';
+  return pts>0?`<td class="pos">${pts}</td>`:'<td class="zero">0</td>';
+}
+const onRoster=(p,t)=>ROSTERS[p].ranked.includes(t)||ROSTERS[p].dh.includes(t);
+
+/* ================= leaderboard: matrix ================= */
+function renderMatrix(){
+  const cols=SIM.cols;
+  const bds=Object.fromEntries(cols.map(p=>[p,breakdown(ROSTERS[p],PROJ_TOP10)]));
+  let h='<thead><tr><th>#</th><th class="t">Movie</th><th>Projected (in-window)</th>'+
+    cols.map(p=>`<th>${p}</th>`).join('')+'</tr></thead><tbody>';
+  PROJ_TOP15.forEach((t,i)=>{
+    h+=`<tr><td>${i+1}</td><td class="t">${t}</td><td>${money(FILMS[i].median)}</td>`;
+    h+=cols.map(p=>{
+      const pts=i<10?bds[p][i]:0;
+      return cellHtml(pts,onRoster(p,t));
+    }).join('')+'</tr>';
+    if(i===9) h+=`<tr class="divider"><td colspan="${3+cols.length}">Outside the top 10</td></tr>`;
+  });
+  // Footer total is the arithmetic sum of the cells above, NOT the simulated median —
+  // the two genuinely differ by a point or two and the sum must win (spec §12.1).
+  h+='</tbody><tfoot><tr><td colspan="3" class="t">Projected pts</td>'+
+    cols.map(p=>`<td>${PROJ_PTS[p]}</td>`).join('')+'</tr>'+
+    '<tr class="odds"><td colspan="3" class="t">Win odds</td>'+
+    cols.map(p=>`<td>${SIM.win[p].toFixed(1)}%</td>`).join('')+'</tr></tfoot>';
+  $("#matrix").innerHTML=h;
+}
+
+/* ================= leaderboard: all players' lists ================= */
+function renderLists(){
+  const cols=SIM.cols;
+  let h='<thead><tr><th class="t">Slot</th>'+cols.map(p=>`<th class="t">${p}</th>`).join('')+'</tr></thead><tbody>';
+  for(let i=0;i<10;i++)
+    h+=`<tr><td class="t">Pick ${i+1}</td>`+cols.map(p=>`<td class="t">${ROSTERS[p].ranked[i]??""}</td>`).join('')+'</tr>';
+  h+=`<tr class="divider"><td colspan="${1+cols.length}">Dark horses</td></tr>`;
+  for(let i=0;i<3;i++)
+    h+=`<tr><td class="t">🐴 ${i+1}</td>`+cols.map(p=>`<td class="t">${ROSTERS[p].dh[i]??""}</td>`).join('')+'</tr>';
+  $("#lists").innerHTML=h+'</tbody>';
+}
+
+/* ================= leaderboard: per-player detail ================= */
+function renderDetail(){
+  const rank=new Map(CATALOG.map((t,i)=>[t,FILMS[i].median>0?i+1:null]));
+  const posMap=new Map(PROJ_TOP10.map((t,i)=>[t,i+1]));
+  $("#detail").innerHTML=SIM.cols.map(p=>{
+    const r=ROSTERS[p];
+    const row=(t,label,pick)=>{
+      const pr=rank.get(t)??null;
+      const pos=posMap.get(t);
+      const pts=pos? (pick? rankedPts(pick,pos):1) : 0;
+      let diff='<span class="dash">—</span>';
+      if(pick&&pr!=null){
+        const d=pick-pr;
+        diff=d===0?'<span class="dash">–</span>':d>0?`<span class="up">▲ ${d}</span>`:`<span class="down">▼ ${-d}</span>`;
+      }
+      return `<tr><td>${label}</td><td class="t">${t}</td>`+
+        `<td>${pr!=null?"#"+pr:'<span class="dash">—</span>'}</td><td>${diff}</td>`+
+        `<td>${pr!=null?money(FILMS[pr-1].median):'<span class="dash">—</span>'}`+
+        `${pr==null?' <span class="badge">no projection</span>':''}</td>`+
+        (pts>0?`<td class="pos">${pts}</td>`:'<td class="zero">0</td>')+'</tr>';
+    };
+    let rows=r.ranked.map((t,i)=>row(t,i+1,i+1)).join('');
+    rows+=`<tr class="divider"><td colspan="6">Dark horses</td></tr>`;
+    rows+=r.dh.map(t=>row(t,"🐴",null)).join('');
+    return `<details class="acc"><summary>${p}
+      <span class="stats"> — ${PROJ_PTS[p]} pts projected · ${CURR_PTS[p]} current · ${SIM.win[p].toFixed(1)}% win</span></summary>
+      <div class="scroller" style="border:none"><table>
+      <thead><tr><th>#</th><th class="t">Movie</th><th>Projected rank</th><th>Diff</th><th>Projected gross</th><th>Pts</th></tr></thead>
+      <tbody>${rows}</tbody></table></div></details>`;
+  }).join('');
+}
+
+/* ================= leaderboard: films table ================= */
+function renderFilms(){
+  const badge=(s)=>`<span class="badge">${s}</span>`;
+  $("#films").innerHTML='<thead><tr><th>#</th><th class="t">Movie</th><th>Released</th><th class="t">Status</th>'+
+    '<th>Projected median (in-window)</th><th>80% range</th><th>Cumulative</th><th class="t">Source</th></tr></thead><tbody>'+
+    FILMS.map((f,i)=>`<tr><td>${f.median>0?i+1:'<span class="dash">—</span>'}</td><td class="t">${f.t}</td><td>${f.rel}</td>`+
+      `<td class="t">${badge(f.status)}</td><td>${f.median>0?money(f.median):'<span class="dash">—</span>'}</td>`+
+      `<td>${band(f)}</td><td>${f.cum>0?money(f.cum):'<span class="dash">—</span>'}</td>`+
+      `<td class="t small">${f.src}</td></tr>`).join('')+'</tbody>';
+}
+
+/* ================= what if? (§12.2) ================= */
+let wiOrder=PROJ_TOP15.slice();
+function renderWhatIf(){
+  $("#wiList").innerHTML=wiOrder.map((t,i)=>
+    `<li draggable="true" data-i="${i}"><span class="film">${t}</span>
+     <span class="mv">
+       <button data-up="${i}" aria-label="Move ${t} up one slot" ${i===0?"disabled":""}>▲</button>
+       <button data-dn="${i}" aria-label="Move ${t} down one slot" ${i===wiOrder.length-1?"disabled":""}>▼</button>
+     </span></li>`).join('');
+  const ord=wiOrder.slice(0,10);
+  const totals=PLAYERS_ALPHA.map(p=>({p,pts:total(ROSTERS[p],ord)})).sort((a,b)=>b.pts-a.pts);
+  // competition ranking: ties share a place, next place skips (1,1,3)
+  let rows='',place=0,prev=null;
+  totals.forEach((r,i)=>{ if(r.pts!==prev){place=i+1;prev=r.pts;}
+    const d=r.pts-PROJ_PTS[r.p];
+    const delta=d===0?'<span class="dash">–</span>':d>0?`<span class="up">▲${d}</span>`:`<span class="down">▼${-d}</span>`;
+    rows+=`<tr><td>${place}</td><td class="t${place===1?" crown":""}">${r.p}</td><td class="pos">${r.pts}</td><td>${delta}</td></tr>`;
+  });
+  $("#wiStandings").innerHTML='<thead><tr><th>Place</th><th class="t">Player</th><th>Pts</th><th>vs proj.</th></tr></thead><tbody>'+rows+'</tbody>';
+  const bds=Object.fromEntries(SIM.cols.map(p=>[p,breakdown(ROSTERS[p],ord)]));
+  let g='<thead><tr><th>#</th><th class="t">Movie</th>'+SIM.cols.map(p=>`<th>${p}</th>`).join('')+'</tr></thead><tbody>';
+  wiOrder.forEach((t,i)=>{
+    g+=`<tr><td>${i+1}</td><td class="t">${t}</td>`+SIM.cols.map(p=>cellHtml(i<10?bds[p][i]:0,onRoster(p,t))).join('')+'</tr>';
+    if(i===9) g+=`<tr class="divider"><td colspan="${2+SIM.cols.length}">Outside the top 10</td></tr>`;
+  });
+  $("#wiGrid").innerHTML=g+'</tbody>';
+}
+function wiMove(i,dir){
+  const j=i+dir; if(j<0||j>=wiOrder.length) return;
+  [wiOrder[i],wiOrder[j]]=[wiOrder[j],wiOrder[i]];
+  renderWhatIf();
+  // return focus so repeated presses keep walking the film (§12.2)
+  const sel=dir<0?`[data-up="${j}"]`:`[data-dn="${j}"]`;
+  const b=$("#wiList").querySelector(sel); if(b) b.focus();
+}
+document.addEventListener("click",e=>{
+  const up=e.target.closest("[data-up]"),dn=e.target.closest("[data-dn]");
+  if(up) wiMove(+up.dataset.up,-1);
+  if(dn) wiMove(+dn.dataset.dn,1);
+  if(e.target.id==="wiReset"){wiOrder=PROJ_TOP15.slice();renderWhatIf();}
+});
+let dragFrom=null;
+document.addEventListener("dragstart",e=>{const li=e.target.closest("#wiList li");if(li){dragFrom=+li.dataset.i;li.classList.add("dragging");}});
+document.addEventListener("dragover",e=>{if(e.target.closest("#wiList li"))e.preventDefault();});
+document.addEventListener("drop",e=>{
+  const li=e.target.closest("#wiList li");
+  if(li&&dragFrom!=null){const to=+li.dataset.i;const [m]=wiOrder.splice(dragFrom,1);wiOrder.splice(to,0,m);renderWhatIf();}
+  dragFrom=null;
+});
+document.addEventListener("dragend",()=>{dragFrom=null;renderWhatIf();});
+
+/* ================= winning scenarios (§12.3) ================= */
+let scSel="emsullivan";
+function renderScenarios(){
+  const byWin=[...SIM.cols].sort((a,b)=>SIM.win[b]-SIM.win[a]);
+  $("#scTabs").innerHTML=byWin.map(p=>{
+    const none=!SCENARIOS[p];
+    return `<button data-sc="${p}" aria-pressed="${p===scSel}" ${none?'disabled title="No winning path — '+p+' wins in 0 of 10,000 simulated seasons"':''}>
+      ${p} · ${SIM.win[p].toFixed(1)}%</button>`;
+  }).join('');
+  const sc=SCENARIOS[scSel], ord=sc.order;
+  const totals=PLAYERS_ALPHA.map(p=>({p,pts:total(ROSTERS[p],ord)})).sort((a,b)=>b.pts-a.pts);
+  const margin=totals[0].pts-totals[1].pts;
+  $("#scCaption").innerHTML=`Most likely finish in which <strong>${scSel}</strong> wins the wager 🏆 —
+    ${scSel} edges the field by just ${margin} pt${margin===1?"":"s"}; they win ~${SIM.win[scSel].toFixed(1)}% of all sims.`;
+  const cols=totals.map(r=>r.p); // re-sorted by this scenario's totals, winner leftmost
+  const bds=Object.fromEntries(cols.map(p=>[p,breakdown(ROSTERS[p],ord)]));
+  let h='<thead><tr><th>#</th><th class="t">Movie</th>'+
+    cols.map(p=>`<th class="${p===scSel?"hlcol":""}">${p}</th>`).join('')+'</tr></thead><tbody>';
+  ord.forEach((t,i)=>{
+    h+=`<tr><td>${i+1}</td><td class="t">${t}</td>`+cols.map(p=>{
+      const pts=bds[p][i], hl=p===scSel?' class="hlcol"':'';
+      return pts>0?`<td${hl}><span class="pos">${pts}</span></td>`:`<td${hl}><span class="mid">·</span></td>`;
+    }).join('')+'</tr>';
+  });
+  h+='</tbody><tfoot><tr><td colspan="2" class="t">Total</td>'+
+    cols.map((p,i)=>`<td class="${p===scSel?"hlcol":""}${i===0?" crown":""}">${totals[i].pts}</td>`).join('')+'</tr></tfoot>';
+  $("#scGrid").innerHTML=h;
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-sc]");
+  if(b&&!b.disabled){scSel=b.dataset.sc;renderScenarios();}
+});
+
+/* ================= odds over time (§12.4): hand-rolled SVG ================= */
+function seriesColor(p){return getComputedStyle(document.documentElement).getPropertyValue("--s-"+p).trim();}
+function renderChart(){
+  const W=920,H=360,L=52,R=110,T=16,B=34;
+  const iw=W-L-R,ih=H-T-B;
+  const n=HISTORY.dates.length;
+  const yMax=70; // next decile above the max observed value
+  const x=(i)=>L+iw*i/(n-1), y=(v)=>T+ih*(1-v/yMax);
+  let s="";
+  for(let g=0;g<=yMax;g+=10)
+    s+=`<line x1="${L}" y1="${y(g)}" x2="${L+iw}" y2="${y(g)}" stroke="var(--grid)"/>`+
+       `<text x="${L-8}" y="${y(g)+4}" text-anchor="end">${g}%</text>`;
+  // x labels thinned to <= 8, always including the most recent
+  const step=Math.ceil(n/8);
+  for(let i=n-1;i>=0;i-=step)
+    s+=`<text x="${x(i)}" y="${H-10}" text-anchor="middle">${HISTORY.dates[i]}</text>`;
+  s+=`<line x1="${L}" y1="${y(0)}" x2="${L+iw}" y2="${y(0)}" stroke="var(--baseline)"/>`;
+  for(const p of PLAYERS_ALPHA){
+    const c=seriesColor(p),v=HISTORY.series[p];
+    let d="",pen=false;
+    v.forEach((val,i)=>{ if(val==null){pen=false;return;}   // a gap breaks the line
+      d+=(pen?" L":" M")+x(i).toFixed(1)+" "+y(val).toFixed(1); pen=true; });
+    s+=`<path d="${d}" fill="none" stroke="${c}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    v.forEach((val,i)=>{ if(val!=null) s+=`<circle cx="${x(i)}" cy="${y(val)}" r="3" fill="${c}"/>`; });
+  }
+  // direct labels: top 4 by latest value, nudged apart; ink text + colored swatch
+  const latest=PLAYERS_ALPHA.map(p=>({p,v:HISTORY.series[p][n-1]})).sort((a,b)=>b.v-a.v).slice(0,4);
+  let ys=latest.map(r=>y(r.v));
+  for(let i=1;i<ys.length;i++) if(ys[i]-ys[i-1]<15) ys[i]=ys[i-1]+15;
+  latest.forEach((r,i)=>{
+    s+=`<rect x="${L+iw+8}" y="${ys[i]-9}" width="10" height="10" rx="3" fill="${seriesColor(r.p)}"/>`+
+       `<text class="dl" x="${L+iw+22}" y="${ys[i]}">${r.p}</text>`;
+  });
+  $("#chart").innerHTML=s;
+  $("#chLegend").innerHTML=PLAYERS_ALPHA.map(p=>{
+    const v=HISTORY.series[p][n-1];
+    return `<span><span class="sw" style="background:${seriesColor(p)}"></span>${p} — ${v.toFixed(1)}%</span>`;
+  }).join('');
+  $("#chTable").innerHTML='<thead><tr><th class="t">Refresh</th>'+
+    PLAYERS_ALPHA.map(p=>`<th>${p}</th>`).join('')+'</tr></thead><tbody>'+
+    HISTORY.dates.map((d,i)=>`<tr><td class="t">${d}</td>`+
+      PLAYERS_ALPHA.map(p=>{const v=HISTORY.series[p][i];
+        return v==null?'<td class="dash">·</td>':`<td>${v.toFixed(1)}%</td>`;}).join('')+'</tr>').join('')+'</tbody>';
+  // crosshair tooltip snapping to the nearest date (pointer-only; table is the accessible path)
+  const svg=$("#chart"),tip=$("#tipbox");
+  svg.addEventListener("mousemove",ev=>{
+    const r=svg.getBoundingClientRect(),sx=W/r.width;
+    const i=Math.max(0,Math.min(n-1,Math.round(((ev.clientX-r.left)*sx-L)/(iw/(n-1)))));
+    svg.querySelector(".xh")?.remove();
+    const ln=document.createElementNS("http://www.w3.org/2000/svg","line");
+    ln.setAttribute("class","xh");
+    ln.setAttribute("x1",x(i));ln.setAttribute("x2",x(i));
+    ln.setAttribute("y1",T);ln.setAttribute("y2",T+ih);
+    ln.setAttribute("stroke","var(--baseline)");ln.setAttribute("stroke-dasharray","3 3");
+    svg.appendChild(ln);
+    tip.style.display="block";
+    tip.style.left=(ev.clientX+14)+"px";tip.style.top=(ev.clientY+10)+"px";
+    tip.innerHTML=`<strong>${HISTORY.dates[i]}</strong><br>`+PLAYERS_ALPHA.map(p=>{
+      const v=HISTORY.series[p][i];
+      return `<span class="dlsw" style="background:${seriesColor(p)}"></span>${p}: ${v==null?"·":v.toFixed(1)+"%"}`;
+    }).join("<br>");
+  });
+  svg.addEventListener("mouseleave",()=>{tip.style.display="none";svg.querySelector(".xh")?.remove();});
+}
+
+/* ================= nav + theme ================= */
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-page]");
+  if(!a) return;
+  e.preventDefault();
+  document.querySelectorAll(".page").forEach(s=>s.classList.toggle("active",s.id===a.dataset.page));
+  document.querySelectorAll("nav.pills a").forEach(x=>{
+    if(x.dataset.page===a.dataset.page) x.setAttribute("aria-current","page");
+    else x.removeAttribute("aria-current");
+  });
+  window.scrollTo(0,0);
+});
+$("#themeToggle").addEventListener("click",()=>{
+  const cur=document.documentElement.getAttribute("data-theme")
+    ||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+  const next=cur==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",next);
+  try{localStorage.setItem("smw-theme",next);}catch(e){}
+  renderChart(); // series colors are theme-scoped
+});
+
+renderMatrix();renderLists();renderDetail();renderFilms();
+renderWhatIf();renderScenarios();renderChart();
+// deep-link support for the single-file mockup: #whatif, #scenarios, #history, #rules
+{const id=location.hash.slice(1);
+ if(document.querySelector(`.page#${CSS.escape(id)}`)) document.querySelector(`[data-page="${id}"]`)?.click();}
+</script>
+</body>
+</html>

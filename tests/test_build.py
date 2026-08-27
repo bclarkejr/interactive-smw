@@ -283,6 +283,16 @@ def test_missing_seasons_dir_is_a_build_error(tmp_path):
     with pytest.raises(ValueError, match="seasons"):
         build.run_build(tmp_path / "data", tmp_path / "out", TODAY, local=True)
 
+def test_pages_carry_selectors_and_footer_note(data_dir, tmp_path):
+    _add_group(data_dir, "h", "Alpha League")
+    out = _run(data_dir, tmp_path)
+    for page in ("index.html", "whatif.html", "scenarios.html", "history.html", "rules.html"):
+        html = (out / page).read_text()
+        assert 'value="../../2026/g/index.html" selected' in html, page
+        assert f'value="../h/{page}"' in html and f'value="../g/{page}" selected' in html, page
+        assert "Forecast: unavailable — only 3 films" in html, page
+    assert "<title>Leaderboard · Summer Movie Wager 2026 · G</title>" in (out / "index.html").read_text()
+
 def test_production_run_appends_forecast_per_group_and_box_office_once(data_dir, tmp_path):
     _add_group(data_dir, "h", "H")
     _add_estimates(data_dir, n=8)
