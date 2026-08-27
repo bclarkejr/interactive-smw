@@ -6,7 +6,7 @@ import smw.render.build as build
 from tests.conftest import FIXTURES
 
 TODAY = date(2026, 8, 15)
-CHART_HTML = (FIXTURES / "year_chart.html").read_text()
+CHART_HTML = (FIXTURES / "synthetic_chart.html").read_text()
 
 @pytest.fixture
 def data_dir(tmp_path):

@@ -9,7 +9,7 @@ PAGES = ("index.html", "whatif.html", "scenarios.html", "history.html", "rules.h
 @pytest.fixture
 def built_site(tmp_path, monkeypatch):
     monkeypatch.setattr(build, "fetch",
-                        lambda year: (FIXTURES / "year_chart.html").read_text())
+                        lambda year: (FIXTURES / "synthetic_chart.html").read_text())
     d = tmp_path / "data"
     (d / "groups").mkdir(parents=True)
     (d / "season.yaml").write_text(
@@ -42,7 +42,7 @@ def test_reproducible_build(built_site, tmp_path, monkeypatch):
     # Byte-identical output for identical inputs (§1.3): rebuild into a second
     # directory from the same inputs and diff every page.
     monkeypatch.setattr(build, "fetch",
-                        lambda year: (FIXTURES / "year_chart.html").read_text())
+                        lambda year: (FIXTURES / "synthetic_chart.html").read_text())
     out2 = tmp_path / "out2"
     # rebuild with the same data dir the fixture created
     build.run_build(tmp_path / "data", out2, date(2026, 8, 15), local=True)

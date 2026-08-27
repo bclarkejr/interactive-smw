@@ -1,0 +1,210 @@
+{
+  "captured_at": "2026-08-26",
+  "current_points": {
+    "bclarke": 43
+  },
+  "forecast_available": true,
+  "median_final_pts": {
+    "bclarke": 43.0
+  },
+  "non_zero_projections": 25,
+  "p10_final_pts": {
+    "bclarke": 43.0
+  },
+  "p90_final_pts": {
+    "bclarke": 43.0
+  },
+  "projections": [
+    {
+      "floor": 197523513.0,
+      "median_in_window_gross": 197592238.21588472,
+      "movie_title": "Backrooms",
+      "sigma": 0.1
+    },
+    {
+      "floor": 116636645.0,
+      "median_in_window_gross": 116770961.13653283,
+      "movie_title": "Disclosure Day",
+      "sigma": 0.1
+    },
+    {
+      "floor": 32233938.0,
+      "median_in_window_gross": 32646646.813323054,
+      "movie_title": "Evil Dead Burn",
+      "sigma": 0.1
+    },
+    {
+      "floor": 20728068.0,
+      "median_in_window_gross": 21645912.741771795,
+      "movie_title": "Hadestown: The Musical",
+      "sigma": 0.16666666666666666
+    },
+    {
+      "floor": 30157230.0,
+      "median_in_window_gross": 59720228.866995074,
+      "movie_title": "Insidious: Out of the Further",
+      "sigma": 0.3
+    },
+    {
+      "floor": 18273185.0,
+      "median_in_window_gross": 18343025.86614593,
+      "movie_title": "Jackass: Best and Last",
+      "sigma": 0.1
+    },
+    {
+      "floor": 64830245.0,
+      "median_in_window_gross": 64871274.58927462,
+      "movie_title": "Masters of the Universe",
+      "sigma": 0.1
+    },
+    {
+      "floor": 182275920.0,
+      "median_in_window_gross": 185545534.12309402,
+      "movie_title": "Minions & Monsters",
+      "sigma": 0.1
+    },
+    {
+      "floor": 125812757.0,
+      "median_in_window_gross": 129956470.00490159,
+      "movie_title": "Moana",
+      "sigma": 0.1
+    },
+    {
+      "floor": 79770110.0,
+      "median_in_window_gross": 79774725.69685529,
+      "movie_title": "Mortal Kombat II",
+      "sigma": 0.1
+    },
+    {
+      "floor": 263451715.0,
+      "median_in_window_gross": 263479433.27306983,
+      "movie_title": "Obsession",
+      "sigma": 0.1
+    },
+    {
+      "floor": 37199592.0,
+      "median_in_window_gross": 52014567.97292308,
+      "movie_title": "PAW Patrol: The Dino Movie",
+      "sigma": 0.26666666666666666
+    },
+    {
+      "floor": 108277762.0,
+      "median_in_window_gross": 108346288.53576174,
+      "movie_title": "Scary Movie",
+      "sigma": 0.1
+    },
+    {
+      "floor": 863346542.0,
+      "median_in_window_gross": 936834893.7066727,
+      "movie_title": "Spider-Man: Brand New Day",
+      "sigma": 0.19999999999999996
+    },
+    {
+      "floor": 177730060.0,
+      "median_in_window_gross": 177764063.15662107,
+      "movie_title": "Star Wars: The Mandalorian and Grogu",
+      "sigma": 0.1
+    },
+    {
+      "floor": 72366532.0,
+      "median_in_window_gross": 72643119.8676792,
+      "movie_title": "Supergirl",
+      "sigma": 0.1
+    },
+    {
+      "floor": 23421793.0,
+      "median_in_window_gross": 23435150.457768235,
+      "movie_title": "The Amazing Digital Circus: The Last Act",
+      "sigma": 0.1
+    },
+    {
+      "floor": 20247080.0,
+      "median_in_window_gross": 20254124.654699083,
+      "movie_title": "The Breadwinner",
+      "sigma": 0.1
+    },
+    {
+      "floor": 220556651.0,
+      "median_in_window_gross": 220563669.8026018,
+      "movie_title": "The Devil Wears Prada 2",
+      "sigma": 0.1
+    },
+    {
+      "floor": 39703017.0,
+      "median_in_window_gross": 55514998.026769236,
+      "movie_title": "The End of Oak Street",
+      "sigma": 0.26666666666666666
+    },
+    {
+      "floor": 25468175.0,
+      "median_in_window_gross": 25565515.414446425,
+      "movie_title": "The Invite",
+      "sigma": 0.1
+    },
+    {
+      "floor": 544911855.0,
+      "median_in_window_gross": 557798796.0518267,
+      "movie_title": "The Odyssey",
+      "sigma": 0.13333333333333333
+    },
+    {
+      "floor": 66078506.0,
+      "median_in_window_gross": 66082329.46661358,
+      "movie_title": "The Sheep Detectives",
+      "sigma": 0.1
+    },
+    {
+      "floor": 478198926.0,
+      "median_in_window_gross": 482343933.03175336,
+      "movie_title": "Toy Story 5",
+      "sigma": 0.1
+    },
+    {
+      "floor": 47016585.0,
+      "median_in_window_gross": 47344845.80691687,
+      "movie_title": "Young Washington",
+      "sigma": 0.1
+    }
+  ],
+  "tie_prob": {
+    "bclarke": 0.0
+  },
+  "win_prob": {
+    "bclarke": 1.0
+  },
+  "winning_scenarios": {
+    "bclarke": {
+      "films": [
+        "Spider-Man: Brand New Day",
+        "The Odyssey",
+        "Toy Story 5",
+        "Obsession",
+        "The Devil Wears Prada 2",
+        "Backrooms",
+        "Minions & Monsters",
+        "Star Wars: The Mandalorian and Grogu",
+        "Moana",
+        "Disclosure Day"
+      ],
+      "grid": {
+        "bclarke": [
+          7,
+          3,
+          5,
+          0,
+          7,
+          1,
+          3,
+          7,
+          3,
+          7
+        ]
+      },
+      "margin": 43,
+      "totals": {
+        "bclarke": 43
+      },
+      "win_pct": 100.0
+    }
+  }
+}

@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What If? · The Friends League</title>
+<script>// -- resolver: runs in <head>, before any body content paints (§13.2 [Changed])
+(function () {
+  var t = null;
+  try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (t === "dark" || t === "light") {
+    document.documentElement.setAttribute("data-theme", t);
+  }
+  // no stored choice: leave attribute off; the prefers-color-scheme CSS block applies
+})();
+
+document.addEventListener("DOMContentLoaded", function () {
+  var btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+  btn.addEventListener("click", function () {
+    var root = document.documentElement;
+    var dark = root.getAttribute("data-theme") === "dark" ||
+      (!root.getAttribute("data-theme") &&
+       matchMedia("(prefers-color-scheme: dark)").matches);
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch (e) {}
+  });
+});
+</script>
+<style>/* Tokens: light on :root; explicit dark attribute; OS preference scoped so an
+   explicit light choice wins (§13.2). */
+:root {
+  --bg: #faf9f6; --card: #ffffff; --ink: #1a1a20; --muted: #71717a;
+  --border: #e4e4e7; --accent: #2563eb; --pos: #15803d; --neg: #b91c1c;
+  --dim: #f4f4f5; --gold: #b45309;
+}
+[data-theme="dark"] {
+  --bg: #131318; --card: #1c1c24; --ink: #e7e7ea; --muted: #9d9da8;
+  --border: #33333e; --accent: #7aa2ff; --pos: #4ade80; --neg: #f87171;
+  --dim: #22222b; --gold: #fbbf24;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131318; --card: #1c1c24; --ink: #e7e7ea; --muted: #9d9da8;
+    --border: #33333e; --accent: #7aa2ff; --pos: #4ade80; --neg: #f87171;
+    --dim: #22222b; --gold: #fbbf24;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+.shell { max-width: 720px; margin: 0 auto; padding: 1rem; }
+.shell.wide { max-width: 1100px; }
+.masthead { position: relative; }
+.masthead h1 { margin: 0.5rem 0 0; font-size: 1.4rem; }
+.season-line { color: var(--muted); margin: 0.2rem 0 1rem; font-size: 0.85rem; }
+#theme-toggle {
+  position: absolute; top: 0.5rem; right: 0; background: var(--card);
+  color: var(--ink); border: 1px solid var(--border); border-radius: 999px;
+  width: 2rem; height: 2rem; cursor: pointer;
+}
+nav { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.2rem; }
+.pill {
+  padding: 0.35rem 0.8rem; border-radius: 999px; text-decoration: none;
+  color: var(--ink); background: var(--card); border: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.pill.current { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+h2 { font-size: 1.15rem; margin: 1.6rem 0 0.6rem; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { padding: 0.35rem 0.55rem; border-bottom: 1px solid var(--border); text-align: left; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-scroll { overflow-x: auto; }
+.table-scroll thead th { position: sticky; top: 0; background: var(--bg); }
+
+.cell-pos { color: var(--pos); font-weight: 600; }
+.cell-zero { color: var(--muted); }
+.cell-none { color: var(--border); }
+.divider-row td {
+  border-bottom: 2px dashed var(--muted); color: var(--muted);
+  text-align: center; font-size: 0.8rem; padding: 0.15rem;
+}
+.badge {
+  display: inline-block; font-size: 0.7rem; padding: 0.05rem 0.45rem;
+  border-radius: 999px; background: var(--dim); color: var(--muted);
+  border: 1px solid var(--border); white-space: nowrap;
+}
+.notice {
+  background: var(--dim); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.8rem 1rem; margin: 1rem 0; color: var(--muted);
+}
+.locked { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+.up { color: var(--pos); } .down { color: var(--neg); } .flat { color: var(--muted); }
+details { margin: 0.5rem 0; }
+details > summary { cursor: pointer; padding: 0.45rem 0; }
+.stats-line { color: var(--muted); font-size: 0.85rem; }
+footer { margin: 2.5rem 0 1rem; color: var(--muted); font-size: 0.85rem; }
+footer a { color: var(--muted); }
+
+@media (max-width: 700px) {
+  body { font-size: 0.92rem; }
+  th, td { padding: 0.25rem 0.35rem; }
+  .two-col { grid-template-columns: 1fr !important; }
+}
+
+/* What If? sandbox */
+.two-col { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
+.standings { position: sticky; top: 1rem; background: var(--card);
+  border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; }
+#film-list { list-style: none; counter-reset: slot; padding: 0; margin: 0; }
+#film-list li { counter-increment: slot; display: flex; align-items: center; gap: 0.4rem;
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.35rem 0.6rem; margin-bottom: 0.3rem; cursor: grab; }
+#film-list li::before { content: counter(slot); color: var(--muted); width: 1.5rem;
+  font-variant-numeric: tabular-nums; }
+#film-list .wi-title { flex: 1; }
+#film-list li button { background: var(--dim); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
+/* pure-CSS top-10 cutoff (§12.2): dashed border + generated label, 11+ dimmed */
+#film-list li:nth-child(10) { border-bottom: 3px dashed var(--muted); }
+#film-list li:nth-child(10)::after { content: "top 10 cutoff"; color: var(--muted);
+  font-size: 0.7rem; }
+#film-list li:nth-child(n+11) { opacity: 0.55; }
+#film-list li.dragging { opacity: 0.4; }
+
+/* Winning Scenarios tabs */
+.tab-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.8rem 0; }
+.tab { padding: 0.35rem 0.8rem; border-radius: 999px; background: var(--card);
+  color: var(--ink); border: 1px solid var(--border); cursor: pointer; }
+.tab[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tab:disabled { opacity: 0.45; cursor: not-allowed; }
+th.highlight-col, td.highlight-col { background: var(--dim); }
+
+/* Series palette: bound to players ALPHABETICALLY, never by rank (§12.4). */
+.series-0 { --series: #2563eb; } .series-1 { --series: #c2410c; }
+.series-2 { --series: #15803d; } .series-3 { --series: #7c3aed; }
+.series-4 { --series: #b91c1c; } .series-5 { --series: #0e7490; }
+.series-6 { --series: #a16207; } .series-7 { --series: #be185d; }
+[data-theme="dark"] .series-0 { --series: #7aa2ff; }
+[data-theme="dark"] .series-1 { --series: #fb923c; }
+[data-theme="dark"] .series-2 { --series: #4ade80; }
+[data-theme="dark"] .series-3 { --series: #a78bfa; }
+[data-theme="dark"] .series-4 { --series: #f87171; }
+[data-theme="dark"] .series-5 { --series: #22d3ee; }
+[data-theme="dark"] .series-6 { --series: #facc15; }
+[data-theme="dark"] .series-7 { --series: #f472b6; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .series-0 { --series: #7aa2ff; }
+  :root:not([data-theme="light"]) .series-1 { --series: #fb923c; }
+  :root:not([data-theme="light"]) .series-2 { --series: #4ade80; }
+  :root:not([data-theme="light"]) .series-3 { --series: #a78bfa; }
+  :root:not([data-theme="light"]) .series-4 { --series: #f87171; }
+  :root:not([data-theme="light"]) .series-5 { --series: #22d3ee; }
+  :root:not([data-theme="light"]) .series-6 { --series: #facc15; }
+  :root:not([data-theme="light"]) .series-7 { --series: #f472b6; }
+}
+.chart-wrap { overflow-x: auto; }
+.odds-chart { width: 100%; height: auto; }
+.odds-chart .grid { stroke: var(--border); stroke-width: 1; }
+.odds-chart .y-label, .odds-chart .x-label { fill: var(--muted); font-size: 10px; }
+.odds-chart .line { fill: none; stroke: var(--series); stroke-width: 2;
+  stroke-linejoin: round; stroke-linecap: round; }
+.odds-chart .marker { fill: var(--series); }
+.odds-chart .swatch { fill: var(--series); }
+.odds-chart .direct-label { fill: var(--ink); font-size: 11px; }
+.legend { list-style: none; padding: 0; }
+.legend-swatch { display: inline-block; width: 10px; height: 10px;
+  background: var(--series); margin-right: 0.4rem; border-radius: 2px; }
+</style>
+
+</head>
+<body>
+<div class="shell">
+<header>
+  <div class="masthead">
+    <h1>The Friends League</h1>
+    <p class="season-line">Summer 2026 · May 1 – Sep 7, 2026 · refreshed 2026-08-26</p>
+    <button id="theme-toggle" type="button" aria-label="Toggle light/dark theme">◐</button>
+  </div>
+  <nav aria-label="Site">
+    <a class="pill" href="index.html"
+       >🏆 Leaderboard</a>
+    <a class="pill current" href="whatif.html"
+       aria-current="page">🎬 What If?</a>
+    <a class="pill" href="scenarios.html"
+       >🔮 Winning Scenarios</a>
+    <a class="pill" href="history.html"
+       >📈 Odds Over Time</a>
+    </nav>
+</header>
+<main>
+
+
+<h2>🎬 What If?</h2>
+<p class="stats-line">Drag films into any finish order — or use the ▲ ▼ buttons —
+and watch every score recompute.</p>
+<div class="two-col">
+  <div>
+    <ol id="film-list"></ol>
+    <button type="button" id="reset-order">Reset to projected order</button>
+    <p class="stats-line">Films outside the projected top 15
+    can't be dragged in and score 0.</p>
+  </div>
+  <div class="standings" aria-live="polite">
+    <h3>If it ends this way…</h3>
+    <table>
+      <thead><tr><th>#</th><th>Player</th><th class="num">Pts</th><th class="num">Δ</th></tr></thead>
+      <tbody id="standings-body"></tbody>
+    </table>
+  </div>
+</div>
+<h3>Points by film</h3>
+<div class="table-scroll">
+<table>
+  <thead><tr id="points-grid-head"></tr></thead>
+  <tbody id="points-grid-body"></tbody>
+</table>
+</div>
+<script>window.WHATIF = {"baseline":{"bclarke":43},"films":["Spider-Man: Brand New Day","The Odyssey","Toy Story 5","Obsession","The Devil Wears Prada 2","Backrooms","Minions & Monsters","Star Wars: The Mandalorian and Grogu","Moana","Disclosure Day","Scary Movie","Mortal Kombat II","Supergirl","The Sheep Detectives","Masters of the Universe"],"players":[{"dark":["Backrooms","Scary Movie","Evil Dead Burn"],"name":"bclarke","ranked":["Toy Story 5","Spider-Man: Brand New Day","Minions & Monsters","The Devil Wears Prada 2","The Odyssey","Moana","Star Wars: The Mandalorian and Grogu","Supergirl","Disclosure Day","Mortal Kombat II"]}]};</script>
+<script>"use strict";
+function rankedPickPoints(predicted, actual) {
+  if (actual === null || actual === undefined) return 0;
+  var d = Math.abs(predicted - actual);
+  if (d === 0) return (actual === 1 || actual === 10) ? 13 : 10;
+  if (d === 1) return 7;
+  if (d === 2) return 5;
+  return 3;
+}
+function positionMap(topTitles) {
+  var pos = {};
+  for (var i = 0; i < topTitles.length; i++) pos[topTitles[i]] = i + 1;
+  return pos;
+}
+function pointsFor(ranked, dark, title, topTitles) {
+  var pos = positionMap(topTitles)[title];
+  var ri = ranked.indexOf(title);
+  if (ri >= 0) return pos ? rankedPickPoints(ri + 1, pos) : 0;
+  if (dark.indexOf(title) >= 0) return pos ? 1 : 0;
+  return null; // not picked
+}
+function scorePlayer(ranked, dark, topTitles) {
+  var pos = positionMap(topTitles), total = 0;
+  for (var i = 0; i < ranked.length; i++)
+    if (pos[ranked[i]]) total += rankedPickPoints(i + 1, pos[ranked[i]]);
+  for (var j = 0; j < dark.length; j++)
+    if (pos[dark[j]]) total += 1;
+  return total;
+}
+if (typeof module !== "undefined") {
+  module.exports = { rankedPickPoints: rankedPickPoints, scorePlayer: scorePlayer };
+}
+</script>
+<script>"use strict";
+(function () {
+  var D = window.WHATIF;
+  var list = document.getElementById("film-list");
+  var order = D.films.slice();
+
+  function top10() { return order.slice(0, 10); }
+
+  function rebuild() {
+    list.innerHTML = "";
+    order.forEach(function (title, idx) {
+      var li = document.createElement("li");
+      li.draggable = true;
+      li.dataset.title = title;
+      var name = document.createElement("span");
+      name.className = "wi-title";
+      name.textContent = title;
+      li.appendChild(name);
+      [["▲", -1], ["▼", 1]].forEach(function (pair) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.textContent = pair[0];
+        b.setAttribute("aria-label",
+          "Move " + title + (pair[1] < 0 ? " up" : " down") + " one slot");
+        b.addEventListener("click", function () {
+          var j = order.indexOf(title), k = j + pair[1];
+          if (k < 0 || k >= order.length) return;
+          order.splice(j, 1); order.splice(k, 0, title);
+          rebuild(); rescore();
+          // return focus so repeated presses keep walking the film (§12.2)
+          var again = list.children[k].querySelectorAll("button")[pair[1] < 0 ? 0 : 1];
+          again.focus();
+        });
+        li.appendChild(b);
+      });
+      li.addEventListener("dragstart", function (e) {
+        e.dataTransfer.setData("text/plain", title);
+        li.classList.add("dragging");
+      });
+      li.addEventListener("dragend", function () { li.classList.remove("dragging"); });
+      li.addEventListener("dragover", function (e) { e.preventDefault(); });
+      li.addEventListener("drop", function (e) {
+        e.preventDefault();
+        var dragged = e.dataTransfer.getData("text/plain");
+        if (!dragged || dragged === title) return;
+        var from = order.indexOf(dragged), to = order.indexOf(title);
+        order.splice(from, 1); order.splice(to, 0, dragged);
+        rebuild(); rescore();
+      });
+      // touch: press-and-hold before a drag begins so page scrolling still works
+      var holdTimer = null, touchDragging = false;
+      li.addEventListener("touchstart", function () {
+        holdTimer = setTimeout(function () { touchDragging = true;
+          li.classList.add("dragging"); }, 350);
+      }, { passive: true });
+      li.addEventListener("touchmove", function (e) {
+        if (!touchDragging) { clearTimeout(holdTimer); return; }
+        e.preventDefault();
+        var y = e.touches[0].clientY;
+        var target = document.elementFromPoint(e.touches[0].clientX, y);
+        var over = target && target.closest("#film-list li");
+        if (over && over !== li) {
+          var from = order.indexOf(title), to = order.indexOf(over.dataset.title);
+          order.splice(from, 1); order.splice(to, 0, title);
+          rebuild(); rescore();
+        }
+      }, { passive: false });
+      li.addEventListener("touchend", function () {
+        clearTimeout(holdTimer); touchDragging = false;
+        li.classList.remove("dragging");
+      });
+      list.appendChild(li);
+    });
+  }
+
+  function rescore() {
+    var finish = top10();
+    var rowsData = D.players.map(function (p) {
+      return { name: p.name, pts: scorePlayer(p.ranked, p.dark, finish),
+               base: D.baseline[p.name] };
+    });
+    rowsData.sort(function (a, b) { return b.pts - a.pts || (a.name < b.name ? -1 : 1); });
+    var tbody = document.getElementById("standings-body");
+    tbody.innerHTML = "";
+    var place = 0, shown = 0, prev = null;
+    rowsData.forEach(function (r) {
+      shown += 1;
+      if (r.pts !== prev) { place = shown; prev = r.pts; }  // competition ranking 1,1,3
+      var tr = document.createElement("tr");
+      var delta = r.pts - r.base;
+      var deltaTxt = delta > 0 ? "▲" + delta : delta < 0 ? "▼" + (-delta) : "–";
+      [place, (place === 1 ? "👑 " : "") + r.name, r.pts, deltaTxt].forEach(function (v) {
+        var td = document.createElement("td");
+        td.textContent = v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    var grid = document.getElementById("points-grid-body");
+    grid.innerHTML = "";
+    order.forEach(function (title, i) {
+      var tr = document.createElement("tr");
+      var td0 = document.createElement("td"); td0.textContent = (i + 1) + ". " + title;
+      tr.appendChild(td0);
+      rowsData.forEach(function (r) {
+        var p = D.players.filter(function (x) { return x.name === r.name; })[0];
+        var pts = pointsFor(p.ranked, p.dark, title, finish);
+        var td = document.createElement("td");
+        td.className = "num " + (pts === null ? "cell-none" : pts > 0 ? "cell-pos" : "cell-zero");
+        td.textContent = pts === null ? "—" : String(pts);
+        tr.appendChild(td);
+      });
+      grid.appendChild(tr);
+    });
+    var head = document.getElementById("points-grid-head");
+    head.innerHTML = "<th>Film</th>" + rowsData.map(function (r) {
+      return "<th class=\"num\"></th>"; }).join("");
+    var ths = head.querySelectorAll("th.num");
+    rowsData.forEach(function (r, i) { ths[i].textContent = r.name; });
+  }
+
+  document.getElementById("reset-order").addEventListener("click", function () {
+    order = D.films.slice();
+    rebuild(); rescore();
+  });
+  rebuild(); rescore();
+})();
+</script>
+
+
+</main>
+<footer>
+  <a href="data.json">data.json</a> · <a href="rules.html">Scoring rules</a>
+</footer>
+</div>
+</body>
+</html>
