@@ -106,3 +106,39 @@ footer a { color: var(--muted); }
 .tab[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
 .tab:disabled { opacity: 0.45; cursor: not-allowed; }
 th.highlight-col, td.highlight-col { background: var(--dim); }
+
+/* Series palette: bound to players ALPHABETICALLY, never by rank (§12.4). */
+.series-0 { --series: #2563eb; } .series-1 { --series: #c2410c; }
+.series-2 { --series: #15803d; } .series-3 { --series: #7c3aed; }
+.series-4 { --series: #b91c1c; } .series-5 { --series: #0e7490; }
+.series-6 { --series: #a16207; } .series-7 { --series: #be185d; }
+[data-theme="dark"] .series-0 { --series: #7aa2ff; }
+[data-theme="dark"] .series-1 { --series: #fb923c; }
+[data-theme="dark"] .series-2 { --series: #4ade80; }
+[data-theme="dark"] .series-3 { --series: #a78bfa; }
+[data-theme="dark"] .series-4 { --series: #f87171; }
+[data-theme="dark"] .series-5 { --series: #22d3ee; }
+[data-theme="dark"] .series-6 { --series: #facc15; }
+[data-theme="dark"] .series-7 { --series: #f472b6; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .series-0 { --series: #7aa2ff; }
+  :root:not([data-theme="light"]) .series-1 { --series: #fb923c; }
+  :root:not([data-theme="light"]) .series-2 { --series: #4ade80; }
+  :root:not([data-theme="light"]) .series-3 { --series: #a78bfa; }
+  :root:not([data-theme="light"]) .series-4 { --series: #f87171; }
+  :root:not([data-theme="light"]) .series-5 { --series: #22d3ee; }
+  :root:not([data-theme="light"]) .series-6 { --series: #facc15; }
+  :root:not([data-theme="light"]) .series-7 { --series: #f472b6; }
+}
+.chart-wrap { overflow-x: auto; }
+.odds-chart { width: 100%; height: auto; }
+.odds-chart .grid { stroke: var(--border); stroke-width: 1; }
+.odds-chart .y-label, .odds-chart .x-label { fill: var(--muted); font-size: 10px; }
+.odds-chart .line { fill: none; stroke: var(--series); stroke-width: 2;
+  stroke-linejoin: round; stroke-linecap: round; }
+.odds-chart .marker { fill: var(--series); }
+.odds-chart .swatch { fill: var(--series); }
+.odds-chart .direct-label { fill: var(--ink); font-size: 11px; }
+.legend { list-style: none; padding: 0; }
+.legend-swatch { display: inline-block; width: 10px; height: 10px;
+  background: var(--series); margin-right: 0.4rem; border-radius: 2px; }

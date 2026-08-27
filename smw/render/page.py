@@ -11,6 +11,7 @@ from smw.config.groups import Group
 from smw.config.season import Season
 from smw.model.project import MovieCatalog
 from smw.model.simulate import SimResult
+from smw.render.chart import render_chart_svg
 from smw.render.views import projected_ranks
 from smw.score.rules import score_player
 
@@ -146,3 +147,29 @@ def render_scenarios(env: Environment, out_dir: Path, ctx: dict,
         **ctx, "title": "Winning Scenarios", "tabs": tabs, "reason": reason,
         "scenarios_js": Markup((STATIC / "scenarios.js").read_text()),
     })
+
+
+def render_history(env: Environment, out_dir: Path, ctx: dict,
+                   data: "dict | None") -> None:
+    extra: dict = {"title": "Odds Over Time", "data": data}
+    if data is not None:
+        legend = []
+        for s in data["series"]:
+            vals = [v for v in s["values"] if v is not None]
+            legend.append({"name": s["name"], "color": s["color"],
+                           "latest_pct": round(vals[-1] * 100, 1) if vals else 0.0})
+        legend.sort(key=lambda e: -e["latest_pct"])
+        table_rows = [
+            {"date": d,
+             "cells": [
+                 (round(s["values"][i] * 100, 1) if s["values"][i] is not None else None)
+                 for s in data["series"]]}
+            for i, d in enumerate(data["dates"])
+        ]
+        extra.update({
+            "svg": Markup(render_chart_svg(data)),
+            "legend": legend,
+            "table_rows": table_rows,
+            "history_js": Markup((STATIC / "history.js").read_text()),
+        })
+    write_page(env, "history.html.j2", out_dir, "history.html", {**ctx, **extra})

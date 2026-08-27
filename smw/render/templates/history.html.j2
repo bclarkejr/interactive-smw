@@ -1,0 +1,38 @@
+{% extends "base.html.j2" %}
+{% block content %}
+{% if data is none %}
+<div class="locked">No forecast history yet — this chart fills in after the first
+production refresh.</div>
+{% else %}
+<h2>📈 Odds Over Time</h2>
+<div class="chart-wrap">{{ svg }}</div>
+<div id="crosshair-tip" class="notice" hidden></div>
+<h3>Legend</h3>
+<ul class="legend">
+{% for s in legend %}
+<li><span class="legend-swatch series-{{ s.color }}"></span>
+  {{ s.name }} — {{ s.latest_pct }}%</li>
+{% endfor %}
+</ul>
+<details>
+<summary>Data table</summary>
+<div class="table-scroll">
+<table>
+<thead><tr><th>Date</th>
+{% for s in data.series %}<th class="num">{{ s.name }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for row in table_rows %}
+<tr><td>{{ row.date }}</td>
+{% for cell in row.cells %}
+<td class="num">{% if cell is none %}<span class="cell-none">·</span>{% else %}{{ cell }}%{% endif %}</td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</details>
+<script>window.HISTORY = {{ data | json_embed }};</script>
+<script>{{ history_js }}</script>
+{% endif %}
+{% endblock %}
