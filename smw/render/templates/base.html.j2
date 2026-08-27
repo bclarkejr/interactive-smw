@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} · {{ display_name }}</title>
+<script>{{ theme_js }}</script>
+<style>{{ css }}</style>
+{% block head_extra %}{% endblock %}
+</head>
+<body>
+<div class="shell{% if wide_shell %} wide{% endif %}">
+<header>
+  <div class="masthead">
+    <h1>{{ display_name }}</h1>
+    <p class="season-line">{{ season_label }} · {{ window_label }} · refreshed {{ refreshed }}</p>
+    <button id="theme-toggle" type="button" aria-label="Toggle light/dark theme">◐</button>
+  </div>
+  <nav aria-label="Site">
+    {% for href, label, key in nav -%}
+    <a class="pill{% if key == active %} current{% endif %}" href="{{ href }}"
+       {% if key == active %}aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor -%}
+  </nav>
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+<footer>
+  <a href="data.json">data.json</a> · <a href="rules.html">Scoring rules</a>
+</footer>
+</div>
+</body>
+</html>
