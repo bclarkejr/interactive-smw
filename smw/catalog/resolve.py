@@ -76,13 +76,16 @@ def with_snapshot(history: dict[str, list[tuple[date, float]]],
                   grosses: dict[str, float], today: date) -> dict[str, list[tuple[date, float]]]:
     """Today's resolved grosses folded into the observation series (same-date max, sorted),
     so the observed-decay blend sees the current refresh, not just persisted ones."""
+    # No look-ahead: a back-dated build must not blend grosses observed after `today`.
+    past = {t: [(d, g) for d, g in obs if d <= today] for t, obs in history.items()}
     out: dict[str, list[tuple[date, float]]] = {}
     for title, gross in grosses.items():
         if gross <= 0:
             continue
-        by_date = dict(history.get(title, []))
+        by_date = dict(past.get(title, []))
         by_date[today] = max(gross, by_date.get(today, 0.0))
         out[title] = sorted(by_date.items())
-    for title, obs in history.items():
-        out.setdefault(title, list(obs))
+    for title, obs in past.items():
+        if obs:
+            out.setdefault(title, obs)
     return out

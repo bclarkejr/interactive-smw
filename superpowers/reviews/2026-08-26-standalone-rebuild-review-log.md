@@ -166,3 +166,13 @@ Last reviewed commit: `a85c6f1`. No approved SHA exists.
 - Pre-round: loop-3 cap finding fixed — `players` defaults to `{}` only when null, any other
   non-mapping is rejected; `ranked`/`dark_horses` must be YAML lists. Tests:
   `test_players_false_is_rejected_not_empty`, `test_players_null_is_empty`, `test_mapping_valued_picks_rejected`.
+
+### Loop 4 — Round 1, 07:56 EDT
+
+- Reviewed head: `3105ffc` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking) · raw: `round-10.json`
+- Deterministic checks before review: 194 passed.
+
+| # | Sev | File | Finding (verbatim summary) | Verdict | Action |
+|---|-----|------|----------------------------|---------|--------|
+| 1 | med | `smw/catalog/resolve.py:83` | `with_snapshot` keeps history rows dated after the run date, so a back-dated build blends look-ahead grosses | **Valid** (introduced by the loop-1 round-2 fix) | Observations after `today` dropped before the snapshot is folded in. Test: `test_with_snapshot_drops_observations_after_today`. |
+| 2 | med | `smw/render/build.py:160` | Persist production refresh dates (5th time) | **Still disputed** (§5 file set, §5.6). | none |

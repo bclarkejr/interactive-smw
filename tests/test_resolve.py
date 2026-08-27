@@ -82,3 +82,11 @@ def test_with_snapshot_merges_today_by_max():
     assert out["New"] == [(date(2026, 6, 8), 20.0)]
     assert out["Old"] == h["Old"]
     assert "Zero" not in out
+
+def test_with_snapshot_drops_observations_after_today():
+    from smw.catalog.resolve import with_snapshot
+    h = {"A": [(date(2026, 6, 1), 100.0), (date(2026, 6, 15), 900.0)],
+         "Future": [(date(2026, 7, 1), 5.0)]}
+    out = with_snapshot(h, {"A": 150.0}, date(2026, 6, 8))
+    assert out["A"] == [(date(2026, 6, 1), 100.0), (date(2026, 6, 8), 150.0)]
+    assert "Future" not in out
