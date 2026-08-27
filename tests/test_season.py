@@ -56,3 +56,59 @@ def test_matrix_rows_below_ten_rejected(tmp_path):
     p.write_text(BASE + "matrix_rows: 9\n")
     with pytest.raises(ValueError, match="matrix_rows"):
         load_season(p)
+
+from smw.config.season import load_season_dir
+
+def _season_dir(tmp_path, name="2026", extra="", groups=("b", "a")):
+    d = tmp_path / name
+    (d / "groups").mkdir(parents=True)
+    (d / "season.yaml").write_text(BASE + extra)
+    for g in groups:
+        (d / "groups" / f"{g}.yaml").write_text(f"group_id: {g}\ndisplay_name: {g.upper()}\n")
+    return d
+
+def test_default_group_key_loads(tmp_path):
+    p = tmp_path / "season.yaml"
+    p.write_text(BASE + "default_group: smw-friends\n")
+    assert load_season(p).default_group == "smw-friends"
+    p.write_text(BASE)
+    assert load_season(p).default_group is None
+
+def test_default_group_must_be_string(tmp_path):
+    p = tmp_path / "season.yaml"
+    p.write_text(BASE + "default_group: 3\n")
+    with pytest.raises(ValueError, match="default_group"):
+        load_season(p)
+
+def test_load_season_dir_fills_default_group_lexically(tmp_path):
+    season, groups = load_season_dir(_season_dir(tmp_path))
+    assert season.default_group == "a"
+    assert [g.group_id for g in groups] == ["a", "b"]
+
+def test_load_season_dir_keeps_explicit_default_group(tmp_path):
+    season, _ = load_season_dir(_season_dir(tmp_path, extra="default_group: b\n"))
+    assert season.default_group == "b"
+
+def test_load_season_dir_unknown_default_group_raises(tmp_path):
+    with pytest.raises(ValueError, match="default_group"):
+        load_season_dir(_season_dir(tmp_path, extra="default_group: zzz\n"))
+
+def test_load_season_dir_name_must_equal_year(tmp_path):
+    with pytest.raises(ValueError, match="2026"):
+        load_season_dir(_season_dir(tmp_path, name="2025"))
+
+def test_load_season_dir_requires_a_group(tmp_path):
+    with pytest.raises(ValueError, match="group"):
+        load_season_dir(_season_dir(tmp_path, groups=()))
+
+def test_load_season_dir_rejects_filename_id_mismatch(tmp_path):
+    d = _season_dir(tmp_path, groups=("a",))
+    (d / "groups" / "a.yaml").write_text("group_id: zzz\ndisplay_name: Z\n")
+    with pytest.raises(ValueError, match="file name must equal group_id"):
+        load_season_dir(d)
+
+def test_load_season_dir_rejects_duplicate_group_ids(tmp_path):
+    d = _season_dir(tmp_path, groups=("a", "b"))
+    (d / "groups" / "b.yaml").write_text("group_id: a\ndisplay_name: Dup\n")
+    with pytest.raises(ValueError, match="duplicate group_id"):
+        load_season_dir(d)

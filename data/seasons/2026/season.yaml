@@ -10,3 +10,4 @@ preopening_run_weeks: 10
 default_wow:
   wide: 0.55
   animated_family: 0.65
+default_group: smw-friends

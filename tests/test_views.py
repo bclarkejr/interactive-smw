@@ -93,6 +93,14 @@ def test_diff_arrows(season, group):
     row = next(r for r in bob.rows if r.title == "M10")
     assert row.diff == -9
 
+def test_list_rows_and_stats_copy_match_mockup(season, group):
+    v = _view(season, group)
+    assert v.list_rows[0][0] == "Pick 1" and v.list_rows[10][0] == "🐴 1"
+    d = v.details[0]
+    assert d.stats_line.startswith("— ") and " pts projected · " in d.stats_line
+    assert d.stats_line.endswith("% win")
+    assert v.films[0].released == "May 1"
+
 def test_empty_roster_set_renders_empty_lists(season):
     from smw.config.groups import Group
     empty = Group("g", "G", {})

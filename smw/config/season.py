@@ -1,8 +1,10 @@
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field, fields, replace
 from datetime import date
 from pathlib import Path
 
 import yaml
+
+from smw.config.groups import Group, load_group
 
 _REQUIRED = ("year", "window_start", "window_end", "seed")
 
@@ -21,6 +23,7 @@ class Season:
     default_wow: dict[str, float] = field(
         default_factory=lambda: {"wide": 0.55, "animated_family": 0.65}
     )
+    default_group: str | None = None
 
 
 def load_season(path: Path) -> Season:
@@ -61,3 +64,32 @@ def _validate(s: Season, where: str) -> None:
     for cat, w in s.default_wow.items():
         if not isinstance(w, (int, float)) or isinstance(w, bool) or not 0 < w <= 1:
             raise ValueError(f"{where}: default_wow.{cat} must be a number in (0, 1]")
+    if s.default_group is not None and not isinstance(s.default_group, str):
+        raise ValueError(f"{where}: default_group must be a string")
+
+
+def load_season_dir(season_dir: Path) -> tuple[Season, list[Group]]:
+    """One season = one directory named after its year (spec §2.1)."""
+    season_dir = Path(season_dir)
+    season = load_season(season_dir / "season.yaml")
+    if season_dir.name != str(season.year):
+        raise ValueError(
+            f"{season_dir}: directory name must equal season.yaml year ({season.year})")
+    paths = sorted((season_dir / "groups").glob("*.yaml"))
+    groups = [load_group(p) for p in paths]
+    if not groups:
+        raise ValueError(f"{season_dir}: no group files under groups/")
+    ids = sorted(g.group_id for g in groups)
+    dupes = {i for i in ids if ids.count(i) > 1}
+    if dupes:
+        raise ValueError(f"{season_dir}: duplicate group_id(s): {', '.join(sorted(dupes))}")
+    for p, g in zip(paths, groups):
+        if p.stem != g.group_id:
+            raise ValueError(f"{p}: file name must equal group_id {g.group_id!r}")
+    if season.default_group is None:
+        season = replace(season, default_group=ids[0])
+    elif season.default_group not in ids:
+        raise ValueError(
+            f"{season_dir / 'season.yaml'}: default_group {season.default_group!r} "
+            "names no roster file")
+    return season, groups

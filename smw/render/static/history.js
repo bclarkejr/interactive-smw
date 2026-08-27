@@ -1,25 +1,39 @@
 "use strict";
 (function () {
   var D = window.HISTORY;
-  var svg = document.querySelector(".odds-chart");
-  var tip = document.getElementById("crosshair-tip");
+  var svg = document.querySelector(".chartbox svg");
+  var tip = document.getElementById("tipbox");
   if (!svg || !tip) return;
-  var ML = 48, MR = 118;
-  svg.addEventListener("mousemove", function (e) {
-    var rect = svg.getBoundingClientRect();
-    var frac = (e.clientX - rect.left) / rect.width;   // viewBox is 0..660
-    var px = frac * 660;
-    var n = D.dates.length;
-    var span = 660 - ML - MR;
-    var i = Math.round((px - ML) / (n > 1 ? span / (n - 1) : span));
+  var W = 920, L = 52, R = 110, iw = W - L - R;
+  var n = D.dates.length;
+  var xh = svg.querySelector(".xh");
+  function x(i) { return n > 1 ? L + iw * i / (n - 1) : L + iw / 2; }
+  svg.addEventListener("mousemove", function (ev) {
+    var r = svg.getBoundingClientRect(), sx = W / r.width;
+    var i = n > 1 ? Math.round(((ev.clientX - r.left) * sx - L) / (iw / (n - 1))) : 0;
     i = Math.max(0, Math.min(n - 1, i));
-    var lines = [D.dates[i]];
+    xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i));
+    xh.style.display = "";
+    tip.textContent = "";
+    var b = document.createElement("strong");
+    b.textContent = D.dates[i];
+    tip.appendChild(b);
     D.series.forEach(function (s) {
+      tip.appendChild(document.createElement("br"));
+      var sw = document.createElement("span");
+      sw.className = "dlsw series-" + s.color;
+      sw.style.background = "var(--series)";
+      tip.appendChild(sw);
       var v = s.values[i];
-      lines.push(s.name + ": " + (v === null ? "·" : Math.round(v * 1000) / 10 + "%"));
+      tip.appendChild(document.createTextNode(
+        s.name + ": " + (v === null ? "·" : (Math.round(v * 1000) / 10).toFixed(1) + "%")));
     });
-    tip.hidden = false;
-    tip.textContent = lines.join("  ");
+    tip.style.display = "block";
+    tip.style.left = (ev.clientX + 14) + "px";
+    tip.style.top = (ev.clientY + 10) + "px";
   });
-  svg.addEventListener("mouseleave", function () { tip.hidden = true; });
+  svg.addEventListener("mouseleave", function () {
+    tip.style.display = "none";
+    xh.style.display = "none";
+  });
 })();

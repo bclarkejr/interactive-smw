@@ -9,7 +9,8 @@ __pycache__/
 !.claude/settings.json
 
 # Brainstorming files
-brainstorming/
+brainstorming/*
+!brainstorming/mockup.html
 
 # C extensions
 *.so

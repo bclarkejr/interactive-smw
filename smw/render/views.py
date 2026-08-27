@@ -111,7 +111,7 @@ def _film_rows(catalog: MovieCatalog, ranks: dict[str, int]) -> list[FilmRow]:
             badge = "no projection"
         else:
             badge = BADGES[f.status]
-        rows.append(FilmRow(ranks.get(f.title), f.title, f.release_date.isoformat(),
+        rows.append(FilmRow(ranks.get(f.title), f.title, f.release_date.strftime("%b %-d"),
                             badge, p.median, p.p10, p.p90, f.cumulative_gross, p.source))
     return rows
 
@@ -124,7 +124,7 @@ def _list_rows(group: Group, order: list[str]) -> list[tuple[str, dict[str, str]
         rows.append((f"Pick {i + 1}",
                      {u: group.players[u].ranked[i] for u in order}))
     for i in range(3):
-        rows.append((f"🐴 Dark Horse {i + 1}",
+        rows.append((f"🐴 {i + 1}",
                      {u: group.players[u].dark_horses[i] for u in order}))
     return rows
 
@@ -148,10 +148,10 @@ def _details(group, order, top_titles, catalog_titles, ranks, medians, mode,
                     gross=medians.get(t), pts=pts, missing=missing)
                 (rows if kind == "ranked" else dark).append(row)
         if mode == "live":
-            stats = (f"{footer[u]} pts projected · {current_points.get(u, 0)} pts current"
+            stats = (f"— {footer[u]} pts projected · {current_points.get(u, 0)} current"
                      f" · {sim.win_prob[u] * 100:.1f}% win")
         else:
-            stats = f"{current_points.get(u, 0)} pts current"
+            stats = f"— {current_points.get(u, 0)} pts current"
         details.append(PlayerDetail(u, stats, rows, dark))
     return details
 

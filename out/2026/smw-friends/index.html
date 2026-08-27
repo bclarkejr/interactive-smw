@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaderboard · Summer Movie Wager 2026 · The Friends League</title>
+<script>/* Theme resolution runs in the head, before body paint (spec §13.2). */
+(function(){try{var t=localStorage.getItem('smw-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+document.addEventListener("DOMContentLoaded",function(){
+  var b=document.getElementById("themeToggle"); if(!b) return;
+  b.addEventListener("click",function(){
+    var cur=document.documentElement.getAttribute("data-theme")
+      ||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+    var next=cur==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",next);
+    try{localStorage.setItem("smw-theme",next);}catch(e){}
+  });
+});
+</script>
+<style>/* ---------- tokens: light on :root; dark via toggle attr AND os pref (spec §13.2) ---------- */
+:root{
+  --bg:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,.10);
+  --affirm:#006300; --neg:#b3261e; --accent:#2a78d6; --pill:#eceae4; --hl:#fdf6e3;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10);
+  --affirm:#0ca30c; --neg:#e66767; --accent:#3987e5; --pill:#26262a; --hl:#26231a;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10);
+    --affirm:#0ca30c; --neg:#e66767; --accent:#3987e5; --pill:#26262a; --hl:#26231a;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px 60px}
+a{color:var(--accent)}
+h1{font-size:1.5rem;margin:.2rem 0 0}
+h2{font-size:1.12rem;margin:2.2rem 0 .7rem}
+.sub{color:var(--ink2)}
+.small{font-size:.85rem;color:var(--muted)}
+
+
+header.site{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-top:26px}
+#themeToggle{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:6px 12px;cursor:pointer;color:var(--ink);font-size:.85rem}
+
+/* ---------- nav pills (§11.2) ---------- */
+nav.pills{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+nav.pills a{background:var(--pill);color:var(--ink);text-decoration:none;border-radius:999px;
+  padding:7px 16px;font-size:.9rem;border:1px solid transparent}
+nav.pills a[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+nav.pills a:hover:not([aria-current]){border-color:var(--border)}
+
+/* ---------- tables ---------- */
+.scroller{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:6px 10px;text-align:right;white-space:nowrap;
+  font-variant-numeric:tabular-nums;border-bottom:1px solid var(--grid)}
+th{color:var(--ink2);font-weight:600}
+thead th{position:sticky;top:0;background:var(--surface);z-index:2}
+td.t,th.t{text-align:left}
+tr.divider td{border-bottom:2px dashed var(--baseline);color:var(--muted);
+  text-align:center;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;padding:3px}
+tfoot td{font-weight:700;border-top:2px solid var(--baseline);border-bottom:none}
+tfoot tr.odds td{font-weight:400;color:var(--ink2)}
+.pos{color:var(--affirm);font-weight:600}
+.zero{color:var(--muted)}
+.dash{color:var(--muted)}
+.up{color:var(--affirm)} .down{color:var(--neg)}
+.badge{display:inline-block;font-size:.72rem;border:1px solid var(--border);border-radius:999px;
+  padding:1px 8px;color:var(--ink2);background:var(--pill)}
+.hlcol{background:var(--hl)}
+.crown::after{content:" 👑"}
+
+/* ---------- accordions ---------- */
+details.acc{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  margin:8px 0;padding:0 14px}
+details.acc summary{cursor:pointer;padding:10px 0;font-weight:600}
+details.acc summary .stats{font-weight:400;color:var(--ink2);font-size:.86rem}
+details.acc[open]{padding-bottom:12px}
+
+/* ---------- what-if (§12.2) ---------- */
+.wi{display:grid;grid-template-columns:minmax(340px,1fr) minmax(280px,340px);gap:22px;align-items:start}
+ol.wi-list{list-style:none;counter-reset:slot;margin:0;padding:0}
+ol.wi-list li{counter-increment:slot;display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:6px 10px;margin:5px 0;cursor:grab}
+ol.wi-list li::before{content:counter(slot);min-width:1.7em;text-align:right;
+  color:var(--ink2);font-variant-numeric:tabular-nums;font-weight:600}
+ol.wi-list li:nth-child(10){border-bottom:3px dashed var(--baseline);position:relative;margin-bottom:22px}
+ol.wi-list li:nth-child(10)::after{content:"— top-10 cutoff —";position:absolute;left:0;right:0;
+  bottom:-20px;text-align:center;font-size:.72rem;color:var(--muted);letter-spacing:.08em}
+ol.wi-list li:nth-child(n+11){opacity:.55}
+ol.wi-list li .film{flex:1}
+ol.wi-list li.dragging{opacity:.4}
+.mv{display:flex;gap:4px}
+.mv button{background:var(--pill);color:var(--ink);border:1px solid var(--border);border-radius:6px;
+  width:26px;height:24px;cursor:pointer;line-height:1}
+.wi-panel{position:sticky;top:14px;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px}
+.wi-panel h3{margin:0 0 8px;font-size:1rem}
+.wi-panel table{font-size:.86rem}
+#wiReset{margin-top:10px;background:var(--pill);color:var(--ink);border:1px solid var(--border);
+  border-radius:8px;padding:6px 14px;cursor:pointer}
+
+/* ---------- scenarios (§12.3) ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.tabs button{background:var(--pill);color:var(--ink);border:1px solid var(--border);
+  border-radius:999px;padding:7px 14px;cursor:pointer;font-size:.88rem}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:600}
+.tabs button:disabled{opacity:.45;cursor:not-allowed}
+.caption{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;margin:10px 0;font-size:.92rem}
+td.mid{color:var(--muted)}
+
+/* ---------- history chart (§12.4) ---------- */
+.chartbox{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+svg text{font:11px system-ui,-apple-system,"Segoe UI",sans-serif;fill:var(--muted)}
+svg text.dl{font-size:12px;font-weight:600;fill:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:.86rem;color:var(--ink2)}
+.legend .sw,.dlsw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:baseline}
+#tipbox{position:fixed;pointer-events:none;background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;font-size:.8rem;display:none;z-index:9;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+
+/* ---------- locked / rules ---------- */
+.locked{text-align:center;color:var(--ink2);padding:70px 20px;background:var(--surface);
+  border:1px solid var(--border);border-radius:10px}
+footer.site{margin-top:48px;border-top:1px solid var(--grid);padding-top:14px;font-size:.85rem;color:var(--ink2)}
+@media(max-width:700px){
+  body{font-size:14px}
+  th,td{padding:4px 7px}
+  .wi{grid-template-columns:1fr}
+  .wi-panel{position:static}
+}
+/* ---------- site additions ---------- */
+/* Series palette: bound to players ALPHABETICALLY, never by rank (rebuild §12.4).
+   0–5 are the mockup's six colours in the mockup's order; 6–7 are the site's extras. */
+.series-0{--series:#2a78d6} .series-1{--series:#eb6834} .series-2{--series:#1baf7a}
+.series-3{--series:#eda100} .series-4{--series:#e87ba4} .series-5{--series:#008300}
+.series-6{--series:#a16207} .series-7{--series:#be185d}
+:root[data-theme="dark"] .series-0{--series:#3987e5}
+:root[data-theme="dark"] .series-1{--series:#d95926}
+:root[data-theme="dark"] .series-2{--series:#199e70}
+:root[data-theme="dark"] .series-3{--series:#c98500}
+:root[data-theme="dark"] .series-4{--series:#d55181}
+:root[data-theme="dark"] .series-5{--series:#008300}
+:root[data-theme="dark"] .series-6{--series:#facc15}
+:root[data-theme="dark"] .series-7{--series:#f472b6}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .series-0{--series:#3987e5}
+  :root:not([data-theme="light"]) .series-1{--series:#d95926}
+  :root:not([data-theme="light"]) .series-2{--series:#199e70}
+  :root:not([data-theme="light"]) .series-3{--series:#c98500}
+  :root:not([data-theme="light"]) .series-4{--series:#d55181}
+  :root:not([data-theme="light"]) .series-5{--series:#008300}
+  :root:not([data-theme="light"]) .series-6{--series:#facc15}
+  :root:not([data-theme="light"]) .series-7{--series:#f472b6}
+}
+/* Masthead selectors (spec §4): the #themeToggle recipe on a native select element. */
+.sel{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:4px 10px;color:var(--ink);font-size:.85rem;margin-left:6px;cursor:pointer}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <div>
+    <h1>🍿 Summer Movie Wager</h1>
+    <div class="sub">Wager window: May 1 – Sep 7, 2026 &nbsp;·&nbsp; <span class="small">Refreshed Aug 27, 2026</span>
+      <label class="vh" for="yearSelect">Season</label>
+      <select id="yearSelect" class="sel" onchange="location.href=this.value"><option value="../../2026/smw-friends/index.html" selected>2026</option></select>
+      <label class="vh" for="groupSelect">Group</label>
+      <select id="groupSelect" class="sel" onchange="location.href=this.value"><option value="../filmcast/index.html">The Filmcast</option><option value="../smw-friends/index.html" selected>The Friends League</option></select>
+    </div>
+  </div>
+  <button id="themeToggle" type="button" aria-label="Toggle color theme">◐ Theme</button>
+</header>
+
+<nav class="pills" aria-label="Site">
+  <a href="index.html" aria-current="page">🏆 Leaderboard</a>
+  <a href="whatif.html">🎬 What If?</a>
+  <a href="scenarios.html">🔮 Winning Scenarios</a>
+  <a href="history.html">📈 Odds Over Time</a>
+  </nav>
+
+
+
+
+<h2>🏆 Projected Standings</h2>
+<div class="scroller"><table id="matrix">
+<thead><tr><th>#</th><th class="t">Movie</th>
+  <th>Projected (in-window)</th><th>emsullivan</th><th>brettfern</th><th>carleigh</th><th>zmeister</th><th>bclarke</th><th>vivrad</th><th>mhartje</th><th>radhadr</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="t">Spider-Man: Brand New Day</td><td>$885.2M</td><td class="pos">5</td><td class="pos">13</td><td class="pos">13</td><td class="pos">13</td><td class="pos">7</td><td class="pos">13</td><td class="pos">3</td><td class="pos">13</td></tr>
+<tr><td>2</td><td class="t">The Odyssey</td><td>$557.8M</td><td class="pos">10</td><td class="pos">7</td><td class="pos">3</td><td class="pos">3</td><td class="pos">3</td><td class="pos">7</td><td class="pos">3</td><td class="dash">—</td></tr>
+<tr><td>3</td><td class="t">Toy Story 5</td><td>$478.8M</td><td class="pos">5</td><td class="pos">7</td><td class="pos">7</td><td class="pos">10</td><td class="pos">5</td><td class="pos">7</td><td class="pos">7</td><td class="pos">1</td></tr>
+<tr><td>4</td><td class="t">Obsession</td><td>$263.5M</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td></tr>
+<tr><td>5</td><td class="t">The Devil Wears Prada 2</td><td>$220.6M</td><td class="pos">10</td><td class="pos">7</td><td class="pos">7</td><td class="pos">3</td><td class="pos">7</td><td class="pos">3</td><td class="pos">5</td><td class="pos">7</td></tr>
+<tr><td>6</td><td class="t">Backrooms</td><td>$197.5M</td><td class="pos">3</td><td class="dash">—</td><td class="pos">3</td><td class="dash">—</td><td class="pos">1</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td></tr>
+<tr><td>7</td><td class="t">Minions &amp; Monsters</td><td>$182.8M</td><td class="pos">10</td><td class="pos">5</td><td class="pos">3</td><td class="pos">10</td><td class="pos">3</td><td class="pos">3</td><td class="pos">7</td><td class="dash">—</td></tr>
+<tr><td>8</td><td class="t">Star Wars: The Mandalorian and Grogu</td><td>$177.7M</td><td class="pos">10</td><td class="pos">7</td><td class="pos">7</td><td class="pos">3</td><td class="pos">7</td><td class="pos">3</td><td class="pos">5</td><td class="pos">3</td></tr>
+<tr><td>9</td><td class="t">Moana</td><td>$126.0M</td><td class="pos">3</td><td class="pos">3</td><td class="pos">3</td><td class="pos">3</td><td class="pos">3</td><td class="pos">3</td><td class="pos">3</td><td class="pos">3</td></tr>
+<tr><td>10</td><td class="t">Disclosure Day</td><td>$116.6M</td><td class="pos">7</td><td class="pos">5</td><td class="pos">7</td><td class="dash">—</td><td class="pos">7</td><td class="pos">3</td><td class="pos">7</td><td class="dash">—</td></tr>
+<tr class="divider"><td colspan="11">Outside the top 10</td></tr>
+<tr><td>11</td><td class="t">Scary Movie</td><td>$108.3M</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="dash">—</td></tr>
+<tr><td>12</td><td class="t">Mortal Kombat II</td><td>$79.8M</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="dash">—</td><td class="dash">—</td></tr>
+<tr><td>13</td><td class="t">Supergirl</td><td>$72.4M</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td><td class="zero">0</td></tr>
+<tr><td>14</td><td class="t">The Sheep Detectives</td><td>$66.1M</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="dash">—</td><td class="zero">0</td><td class="zero">0</td></tr>
+<tr><td>15</td><td class="t">Masters of the Universe</td><td>$64.8M</td><td class="dash">—</td><td class="zero">0</td><td class="dash">—</td><td class="zero">0</td><td class="dash">—</td><td class="zero">0</td><td class="dash">—</td><td class="dash">—</td></tr>
+</tbody>
+<tfoot>
+<tr><td colspan="3" class="t">Projected pts</td><td>63</td><td>54</td><td>53</td><td>45</td><td>43</td><td>42</td><td>40</td><td>27</td></tr>
+<tr class="odds"><td colspan="3" class="t">Win odds</td><td>100.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td><td>0.0%</td></tr>
+</tfoot>
+</table></div>
+<p class="small">Rows: top 15 films by projected median in-window gross. Cells are each film's
+projected points for that player; grey 0 = on their roster but outside the projected top ten,
+— = not picked. Columns are ordered by simulated median points.</p>
+
+<h2>📋 All Players' Lists</h2>
+<div class="scroller"><table id="lists">
+<thead><tr><th class="t">Slot</th><th class="t">emsullivan</th><th class="t">brettfern</th><th class="t">carleigh</th><th class="t">zmeister</th><th class="t">bclarke</th><th class="t">vivrad</th><th class="t">mhartje</th><th class="t">radhadr</th></tr></thead>
+<tbody>
+<tr><td class="t">Pick 1</td><td class="t">Toy Story 5</td><td class="t">Spider-Man: Brand New Day</td><td class="t">Spider-Man: Brand New Day</td><td class="t">Spider-Man: Brand New Day</td><td class="t">Toy Story 5</td><td class="t">Spider-Man: Brand New Day</td><td class="t">Moana</td><td class="t">Spider-Man: Brand New Day</td></tr>
+<tr><td class="t">Pick 2</td><td class="t">The Odyssey</td><td class="t">Toy Story 5</td><td class="t">Toy Story 5</td><td class="t">Supergirl</td><td class="t">Spider-Man: Brand New Day</td><td class="t">Toy Story 5</td><td class="t">Toy Story 5</td><td class="t">Moana</td></tr>
+<tr><td class="t">Pick 3</td><td class="t">Spider-Man: Brand New Day</td><td class="t">The Odyssey</td><td class="t">Moana</td><td class="t">Toy Story 5</td><td class="t">Minions &amp; Monsters</td><td class="t">The Odyssey</td><td class="t">Supergirl</td><td class="t">Supergirl</td></tr>
+<tr><td class="t">Pick 4</td><td class="t">Moana</td><td class="t">Moana</td><td class="t">Minions &amp; Monsters</td><td class="t">Moana</td><td class="t">The Devil Wears Prada 2</td><td class="t">Minions &amp; Monsters</td><td class="t">Spider-Man: Brand New Day</td><td class="t">Star Wars: The Mandalorian and Grogu</td></tr>
+<tr><td class="t">Pick 5</td><td class="t">The Devil Wears Prada 2</td><td class="t">Minions &amp; Monsters</td><td class="t">The Odyssey</td><td class="t">Star Wars: The Mandalorian and Grogu</td><td class="t">The Odyssey</td><td class="t">Star Wars: The Mandalorian and Grogu</td><td class="t">The Odyssey</td><td class="t">Animal Farm</td></tr>
+<tr><td class="t">Pick 6</td><td class="t">Young Washington</td><td class="t">The Devil Wears Prada 2</td><td class="t">The Devil Wears Prada 2</td><td class="t">The Odyssey</td><td class="t">Moana</td><td class="t">Moana</td><td class="t">Star Wars: The Mandalorian and Grogu</td><td class="t">The Devil Wears Prada 2</td></tr>
+<tr><td class="t">Pick 7</td><td class="t">Minions &amp; Monsters</td><td class="t">Star Wars: The Mandalorian and Grogu</td><td class="t">Star Wars: The Mandalorian and Grogu</td><td class="t">Minions &amp; Monsters</td><td class="t">Star Wars: The Mandalorian and Grogu</td><td class="t">Disclosure Day</td><td class="t">The Devil Wears Prada 2</td><td class="t">The Breadwinner</td></tr>
+<tr><td class="t">Pick 8</td><td class="t">Star Wars: The Mandalorian and Grogu</td><td class="t">Disclosure Day</td><td class="t">Supergirl</td><td class="t">The Devil Wears Prada 2</td><td class="t">Supergirl</td><td class="t">Supergirl</td><td class="t">Minions &amp; Monsters</td><td class="t">PAW Patrol: The Dino Movie</td></tr>
+<tr><td class="t">Pick 9</td><td class="t">Disclosure Day</td><td class="t">Supergirl</td><td class="t">Disclosure Day</td><td class="t">Scary Movie</td><td class="t">Disclosure Day</td><td class="t">The Devil Wears Prada 2</td><td class="t">Disclosure Day</td><td class="t">Tom and Jerry: Forbidden Compass</td></tr>
+<tr><td class="t">Pick 10</td><td class="t">Backrooms</td><td class="t">Scary Movie</td><td class="t">Backrooms</td><td class="t">Insidious: Out of the Further</td><td class="t">Mortal Kombat II</td><td class="t">Masters of the Universe</td><td class="t">Scary Movie</td><td class="t">Passenger</td></tr>
+<tr class="divider"><td colspan="9">Dark horses</td></tr>
+<tr><td class="t">🐴 1</td><td class="t">Mortal Kombat II</td><td class="t">Coyote vs. Acme</td><td class="t">Mortal Kombat II</td><td class="t">Masters of the Universe</td><td class="t">Backrooms</td><td class="t">Scary Movie</td><td class="t">Power Ballad</td><td class="t">The Sheep Detectives</td></tr>
+<tr><td class="t">🐴 2</td><td class="t">Scary Movie</td><td class="t">Mortal Kombat II</td><td class="t">The End of Oak Street</td><td class="t">Mortal Kombat II</td><td class="t">Scary Movie</td><td class="t">Mortal Kombat II</td><td class="t">I Love Boosters</td><td class="t">Toy Story 5</td></tr>
+<tr><td class="t">🐴 3</td><td class="t">Supergirl</td><td class="t">Masters of the Universe</td><td class="t">Scary Movie</td><td class="t">Coyote vs. Acme</td><td class="t">Evil Dead Burn</td><td class="t">Billie Eilish: Hit Me Hard and Soft</td><td class="t">The Sheep Detectives</td><td class="t">Finding Emily</td></tr>
+</tbody>
+</table></div>
+
+<h2>👤 Per-Player Detail</h2>
+<details class="acc"><summary>emsullivan <span class="stats">— 63 pts projected · 63 current · 100.0% win</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th>#</th><th class="t">Movie</th><th>Projected rank</th><th>Diff</th><th>Projected gross</th><th>Pts</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="t">Toy Story 5</td>
+  <td>#3</td>
+  <td><span class="down">▼ 2</span></td>
+  <td>$478.8M</td>
+  <td class="pos">5</td></tr>
+<tr><td>2</td><td class="t">The Odyssey</td>
+  <td>#2</td>
+  <td><span class="dash">–</span></td>
+  <td>$557.8M</td>
+  <td class="pos">10</td></tr>
+<tr><td>3</td><td class="t">Spider-Man: Brand New Day</td>
+  <td>#1</td>
+  <td><span class="up">▲ 2</span></td>
+  <td>$885.2M</td>
+  <td class="pos">5</td></tr>
+<tr><td>4</td><td class="t">Moana</td>
+  <td>#9</td>
+  <td><span class="down">▼ 5</span></td>
+  <td>$126.0M</td>
+  <td class="pos">3</td></tr>
+<tr><td>5</td><td class="t">The Devil Wears Prada 2</td>
+  <td>#5</td>
+  <td><span class="dash">–</span></td>
+  <td>$220.6M</td>
+  <td class="pos">10</td></tr>
+<tr><td>6</td><td class="t">Young Washington</td>
+  <td>#18</td>
+  <td><span class="down">▼ 12</span></td>
+  <td>$47.0M</td>
+  <td class="zero">0</td></tr>
+<tr><td>7</td><td class="t">Minions &amp; Monsters</td>
+  <td>#7</td>
+  <td><span class="dash">–</span></td>
+  <td>$182.8M</td>
+  <td class="pos">10</td></tr>
+<tr><td>8</td><td class="t">Star Wars: The Mandalorian and Grogu</td>
+  <td>#8</td>
+  <td><span class="dash">–</span></td>
+  <td>$177.7M</td>
+  <td class="pos">10</td></tr>
+<tr><td>9</td><td class="t">Disclosure Day</td>
+  <td>#10</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$116.6M</td>
+  <td class="pos">7</td></tr>
+<tr><td>10</td><td class="t">Backrooms</td>
+  <td>#6</td>
+  <td><span class="up">▲ 4</span></td>
+  <td>$197.5M</td>
+  <td class="pos">3</td></tr>
+<tr class="divider"><td colspan="6">Dark horses</td></tr>
+<tr><td>🐴</td><td class="t">Mortal Kombat II</td>
+  <td>#12</td>
+  <td><span class="dash">—</span></td>
+  <td>$79.8M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Scary Movie</td>
+  <td>#11</td>
+  <td><span class="dash">—</span></td>
+  <td>$108.3M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Supergirl</td>
+  <td>#13</td>
+  <td><span class="dash">—</span></td>
+  <td>$72.4M</td>
+  <td class="zero">0</td></tr>
+</tbody>
+</table></div>
+</details>
+<details class="acc"><summary>brettfern <span class="stats">— 54 pts projected · 54 current · 0.0% win</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th>#</th><th class="t">Movie</th><th>Projected rank</th><th>Diff</th><th>Projected gross</th><th>Pts</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="t">Spider-Man: Brand New Day</td>
+  <td>#1</td>
+  <td><span class="dash">–</span></td>
+  <td>$885.2M</td>
+  <td class="pos">13</td></tr>
+<tr><td>2</td><td class="t">Toy Story 5</td>
+  <td>#3</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$478.8M</td>
+  <td class="pos">7</td></tr>
+<tr><td>3</td><td class="t">The Odyssey</td>
+  <td>#2</td>
+  <td><span class="up">▲ 1</span></td>
+  <td>$557.8M</td>
+  <td class="pos">7</td></tr>
+<tr><td>4</td><td class="t">Moana</td>
+  <td>#9</td>
+  <td><span class="down">▼ 5</span></td>
+  <td>$126.0M</td>
+  <td class="pos">3</td></tr>
+<tr><td>5</td><td class="t">Minions &amp; Monsters</td>
+  <td>#7</td>
+  <td><span class="down">▼ 2</span></td>
+  <td>$182.8M</td>
+  <td class="pos">5</td></tr>
+<tr><td>6</td><td class="t">The Devil Wears Prada 2</td>
+  <td>#5</td>
+  <td><span class="up">▲ 1</span></td>
+  <td>$220.6M</td>
+  <td class="pos">7</td></tr>
+<tr><td>7</td><td class="t">Star Wars: The Mandalorian and Grogu</td>
+  <td>#8</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$177.7M</td>
+  <td class="pos">7</td></tr>
+<tr><td>8</td><td class="t">Disclosure Day</td>
+  <td>#10</td>
+  <td><span class="down">▼ 2</span></td>
+  <td>$116.6M</td>
+  <td class="pos">5</td></tr>
+<tr><td>9</td><td class="t">Supergirl</td>
+  <td>#13</td>
+  <td><span class="down">▼ 4</span></td>
+  <td>$72.4M</td>
+  <td class="zero">0</td></tr>
+<tr><td>10</td><td class="t">Scary Movie</td>
+  <td>#11</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$108.3M</td>
+  <td class="zero">0</td></tr>
+<tr class="divider"><td colspan="6">Dark horses</td></tr>
+<tr><td>🐴</td><td class="t">Coyote vs. Acme</td>
+  <td><span class="dash">—</span></td>
+  <td><span class="dash">—</span></td>
+  <td><span class="dash">—</span> <span class="badge">no projection</span></td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Mortal Kombat II</td>
+  <td>#12</td>
+  <td><span class="dash">—</span></td>
+  <td>$79.8M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Masters of the Universe</td>
+  <td>#15</td>
+  <td><span class="dash">—</span></td>
+  <td>$64.8M</td>
+  <td class="zero">0</td></tr>
+</tbody>
+</table></div>
+</details>
+<details class="acc"><summary>carleigh <span class="stats">— 53 pts projected · 53 current · 0.0% win</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th>#</th><th class="t">Movie</th><th>Projected rank</th><th>Diff</th><th>Projected gross</th><th>Pts</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="t">Spider-Man: Brand New Day</td>
+  <td>#1</td>
+  <td><span class="dash">–</span></td>
+  <td>$885.2M</td>
+  <td class="pos">13</td></tr>
+<tr><td>2</td><td class="t">Toy Story 5</td>
+  <td>#3</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$478.8M</td>
+  <td class="pos">7</td></tr>
+<tr><td>3</td><td class="t">Moana</td>
+  <td>#9</td>
+  <td><span class="down">▼ 6</span></td>
+  <td>$126.0M</td>
+  <td class="pos">3</td></tr>
+<tr><td>4</td><td class="t">Minions &amp; Monsters</td>
+  <td>#7</td>
+  <td><span class="down">▼ 3</span></td>
+  <td>$182.8M</td>
+  <td class="pos">3</td></tr>
+<tr><td>5</td><td class="t">The Odyssey</td>
+  <td>#2</td>
+  <td><span class="up">▲ 3</span></td>
+  <td>$557.8M</td>
+  <td class="pos">3</td></tr>
+<tr><td>6</td><td class="t">The Devil Wears Prada 2</td>
+  <td>#5</td>
+  <td><span class="up">▲ 1</span></td>
+  <td>$220.6M</td>
+  <td class="pos">7</td></tr>
+<tr><td>7</td><td class="t">Star Wars: The Mandalorian and Grogu</td>
+  <td>#8</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$177.7M</td>
+  <td class="pos">7</td></tr>
+<tr><td>8</td><td class="t">Supergirl</td>
+  <td>#13</td>
+  <td><span class="down">▼ 5</span></td>
+  <td>$72.4M</td>
+  <td class="zero">0</td></tr>
+<tr><td>9</td><td class="t">Disclosure Day</td>
+  <td>#10</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$116.6M</td>
+  <td class="pos">7</td></tr>
+<tr><td>10</td><td class="t">Backrooms</td>
+  <td>#6</td>
+  <td><span class="up">▲ 4</span></td>
+  <td>$197.5M</td>
+  <td class="pos">3</td></tr>
+<tr class="divider"><td colspan="6">Dark horses</td></tr>
+<tr><td>🐴</td><td class="t">Mortal Kombat II</td>
+  <td>#12</td>
+  <td><span class="dash">—</span></td>
+  <td>$79.8M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">The End of Oak Street</td>
+  <td>#17</td>
+  <td><span class="dash">—</span></td>
+  <td>$48.0M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Scary Movie</td>
+  <td>#11</td>
+  <td><span class="dash">—</span></td>
+  <td>$108.3M</td>
+  <td class="zero">0</td></tr>
+</tbody>
+</table></div>
+</details>
+<details class="acc"><summary>zmeister <span class="stats">— 45 pts projected · 45 current · 0.0% win</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th>#</th><th class="t">Movie</th><th>Projected rank</th><th>Diff</th><th>Projected gross</th><th>Pts</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="t">Spider-Man: Brand New Day</td>
+  <td>#1</td>
+  <td><span class="dash">–</span></td>
+  <td>$885.2M</td>
+  <td class="pos">13</td></tr>
+<tr><td>2</td><td class="t">Supergirl</td>
+  <td>#13</td>
+  <td><span class="down">▼ 11</span></td>
+  <td>$72.4M</td>
+  <td class="zero">0</td></tr>
+<tr><td>3</td><td class="t">Toy Story 5</td>
+  <td>#3</td>
+  <td><span class="dash">–</span></td>
+  <td>$478.8M</td>
+  <td class="pos">10</td></tr>
+<tr><td>4</td><td class="t">Moana</td>
+  <td>#9</td>
+  <td><span class="down">▼ 5</span></td>
+  <td>$126.0M</td>
+  <td class="pos">3</td></tr>
+<tr><td>5</td><td class="t">Star Wars: The Mandalorian and Grogu</td>
+  <td>#8</td>
+  <td><span class="down">▼ 3</span></td>
+  <td>$177.7M</td>
+  <td class="pos">3</td></tr>
+<tr><td>6</td><td class="t">The Odyssey</td>
+  <td>#2</td>
+  <td><span class="up">▲ 4</span></td>
+  <td>$557.8M</td>
+  <td class="pos">3</td></tr>
+<tr><td>7</td><td class="t">Minions &amp; Monsters</td>
+  <td>#7</td>
+  <td><span class="dash">–</span></td>
+  <td>$182.8M</td>
+  <td class="pos">10</td></tr>
+<tr><td>8</td><td class="t">The Devil Wears Prada 2</td>
+  <td>#5</td>
+  <td><span class="up">▲ 3</span></td>
+  <td>$220.6M</td>
+  <td class="pos">3</td></tr>
+<tr><td>9</td><td class="t">Scary Movie</td>
+  <td>#11</td>
+  <td><span class="down">▼ 2</span></td>
+  <td>$108.3M</td>
+  <td class="zero">0</td></tr>
+<tr><td>10</td><td class="t">Insidious: Out of the Further</td>
+  <td>#16</td>
+  <td><span class="down">▼ 6</span></td>
+  <td>$58.6M</td>
+  <td class="zero">0</td></tr>
+<tr class="divider"><td colspan="6">Dark horses</td></tr>
+<tr><td>🐴</td><td class="t">Masters of the Universe</td>
+  <td>#15</td>
+  <td><span class="dash">—</span></td>
+  <td>$64.8M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Mortal Kombat II</td>
+  <td>#12</td>
+  <td><span class="dash">—</span></td>
+  <td>$79.8M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Coyote vs. Acme</td>
+  <td><span class="dash">—</span></td>
+  <td><span class="dash">—</span></td>
+  <td><span class="dash">—</span> <span class="badge">no projection</span></td>
+  <td class="zero">0</td></tr>
+</tbody>
+</table></div>
+</details>
+<details class="acc"><summary>bclarke <span class="stats">— 43 pts projected · 43 current · 0.0% win</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th>#</th><th class="t">Movie</th><th>Projected rank</th><th>Diff</th><th>Projected gross</th><th>Pts</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="t">Toy Story 5</td>
+  <td>#3</td>
+  <td><span class="down">▼ 2</span></td>
+  <td>$478.8M</td>
+  <td class="pos">5</td></tr>
+<tr><td>2</td><td class="t">Spider-Man: Brand New Day</td>
+  <td>#1</td>
+  <td><span class="up">▲ 1</span></td>
+  <td>$885.2M</td>
+  <td class="pos">7</td></tr>
+<tr><td>3</td><td class="t">Minions &amp; Monsters</td>
+  <td>#7</td>
+  <td><span class="down">▼ 4</span></td>
+  <td>$182.8M</td>
+  <td class="pos">3</td></tr>
+<tr><td>4</td><td class="t">The Devil Wears Prada 2</td>
+  <td>#5</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$220.6M</td>
+  <td class="pos">7</td></tr>
+<tr><td>5</td><td class="t">The Odyssey</td>
+  <td>#2</td>
+  <td><span class="up">▲ 3</span></td>
+  <td>$557.8M</td>
+  <td class="pos">3</td></tr>
+<tr><td>6</td><td class="t">Moana</td>
+  <td>#9</td>
+  <td><span class="down">▼ 3</span></td>
+  <td>$126.0M</td>
+  <td class="pos">3</td></tr>
+<tr><td>7</td><td class="t">Star Wars: The Mandalorian and Grogu</td>
+  <td>#8</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$177.7M</td>
+  <td class="pos">7</td></tr>
+<tr><td>8</td><td class="t">Supergirl</td>
+  <td>#13</td>
+  <td><span class="down">▼ 5</span></td>
+  <td>$72.4M</td>
+  <td class="zero">0</td></tr>
+<tr><td>9</td><td class="t">Disclosure Day</td>
+  <td>#10</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$116.6M</td>
+  <td class="pos">7</td></tr>
+<tr><td>10</td><td class="t">Mortal Kombat II</td>
+  <td>#12</td>
+  <td><span class="down">▼ 2</span></td>
+  <td>$79.8M</td>
+  <td class="zero">0</td></tr>
+<tr class="divider"><td colspan="6">Dark horses</td></tr>
+<tr><td>🐴</td><td class="t">Backrooms</td>
+  <td>#6</td>
+  <td><span class="dash">—</span></td>
+  <td>$197.5M</td>
+  <td class="pos">1</td></tr>
+<tr><td>🐴</td><td class="t">Scary Movie</td>
+  <td>#11</td>
+  <td><span class="dash">—</span></td>
+  <td>$108.3M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Evil Dead Burn</td>
+  <td>#20</td>
+  <td><span class="dash">—</span></td>
+  <td>$32.2M</td>
+  <td class="zero">0</td></tr>
+</tbody>
+</table></div>
+</details>
+<details class="acc"><summary>vivrad <span class="stats">— 42 pts projected · 42 current · 0.0% win</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th>#</th><th class="t">Movie</th><th>Projected rank</th><th>Diff</th><th>Projected gross</th><th>Pts</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="t">Spider-Man: Brand New Day</td>
+  <td>#1</td>
+  <td><span class="dash">–</span></td>
+  <td>$885.2M</td>
+  <td class="pos">13</td></tr>
+<tr><td>2</td><td class="t">Toy Story 5</td>
+  <td>#3</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$478.8M</td>
+  <td class="pos">7</td></tr>
+<tr><td>3</td><td class="t">The Odyssey</td>
+  <td>#2</td>
+  <td><span class="up">▲ 1</span></td>
+  <td>$557.8M</td>
+  <td class="pos">7</td></tr>
+<tr><td>4</td><td class="t">Minions &amp; Monsters</td>
+  <td>#7</td>
+  <td><span class="down">▼ 3</span></td>
+  <td>$182.8M</td>
+  <td class="pos">3</td></tr>
+<tr><td>5</td><td class="t">Star Wars: The Mandalorian and Grogu</td>
+  <td>#8</td>
+  <td><span class="down">▼ 3</span></td>
+  <td>$177.7M</td>
+  <td class="pos">3</td></tr>
+<tr><td>6</td><td class="t">Moana</td>
+  <td>#9</td>
+  <td><span class="down">▼ 3</span></td>
+  <td>$126.0M</td>
+  <td class="pos">3</td></tr>
+<tr><td>7</td><td class="t">Disclosure Day</td>
+  <td>#10</td>
+  <td><span class="down">▼ 3</span></td>
+  <td>$116.6M</td>
+  <td class="pos">3</td></tr>
+<tr><td>8</td><td class="t">Supergirl</td>
+  <td>#13</td>
+  <td><span class="down">▼ 5</span></td>
+  <td>$72.4M</td>
+  <td class="zero">0</td></tr>
+<tr><td>9</td><td class="t">The Devil Wears Prada 2</td>
+  <td>#5</td>
+  <td><span class="up">▲ 4</span></td>
+  <td>$220.6M</td>
+  <td class="pos">3</td></tr>
+<tr><td>10</td><td class="t">Masters of the Universe</td>
+  <td>#15</td>
+  <td><span class="down">▼ 5</span></td>
+  <td>$64.8M</td>
+  <td class="zero">0</td></tr>
+<tr class="divider"><td colspan="6">Dark horses</td></tr>
+<tr><td>🐴</td><td class="t">Scary Movie</td>
+  <td>#11</td>
+  <td><span class="dash">—</span></td>
+  <td>$108.3M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Mortal Kombat II</td>
+  <td>#12</td>
+  <td><span class="dash">—</span></td>
+  <td>$79.8M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Billie Eilish: Hit Me Hard and Soft</td>
+  <td>#28</td>
+  <td><span class="dash">—</span></td>
+  <td>$9.9M</td>
+  <td class="zero">0</td></tr>
+</tbody>
+</table></div>
+</details>
+<details class="acc"><summary>mhartje <span class="stats">— 40 pts projected · 40 current · 0.0% win</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th>#</th><th class="t">Movie</th><th>Projected rank</th><th>Diff</th><th>Projected gross</th><th>Pts</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="t">Moana</td>
+  <td>#9</td>
+  <td><span class="down">▼ 8</span></td>
+  <td>$126.0M</td>
+  <td class="pos">3</td></tr>
+<tr><td>2</td><td class="t">Toy Story 5</td>
+  <td>#3</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$478.8M</td>
+  <td class="pos">7</td></tr>
+<tr><td>3</td><td class="t">Supergirl</td>
+  <td>#13</td>
+  <td><span class="down">▼ 10</span></td>
+  <td>$72.4M</td>
+  <td class="zero">0</td></tr>
+<tr><td>4</td><td class="t">Spider-Man: Brand New Day</td>
+  <td>#1</td>
+  <td><span class="up">▲ 3</span></td>
+  <td>$885.2M</td>
+  <td class="pos">3</td></tr>
+<tr><td>5</td><td class="t">The Odyssey</td>
+  <td>#2</td>
+  <td><span class="up">▲ 3</span></td>
+  <td>$557.8M</td>
+  <td class="pos">3</td></tr>
+<tr><td>6</td><td class="t">Star Wars: The Mandalorian and Grogu</td>
+  <td>#8</td>
+  <td><span class="down">▼ 2</span></td>
+  <td>$177.7M</td>
+  <td class="pos">5</td></tr>
+<tr><td>7</td><td class="t">The Devil Wears Prada 2</td>
+  <td>#5</td>
+  <td><span class="up">▲ 2</span></td>
+  <td>$220.6M</td>
+  <td class="pos">5</td></tr>
+<tr><td>8</td><td class="t">Minions &amp; Monsters</td>
+  <td>#7</td>
+  <td><span class="up">▲ 1</span></td>
+  <td>$182.8M</td>
+  <td class="pos">7</td></tr>
+<tr><td>9</td><td class="t">Disclosure Day</td>
+  <td>#10</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$116.6M</td>
+  <td class="pos">7</td></tr>
+<tr><td>10</td><td class="t">Scary Movie</td>
+  <td>#11</td>
+  <td><span class="down">▼ 1</span></td>
+  <td>$108.3M</td>
+  <td class="zero">0</td></tr>
+<tr class="divider"><td colspan="6">Dark horses</td></tr>
+<tr><td>🐴</td><td class="t">Power Ballad</td>
+  <td>#30</td>
+  <td><span class="dash">—</span></td>
+  <td>$2.6M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">I Love Boosters</td>
+  <td>#27</td>
+  <td><span class="dash">—</span></td>
+  <td>$10.3M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">The Sheep Detectives</td>
+  <td>#14</td>
+  <td><span class="dash">—</span></td>
+  <td>$66.1M</td>
+  <td class="zero">0</td></tr>
+</tbody>
+</table></div>
+</details>
+<details class="acc"><summary>radhadr <span class="stats">— 27 pts projected · 27 current · 0.0% win</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th>#</th><th class="t">Movie</th><th>Projected rank</th><th>Diff</th><th>Projected gross</th><th>Pts</th></tr></thead>
+<tbody>
+<tr><td>1</td><td class="t">Spider-Man: Brand New Day</td>
+  <td>#1</td>
+  <td><span class="dash">–</span></td>
+  <td>$885.2M</td>
+  <td class="pos">13</td></tr>
+<tr><td>2</td><td class="t">Moana</td>
+  <td>#9</td>
+  <td><span class="down">▼ 7</span></td>
+  <td>$126.0M</td>
+  <td class="pos">3</td></tr>
+<tr><td>3</td><td class="t">Supergirl</td>
+  <td>#13</td>
+  <td><span class="down">▼ 10</span></td>
+  <td>$72.4M</td>
+  <td class="zero">0</td></tr>
+<tr><td>4</td><td class="t">Star Wars: The Mandalorian and Grogu</td>
+  <td>#8</td>
+  <td><span class="down">▼ 4</span></td>
+  <td>$177.7M</td>
+  <td class="pos">3</td></tr>
+<tr><td>5</td><td class="t">Animal Farm</td>
+  <td>#29</td>
+  <td><span class="down">▼ 24</span></td>
+  <td>$5.6M</td>
+  <td class="zero">0</td></tr>
+<tr><td>6</td><td class="t">The Devil Wears Prada 2</td>
+  <td>#5</td>
+  <td><span class="up">▲ 1</span></td>
+  <td>$220.6M</td>
+  <td class="pos">7</td></tr>
+<tr><td>7</td><td class="t">The Breadwinner</td>
+  <td>#24</td>
+  <td><span class="down">▼ 17</span></td>
+  <td>$20.2M</td>
+  <td class="zero">0</td></tr>
+<tr><td>8</td><td class="t">PAW Patrol: The Dino Movie</td>
+  <td>#19</td>
+  <td><span class="down">▼ 11</span></td>
+  <td>$44.7M</td>
+  <td class="zero">0</td></tr>
+<tr><td>9</td><td class="t">Tom and Jerry: Forbidden Compass</td>
+  <td><span class="dash">—</span></td>
+  <td><span class="dash">—</span></td>
+  <td><span class="dash">—</span> <span class="badge">no projection</span></td>
+  <td class="zero">0</td></tr>
+<tr><td>10</td><td class="t">Passenger</td>
+  <td>#26</td>
+  <td><span class="down">▼ 16</span></td>
+  <td>$18.0M</td>
+  <td class="zero">0</td></tr>
+<tr class="divider"><td colspan="6">Dark horses</td></tr>
+<tr><td>🐴</td><td class="t">The Sheep Detectives</td>
+  <td>#14</td>
+  <td><span class="dash">—</span></td>
+  <td>$66.1M</td>
+  <td class="zero">0</td></tr>
+<tr><td>🐴</td><td class="t">Toy Story 5</td>
+  <td>#3</td>
+  <td><span class="dash">—</span></td>
+  <td>$478.8M</td>
+  <td class="pos">1</td></tr>
+<tr><td>🐴</td><td class="t">Finding Emily</td>
+  <td><span class="dash">—</span></td>
+  <td><span class="dash">—</span></td>
+  <td><span class="dash">—</span> <span class="badge">no projection</span></td>
+  <td class="zero">0</td></tr>
+</tbody>
+</table></div>
+</details>
+
+
+<h2>🎞️ Films</h2>
+<details class="acc"><summary>Show all tracked films <span class="stats">(42 films · projections, ranges, provenance)</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th>#</th><th class="t">Movie</th><th>Released</th><th class="t">Status</th>
+<th>Projected median (in-window)</th><th>80% range</th><th>Cumulative</th><th class="t">Source</th></tr></thead>
+<tbody>
+<tr><td>1</td>
+  <td class="t">Spider-Man: Brand New Day</td><td>Jul 31</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$885.2M</td>
+  <td>$881.0M – $890.6M</td>
+  <td>$866.5M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>2</td>
+  <td class="t">The Odyssey</td><td>Jul 17</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$557.8M</td>
+  <td>$556.1M – $559.7M</td>
+  <td>$547.2M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>3</td>
+  <td class="t">Toy Story 5</td><td>Jun 19</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$478.8M</td>
+  <td>$478.8M – $478.9M</td>
+  <td>$478.3M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>4</td>
+  <td class="t">Obsession</td><td>May 15</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$263.5M</td>
+  <td>$263.5M – $263.6M</td>
+  <td>$263.5M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>5</td>
+  <td class="t">The Devil Wears Prada 2</td><td>May 1</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$220.6M</td>
+  <td>$220.6M – $220.6M</td>
+  <td>$220.6M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>6</td>
+  <td class="t">Backrooms</td><td>May 29</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$197.5M</td>
+  <td>$197.5M – $197.5M</td>
+  <td>$197.5M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>7</td>
+  <td class="t">Minions &amp; Monsters</td><td>Jul 1</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$182.8M</td>
+  <td>$182.7M – $182.8M</td>
+  <td>$182.4M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>8</td>
+  <td class="t">Star Wars: The Mandalorian and Grogu</td><td>May 22</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$177.7M</td>
+  <td>$177.7M – $177.7M</td>
+  <td>$177.7M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>9</td>
+  <td class="t">Moana</td><td>Jul 10</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$126.0M</td>
+  <td>$126.0M – $126.1M</td>
+  <td>$125.9M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>10</td>
+  <td class="t">Disclosure Day</td><td>Jun 12</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$116.6M</td>
+  <td>$116.6M – $116.6M</td>
+  <td>$116.6M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>11</td>
+  <td class="t">Scary Movie</td><td>Jun 5</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$108.3M</td>
+  <td>$108.3M – $108.3M</td>
+  <td>$108.3M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>12</td>
+  <td class="t">Mortal Kombat II</td><td>May 8</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$79.8M</td>
+  <td>$79.8M – $79.8M</td>
+  <td>$79.8M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>13</td>
+  <td class="t">Supergirl</td><td>Jun 26</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$72.4M</td>
+  <td>$72.4M – $72.4M</td>
+  <td>$72.4M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>14</td>
+  <td class="t">The Sheep Detectives</td><td>May 8</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$66.1M</td>
+  <td>$66.1M – $66.1M</td>
+  <td>$66.1M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>15</td>
+  <td class="t">Masters of the Universe</td><td>Jun 5</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$64.8M</td>
+  <td>$64.8M – $64.8M</td>
+  <td>$64.8M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>16</td>
+  <td class="t">Insidious: Out of the Further</td><td>Aug 21</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$58.6M</td>
+  <td>$50.1M – $71.1M</td>
+  <td>$32.0M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>17</td>
+  <td class="t">The End of Oak Street</td><td>Aug 14</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$48.0M</td>
+  <td>$45.8M – $51.0M</td>
+  <td>$40.5M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>18</td>
+  <td class="t">Young Washington</td><td>Jul 3</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$47.0M</td>
+  <td>$47.0M – $47.0M</td>
+  <td>$47.0M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>19</td>
+  <td class="t">PAW Patrol: The Dino Movie</td><td>Aug 14</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$44.7M</td>
+  <td>$42.7M – $47.5M</td>
+  <td>$37.8M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>20</td>
+  <td class="t">Evil Dead Burn</td><td>Jul 10</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$32.2M</td>
+  <td>$32.2M – $32.2M</td>
+  <td>$32.2M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>21</td>
+  <td class="t">The Invite</td><td>Jun 26</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$25.5M</td>
+  <td>$25.5M – $25.5M</td>
+  <td>$25.5M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>22</td>
+  <td class="t">The Amazing Digital Circus: The Last Act</td><td>Jun 4</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$23.4M</td>
+  <td>$23.4M – $23.4M</td>
+  <td>$23.4M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>23</td>
+  <td class="t">Hadestown: The Musical</td><td>Jul 24</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$20.7M</td>
+  <td>$20.7M – $20.7M</td>
+  <td>$20.7M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>24</td>
+  <td class="t">The Breadwinner</td><td>May 29</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$20.2M</td>
+  <td>$20.2M – $20.2M</td>
+  <td>$20.2M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>25</td>
+  <td class="t">Jackass: Best and Last</td><td>Jun 26</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$18.3M</td>
+  <td>$18.3M – $18.3M</td>
+  <td>$18.3M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>26</td>
+  <td class="t">Passenger</td><td>May 22</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$18.0M</td>
+  <td>$18.0M – $18.0M</td>
+  <td>$18.0M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>27</td>
+  <td class="t">I Love Boosters</td><td>May 22</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$10.3M</td>
+  <td>$10.2M – $10.4M</td>
+  <td>$9.7M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>28</td>
+  <td class="t">Billie Eilish: Hit Me Hard and Soft</td><td>May 8</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$9.9M</td>
+  <td>$9.9M – $9.9M</td>
+  <td>$9.9M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>29</td>
+  <td class="t">Animal Farm</td><td>May 1</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$5.6M</td>
+  <td>$5.6M – $5.6M</td>
+  <td>$5.6M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>30</td>
+  <td class="t">Power Ballad</td><td>May 29</td>
+  <td class="t"><span class="badge">in theaters</span></td>
+  <td>$2.6M</td>
+  <td>$2.6M – $2.6M</td>
+  <td>$2.6M</td>
+  <td class="t small">decay model</td></tr>
+<tr><td>31</td>
+  <td class="t">MET Opera: Eugene Onegin</td><td>Aug 27</td>
+  <td class="t"><span class="badge">closed</span></td>
+  <td>$0.7M</td>
+  <td>$0.7M (final)</td>
+  <td>$0.7M</td>
+  <td class="t small">final gross</td></tr>
+<tr><td>32</td>
+  <td class="t">Dhamaal 4</td><td>Aug 27</td>
+  <td class="t"><span class="badge">closed</span></td>
+  <td>$0.7M</td>
+  <td>$0.7M (final)</td>
+  <td>$0.7M</td>
+  <td class="t small">final gross</td></tr>
+<tr><td>33</td>
+  <td class="t">Main Vaapas Aaunga</td><td>Aug 27</td>
+  <td class="t"><span class="badge">closed</span></td>
+  <td>$0.7M</td>
+  <td>$0.7M (final)</td>
+  <td>$0.7M</td>
+  <td class="t small">final gross</td></tr>
+<tr><td>34</td>
+  <td class="t">The Wizard of the Kremlin</td><td>Aug 27</td>
+  <td class="t"><span class="badge">closed</span></td>
+  <td>$0.7M</td>
+  <td>$0.7M (final)</td>
+  <td>$0.7M</td>
+  <td class="t small">final gross</td></tr>
+<tr><td>35</td>
+  <td class="t">Revolutionary America</td><td>Aug 27</td>
+  <td class="t"><span class="badge">closed</span></td>
+  <td>$0.6M</td>
+  <td>$0.6M (final)</td>
+  <td>$0.6M</td>
+  <td class="t small">final gross</td></tr>
+<tr><td>36</td>
+  <td class="t">Pinocchio: Unstrung</td><td>Aug 27</td>
+  <td class="t"><span class="badge">closed</span></td>
+  <td>$0.6M</td>
+  <td>$0.6M (final)</td>
+  <td>$0.6M</td>
+  <td class="t small">final gross</td></tr>
+<tr><td>37</td>
+  <td class="t">Alpha</td><td>Aug 27</td>
+  <td class="t"><span class="badge">closed</span></td>
+  <td>$0.6M</td>
+  <td>$0.6M (final)</td>
+  <td>$0.6M</td>
+  <td class="t small">final gross</td></tr>
+<tr><td>38</td>
+  <td class="t">Sacred Heart: His Reign Has No End</td><td>Aug 27</td>
+  <td class="t"><span class="badge">closed</span></td>
+  <td>$0.6M</td>
+  <td>$0.6M (final)</td>
+  <td>$0.6M</td>
+  <td class="t small">final gross</td></tr>
+<tr><td>39</td>
+  <td class="t">Lenin</td><td>Aug 27</td>
+  <td class="t"><span class="badge">closed</span></td>
+  <td>$0.6M</td>
+  <td>$0.6M (final)</td>
+  <td>$0.6M</td>
+  <td class="t small">final gross</td></tr>
+<tr><td><span class="dash">—</span></td>
+  <td class="t">Coyote vs. Acme</td><td>Sep 7</td>
+  <td class="t"><span class="badge">no projection</span></td>
+  <td><span class="dash">—</span></td>
+  <td>—</td>
+  <td><span class="dash">—</span></td>
+  <td class="t small">no analyst entry</td></tr>
+<tr><td><span class="dash">—</span></td>
+  <td class="t">Finding Emily</td><td>Sep 7</td>
+  <td class="t"><span class="badge">no projection</span></td>
+  <td><span class="dash">—</span></td>
+  <td>—</td>
+  <td><span class="dash">—</span></td>
+  <td class="t small">no analyst entry</td></tr>
+<tr><td><span class="dash">—</span></td>
+  <td class="t">Tom and Jerry: Forbidden Compass</td><td>Sep 7</td>
+  <td class="t"><span class="badge">no projection</span></td>
+  <td><span class="dash">—</span></td>
+  <td>—</td>
+  <td><span class="dash">—</span></td>
+  <td class="t small">no analyst entry</td></tr>
+</tbody>
+</table></div>
+</details>
+
+
+<footer class="site">
+  Raw numbers: <a href="data.json">data.json</a> &nbsp;·&nbsp;
+  <a href="rules.html">Scoring rules</a> &nbsp;·&nbsp;
+  <span class="small">Forecast: 10,000 seeded Monte Carlo seasons over 39 projected films.</span>
+</footer>
+
+</div>
+</body>
+</html>

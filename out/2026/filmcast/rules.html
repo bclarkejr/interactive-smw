@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="0; url=2026/smw-friends/index.html">
-<title>Summer Movie Wager</title>
+<title>Scoring rules · Summer Movie Wager 2026 · The Filmcast</title>
 <script>/* Theme resolution runs in the head, before body paint (spec §13.2). */
 (function(){try{var t=localStorage.getItem('smw-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 document.addEventListener("DOMContentLoaded",function(){
@@ -174,7 +173,55 @@ footer.site{margin-top:48px;border-top:1px solid var(--grid);padding-top:14px;fo
 </head>
 <body>
 <div class="wrap">
-<p><a href="2026/smw-friends/index.html">Summer Movie Wager</a></p>
+
+<header class="site">
+  <div>
+    <h1>🍿 Summer Movie Wager</h1>
+    <div class="sub">Wager window: May 1 – Sep 7, 2026 &nbsp;·&nbsp; <span class="small">Refreshed Aug 27, 2026</span>
+      <label class="vh" for="yearSelect">Season</label>
+      <select id="yearSelect" class="sel" onchange="location.href=this.value"><option value="../../2026/smw-friends/index.html" selected>2026</option></select>
+      <label class="vh" for="groupSelect">Group</label>
+      <select id="groupSelect" class="sel" onchange="location.href=this.value"><option value="../filmcast/rules.html" selected>The Filmcast</option><option value="../smw-friends/rules.html">The Friends League</option></select>
+    </div>
+  </div>
+  <button id="themeToggle" type="button" aria-label="Toggle color theme">◐ Theme</button>
+</header>
+
+<nav class="pills" aria-label="Site">
+  <a href="index.html">🏆 Leaderboard</a>
+  <a href="whatif.html">🎬 What If?</a>
+  <a href="scenarios.html">🔮 Winning Scenarios</a>
+  <a href="history.html">📈 Odds Over Time</a>
+  </nav>
+
+
+<h2>📜 Scoring rules</h2>
+<p>Before the window opens, each player locks <strong>10 ranked picks</strong> — the films they
+believe will gross the most at the domestic box office between <strong>May 1 and Sep 7, 2026</strong>, in predicted finish order — plus <strong>3 dark horses</strong>, unordered.
+All 13 titles must be distinct. Only films released inside the window count, and only money
+earned through Labor Day counts.</p>
+<div class="scroller"><table>
+  <thead><tr><th class="t">Ranked pick, vs. the actual top ten</th><th>Points</th></tr></thead>
+  <tbody>
+    <tr><td class="t">Exact match at position 1 or position 10</td><td class="pos">13</td></tr>
+    <tr><td class="t">Exact match at positions 2–9</td><td class="pos">10</td></tr>
+    <tr><td class="t">In the top ten, off by exactly 1 position</td><td class="pos">7</td></tr>
+    <tr><td class="t">In the top ten, off by exactly 2 positions</td><td class="pos">5</td></tr>
+    <tr><td class="t">In the top ten, off by 3 or more positions</td><td class="pos">3</td></tr>
+    <tr><td class="t">Not in the top ten</td><td class="zero">0</td></tr>
+    <tr><td class="t">🐴 Dark horse anywhere in the top ten</td><td class="pos">1</td></tr>
+  </tbody>
+</table></div>
+<p class="small">Maximum possible score: 13 + 10×8 + 13 + 3 = <strong>109</strong>.
+Highest total wins; there is no tiebreaker — tied players share the placement.</p>
+
+
+<footer class="site">
+  Raw numbers: <a href="data.json">data.json</a> &nbsp;·&nbsp;
+  <a href="rules.html">Scoring rules</a> &nbsp;·&nbsp;
+  <span class="small">Forecast: 10,000 seeded Monte Carlo seasons over 39 projected films.</span>
+</footer>
+
 </div>
 </body>
 </html>
