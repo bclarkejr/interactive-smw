@@ -48,6 +48,8 @@ def test_current_points_mode_has_no_forecast_numbers(tmp_path, season, group):
     assert "Projected pts" not in html
     assert "Current pts" in html
     assert "🏆 Current Standings" in html
+    assert "projected median" not in html and "simulated median" not in html
+    assert "ordered by current points" in html
 
 def test_live_mode_has_forecast_rows(tmp_path, season, group):
     html = _render(tmp_path, season, group)

@@ -137,11 +137,13 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
         print(f"warning: {season.year}: no box-office history file yet (normal on the first run)")
     history = load_history(history_path)
 
-    live_window = season.window_start <= today - timedelta(days=1) <= season.window_end
-    # A frozen or not-yet-open season renders but persists nothing (§2.2): only a
-    # live-window production run appends history.
-    persist = not local and live_window
-    if live_window:
+    fetch_window = season.window_start <= today - timedelta(days=1) <= season.window_end
+    # Persist from opening day through the final eligible run (window_end + 1); the chart
+    # fetch keeps its yesterday-based boundary (§6.1). A frozen or not-yet-open season
+    # renders but persists nothing (§2.2).
+    persist = not local and (
+        season.window_start <= today <= season.window_end + timedelta(days=1))
+    if fetch_window:
         raw = apply_chart_aliases(parse_chart(fetch(season.year), season.year), overrides)
         chart_rows = windowed(raw, season)  # Guards A and B — before the floor, so an
         floor = chart_floor(raw)            # empty parse fails with Guard A, not min()

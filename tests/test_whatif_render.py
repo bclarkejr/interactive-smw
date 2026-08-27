@@ -46,7 +46,7 @@ def test_site_drag_code_is_gone():
 
 def test_vendored_library_is_minified_1_15_6_without_urls():
     lib = (STATIC / "sortable.min.js").read_text()
-    assert lib.startswith("/*! Sortable 1.15.6 - MIT */")
+    assert lib.startswith("/*! Sortable 1.15.6 - MIT | (c) 2019 Lebedev Konstantin */")
     assert "://" not in lib and "</script" not in lib
     assert lib.count("\n") < 5   # minified
 

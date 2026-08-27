@@ -29,9 +29,9 @@
 {% endif -%}
 </tfoot>
 </table></div>
-<p class="small">Rows: top {{ view.rows | length }} films by projected median in-window gross. Cells are each film's
+{% if view.mode == "live" %}<p class="small">Rows: top {{ view.rows | length }} films by projected median in-window gross. Cells are each film's
 projected points for that player; grey 0 = on their roster but outside the projected top ten,
-— = not picked. Columns are ordered by simulated median points.</p>
+— = not picked. Columns are ordered by simulated median points.</p>{% else %}<p class="small">Rows: top {{ view.rows | length }} films by cumulative gross to date. Cells are each film's current points for that player; grey 0 = on their roster but outside the current top ten, — = not picked. Columns are ordered by current points.</p>{% endif %}
 
 <h2>📋 All Players' Lists</h2>
 <div class="scroller"><table id="lists">

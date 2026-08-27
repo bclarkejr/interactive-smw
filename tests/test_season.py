@@ -100,3 +100,15 @@ def test_load_season_dir_name_must_equal_year(tmp_path):
 def test_load_season_dir_requires_a_group(tmp_path):
     with pytest.raises(ValueError, match="group"):
         load_season_dir(_season_dir(tmp_path, groups=()))
+
+def test_load_season_dir_rejects_filename_id_mismatch(tmp_path):
+    d = _season_dir(tmp_path, groups=("a",))
+    (d / "groups" / "a.yaml").write_text("group_id: zzz\ndisplay_name: Z\n")
+    with pytest.raises(ValueError, match="file name must equal group_id"):
+        load_season_dir(d)
+
+def test_load_season_dir_rejects_duplicate_group_ids(tmp_path):
+    d = _season_dir(tmp_path, groups=("a", "b"))
+    (d / "groups" / "b.yaml").write_text("group_id: a\ndisplay_name: Dup\n")
+    with pytest.raises(ValueError, match="duplicate group_id"):
+        load_season_dir(d)

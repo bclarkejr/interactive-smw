@@ -101,6 +101,14 @@ def test_local_run_appends_nothing(data_dir, tmp_path):
     assert not (data_dir / "box_office_history.jsonl").exists()
     assert not (data_dir / "forecast_history" / "g.jsonl").exists()
 
+def test_production_run_on_window_start_persists(data_dir, tmp_path):
+    # Round-1 finding: opening day is live even though the chart isn't fetched yet.
+    (data_dir / "box_office_history.jsonl").write_text(
+        '{"movie": "Big Summer Film", "date": "2026-04-30", "cumulative_gross": 5.0}\n')
+    _run(data_dir, tmp_path, today=date(2026, 5, 1), local=False)
+    rows = (data_dir / "box_office_history.jsonl").read_text().splitlines()
+    assert any('"date": "2026-05-01"' in r for r in rows)
+
 def test_production_run_appends_box_office_rows(data_dir, tmp_path):
     # §13.5 named gap: a production run appends the expected rows; local appends none.
     _run(data_dir, tmp_path, local=False)

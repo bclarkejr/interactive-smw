@@ -75,10 +75,17 @@ def load_season_dir(season_dir: Path) -> tuple[Season, list[Group]]:
     if season_dir.name != str(season.year):
         raise ValueError(
             f"{season_dir}: directory name must equal season.yaml year ({season.year})")
-    groups = [load_group(p) for p in sorted((season_dir / "groups").glob("*.yaml"))]
+    paths = sorted((season_dir / "groups").glob("*.yaml"))
+    groups = [load_group(p) for p in paths]
     if not groups:
         raise ValueError(f"{season_dir}: no group files under groups/")
     ids = sorted(g.group_id for g in groups)
+    dupes = {i for i in ids if ids.count(i) > 1}
+    if dupes:
+        raise ValueError(f"{season_dir}: duplicate group_id(s): {', '.join(sorted(dupes))}")
+    for p, g in zip(paths, groups):
+        if p.stem != g.group_id:
+            raise ValueError(f"{p}: file name must equal group_id {g.group_id!r}")
     if season.default_group is None:
         season = replace(season, default_group=ids[0])
     elif season.default_group not in ids:
