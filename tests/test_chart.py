@@ -35,7 +35,7 @@ def test_gap_breaks_svg_path():
     svg = render_chart_svg(build_history_data(ROWS))
     # alice's path must contain two M (move) commands: one start, one after the gap
     import re
-    alice_path = re.search(r'<path class="line series-0" d="([^"]+)"', svg).group(1)
+    alice_path = re.search(r'<path class="series-0" d="([^"]+)"', svg).group(1)
     assert alice_path.count("M") == 2
 
 def test_y_axis_next_decile_above_max():
@@ -47,7 +47,7 @@ def test_x_labels_thinned_to_eight_max_including_latest():
     rows = [{"date": f"2026-06-{d:02d}", "player": "a", "win_prob": 0.5}
             for d in range(1, 29)]
     svg = render_chart_svg(build_history_data(rows))
-    labels = svg.count('class="x-label"')
+    labels = svg.count('text-anchor="middle"')
     assert labels <= 8
     assert "2026-06-28" in svg
 
@@ -70,6 +70,17 @@ def test_direct_labels_stay_inside_viewbox():
     from smw.render.chart import H, MB, LABEL_MIN_GAP
     rows = [{"date": "2026-06-01", "player": p, "win_prob": 0.01} for p in "abcd"]
     svg = render_chart_svg(build_history_data(rows))
-    ys = sorted(float(y) for y in re.findall(r'class="direct-label" x="[\d.]+" y="([\d.]+)"', svg))
+    ys = sorted(float(y) for y in re.findall(r'class="dl" x="[\d.]+" y="([\d.]+)"', svg))
     assert len(ys) == 4 and ys[-1] <= H - MB
     assert all(b - a >= LABEL_MIN_GAP - 1e-9 for a, b in zip(ys, ys[1:]))
+
+def test_mockup_geometry_and_elements():
+    svg = render_chart_svg(build_history_data(ROWS))
+    assert svg.startswith('<svg viewBox="0 0 920 360" width="100%" role="img" aria-label="Line chart of win probability by refresh date for 2 players">')
+    assert 'stroke="var(--baseline)"' in svg           # 0% baseline
+    assert 'stroke="var(--grid)"' in svg               # gridlines
+    assert svg.count('r="3"') == 7                     # one marker per value (8 rows, 1 superseded)
+    assert 'width="10" height="10" rx="3"' in svg      # direct-label swatch
+    assert 'class="dl"' in svg and ">alice</text>" in svg
+    assert '<line class="xh"' in svg and 'display:none' in svg
+    assert 'class="x-label"' not in svg and 'class="direct-label"' not in svg

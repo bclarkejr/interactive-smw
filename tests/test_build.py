@@ -192,9 +192,9 @@ def test_degraded_production_refresh_shows_as_history_gap(data_dir, tmp_path):
     out = _run(data_dir, tmp_path, today=date(2026, 8, 15), local=False)
     html = (out / "history.html").read_text()
     svg = html[html.index("<svg"):html.index("</svg>")]
-    assert 'class="x-label"' in svg and "2026-08-15" in svg   # the degraded date is on the axis
+    assert 'text-anchor="middle"' in svg and "2026-08-15" in svg   # the degraded date is on the axis
     assert svg.count("<circle") == 1                          # but has no forecast marker
-    assert "<td>2026-08-15</td>" in html                       # and shows in the table
+    assert '<td class="t">2026-08-15</td>' in html              # and shows in the table
 
 def test_empty_chart_parse_fails_with_guard_a(data_dir, tmp_path, monkeypatch):
     from smw.ingest.boxoffice import IngestError

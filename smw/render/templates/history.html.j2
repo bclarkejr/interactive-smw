@@ -5,33 +5,25 @@
 production refresh.</div>
 {% else %}
 <h2>📈 Odds Over Time</h2>
-<div class="chart-wrap">{{ svg }}</div>
-<div id="crosshair-tip" class="notice" hidden></div>
-<h3>Legend</h3>
-<ul class="legend">
-{% for s in legend %}
-<li><span class="legend-swatch series-{{ s.color }}"></span>
-  {{ s.name }} — {{ s.latest_pct }}%</li>
-{% endfor %}
-</ul>
-<details>
-<summary>Data table</summary>
-<div class="table-scroll">
-<table>
-<thead><tr><th>Date</th>
-{% for s in data.series %}<th class="num">{{ s.name }}</th>{% endfor %}</tr></thead>
-<tbody>
-{% for row in table_rows %}
-<tr><td>{{ row.date }}</td>
-{% for cell in row.cells %}
-<td class="num">{% if cell is none %}<span class="cell-none">·</span>{% else %}{{ cell }}%{% endif %}</td>
-{% endfor %}
-</tr>
-{% endfor %}
-</tbody>
-</table>
+<p class="sub">Each player's win probability at every production refresh. A break in a line
+means no forecast was produced that week.</p>
+<div class="chartbox">
+{{ svg }}
+<div class="legend">
+{%- for s in legend %}<span><span class="sw series-{{ s.color }}" style="background:var(--series)"></span>{{ s.name }} — {{ s.latest_pct }}%</span>{% endfor %}
 </div>
+</div>
+<details class="acc"><summary>Data table <span class="stats">(accessible fallback)</span></summary>
+<div class="scroller" style="border:none"><table>
+<thead><tr><th class="t">Refresh</th>{% for s in data.series %}<th>{{ s.name }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for row in table_rows -%}
+<tr><td class="t">{{ row.date }}</td>{% for cell in row.cells %}{% if cell is none %}<td class="dash">·</td>{% else %}<td>{{ cell }}%</td>{% endif %}{% endfor %}</tr>
+{% endfor -%}
+</tbody>
+</table></div>
 </details>
+<div id="tipbox"></div>
 <script>window.HISTORY = {{ data | json_embed }};</script>
 <script>{{ history_js }}</script>
 {% endif %}

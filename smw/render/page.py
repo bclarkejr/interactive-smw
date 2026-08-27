@@ -197,7 +197,6 @@ def render_history(env: Environment, out_dir: Path, ctx: dict,
             vals = [v for v in s["values"] if v is not None]
             legend.append({"name": s["name"], "color": s["color"],
                            "latest_pct": round(vals[-1] * 100, 1) if vals else 0.0})
-        legend.sort(key=lambda e: -e["latest_pct"])
         table_rows = [
             {"date": d,
              "cells": [

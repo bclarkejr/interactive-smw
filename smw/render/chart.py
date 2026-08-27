@@ -4,11 +4,11 @@ dependency by an order of magnitude."""
 import math
 from html import escape
 
-W, H = 660, 300
-ML, MR, MT, MB = 48, 118, 12, 30  # right margin leaves room for direct labels
+W, H = 920, 360
+ML, MR, MT, MB = 52, 110, 16, 34  # right margin leaves room for direct labels
 MAX_X_LABELS = 8
 DIRECT_LABELS = 4
-LABEL_MIN_GAP = 14
+LABEL_MIN_GAP = 15
 
 
 def build_history_data(rows: list[dict], refresh_dates=()) -> "dict | None":
@@ -47,24 +47,27 @@ def render_chart_svg(data: dict) -> str:
     vmax = max((v for s in series for v in s["values"] if v is not None), default=0.0)
     ymax = max(0.1, math.floor(vmax * 10 + 1) / 10)  # next decile above the max
     ymax = min(ymax, 1.0)
+    iw = W - ML - MR
 
-    parts = [f'<svg viewBox="0 0 {W} {H}" role="img" class="odds-chart" '
-             'aria-label="Each player\'s win probability at every refresh">']
-    # gridlines every 10%
+    parts = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" '
+             f'aria-label="Line chart of win probability by refresh date for '
+             f'{len(series)} players">']
     tick = 0.0
-    while tick <= ymax + 1e-9:
+    while tick <= ymax + 1e-9:  # gridlines every 10%
         y = _y(tick, ymax)
-        parts.append(f'<line class="grid" x1="{ML}" y1="{y:.1f}" '
-                     f'x2="{W - MR}" y2="{y:.1f}"/>')
-        parts.append(f'<text class="y-label" x="{ML - 6}" y="{y + 4:.1f}" '
-                     f'text-anchor="end">{round(tick * 100)}%</text>')
+        parts.append(f'<line x1="{ML}" y1="{y:.1f}" x2="{ML + iw}" y2="{y:.1f}" '
+                     'stroke="var(--grid)"/>')
+        parts.append(f'<text x="{ML - 8}" y="{y + 4:.1f}" text-anchor="end">'
+                     f'{round(tick * 100)}%</text>')
         tick += 0.1
-    # x labels, thinned, always including the most recent
+    # x labels thinned to <= 8, walking back from the most recent (mockup)
     step = max(1, math.ceil(n / MAX_X_LABELS))
-    idxs = sorted(set(range(0, n, step)) | {n - 1})[-MAX_X_LABELS:]
-    for i in idxs:
-        parts.append(f'<text class="x-label" x="{_x(i, n):.1f}" y="{H - 8}" '
-                     f'text-anchor="middle">{escape(str(dates[i]))}</text>')
+    for i in sorted(range(n - 1, -1, -step)):
+        parts.append(f'<text x="{_x(i, n):.1f}" y="{H - 10}" text-anchor="middle">'
+                     f'{escape(str(dates[i]))}</text>')
+    y0 = _y(0.0, ymax)
+    parts.append(f'<line x1="{ML}" y1="{y0:.1f}" x2="{ML + iw}" y2="{y0:.1f}" '
+                 'stroke="var(--baseline)"/>')
     # one path per series; a None breaks the line (§12.4 — a gap means no forecast
     # was produced; drawing through it would assert a number never computed)
     for s in series:
@@ -73,24 +76,25 @@ def render_chart_svg(data: dict) -> str:
             if v is None:
                 pen_down = False
                 continue
-            cmd = "L" if pen_down else "M"
-            d_cmds.append(f"{cmd}{_x(i, n):.1f} {_y(v, ymax):.1f}")
+            d_cmds.append(f'{"L" if pen_down else "M"}{_x(i, n):.1f} {_y(v, ymax):.1f}')
             pen_down = True
-        parts.append(f'<path class="line series-{s["color"]}" d="{" ".join(d_cmds)}"/>')
+        parts.append(f'<path class="series-{s["color"]}" d="{" ".join(d_cmds)}" fill="none" '
+                     'stroke="var(--series)" stroke-width="2" stroke-linejoin="round" '
+                     'stroke-linecap="round"/>')
         for i, v in enumerate(s["values"]):
             if v is not None:
-                parts.append(f'<circle class="marker series-{s["color"]}" '
-                             f'cx="{_x(i, n):.1f}" cy="{_y(v, ymax):.1f}" r="2.5"/>')
-    # direct labels: top four by latest value, nudged apart
+                parts.append(f'<circle class="series-{s["color"]}" cx="{_x(i, n):.1f}" '
+                             f'cy="{_y(v, ymax):.1f}" r="3" fill="var(--series)"/>')
+    # direct labels: top four by latest value, nudged apart; ink text + coloured swatch
     latest = []
     for s in series:
-        vals = [v for v in s["values"] if v is not None]
-        if vals:
-            last_i = max(i for i, v in enumerate(s["values"]) if v is not None)
-            latest.append((s, s["values"][last_i], last_i))
-    latest.sort(key=lambda t: -t[1])
+        idx = [i for i, v in enumerate(s["values"]) if v is not None]
+        if idx:
+            latest.append((s, s["values"][idx[-1]]))
+    latest.sort(key=lambda t: (-t[1], t[0]["name"]))
+    latest = latest[:DIRECT_LABELS]
     placed = []
-    for s, v, last_i in latest[:DIRECT_LABELS]:
+    for s, v in latest:
         y = _y(v, ymax)
         while any(abs(y - py) < LABEL_MIN_GAP for py in placed):
             y += LABEL_MIN_GAP
@@ -103,14 +107,14 @@ def render_chart_svg(data: dict) -> str:
     for k in range(len(placed)):
         floor_y = top if k == 0 else placed[k - 1] + LABEL_MIN_GAP
         placed[k] = max(placed[k], floor_y)
-    label_y = dict(zip(sorted(range(len(placed)), key=lambda k: _y(latest[k][1], ymax)),
-                       placed))
-    for k, (s, v, last_i) in enumerate(latest[:DIRECT_LABELS]):
-        y = label_y[k]
-        x = W - MR + 8
-        parts.append(f'<rect class="swatch series-{s["color"]}" x="{x}" '
-                     f'y="{y - 8:.1f}" width="8" height="8"/>')
-        parts.append(f'<text class="direct-label" x="{x + 12}" y="{y:.1f}">'
-                     f'{escape(str(s["name"]))} {round(v * 100)}%</text>')
+    for (s, v), y in zip(latest, placed):  # latest is top-down; placed is ascending y
+        x = ML + iw + 8
+        parts.append(f'<rect class="series-{s["color"]}" x="{x}" y="{y - 9:.1f}" '
+                     'width="10" height="10" rx="3" fill="var(--series)"/>')
+        parts.append(f'<text class="dl" x="{x + 14}" y="{y:.1f}">'
+                     f'{escape(str(s["name"]))}</text>')
+    # crosshair: emitted hidden so history.js never needs the SVG namespace URL
+    parts.append(f'<line class="xh" x1="{ML}" x2="{ML}" y1="{MT}" y2="{H - MB}" '
+                 'stroke="var(--baseline)" stroke-dasharray="3 3" style="display:none"/>')
     parts.append("</svg>")
     return "".join(parts)
