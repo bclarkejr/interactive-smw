@@ -1,0 +1,99 @@
+group_id: filmcast
+display_name: "The Filmcast"
+players:
+  Devindra:
+    dark_horses:
+    - Obsession
+    - 'Billie Eilish: Hit Me Hard and Soft'
+    - Scary Movie
+    ranked:
+    - 'Spider-Man: Brand New Day'
+    - The Odyssey
+    - Toy Story 5
+    - Minions & Monsters
+    - 'Star Wars: The Mandalorian and Grogu'
+    - Moana
+    - Supergirl
+    - The Devil Wears Prada 2
+    - Mortal Kombat II
+    - Disclosure Day
+  Germain:
+    dark_horses:
+    - Obsession
+    - Mortal Kombat II
+    - Masters of the Universe
+    ranked:
+    - 'Spider-Man: Brand New Day'
+    - Toy Story 5
+    - The Odyssey
+    - Minions & Monsters
+    - Moana
+    - 'Star Wars: The Mandalorian and Grogu'
+    - The Devil Wears Prada 2
+    - Disclosure Day
+    - Supergirl
+    - Scary Movie
+  Jeff:
+    dark_horses:
+    - Disclosure Day
+    - Masters of the Universe
+    - Evil Dead Burn
+    ranked:
+    - Toy Story 5
+    - 'Spider-Man: Brand New Day'
+    - The Odyssey
+    - Moana
+    - Minions & Monsters
+    - The Devil Wears Prada 2
+    - 'Star Wars: The Mandalorian and Grogu'
+    - Supergirl
+    - Scary Movie
+    - Mortal Kombat II
+  Peter:
+    dark_horses:
+    - Masters of the Universe
+    - Mortal Kombat II
+    - Evil Dead Burn
+    ranked:
+    - Toy Story 5
+    - 'Spider-Man: Brand New Day'
+    - Minions & Monsters
+    - Moana
+    - The Odyssey
+    - The Devil Wears Prada 2
+    - 'Star Wars: The Mandalorian and Grogu'
+    - Supergirl
+    - Disclosure Day
+    - Scary Movie
+  BJ:
+    dark_horses:
+    - 'PAW Patrol: The Dino Movie'
+    - Evil Dead Burn
+    - Obsession
+    ranked:
+    - Toy Story 5
+    - 'Spider-Man: Brand New Day'
+    - The Odyssey
+    - Minions & Monsters
+    - Supergirl
+    - Moana
+    - 'Star Wars: The Mandalorian and Grogu'
+    - Disclosure Day
+    - The Devil Wears Prada 2
+    - Masters of the Universe
+  David:
+    dark_horses:
+    - Disclosure Day
+    - 'Jackass: Best and Last'
+    - Masters of the Universe
+    ranked:
+    - 'Spider-Man: Brand New Day'
+    - Toy Story 5
+    - Minions & Monsters
+    - Moana
+    - The Odyssey
+    - Supergirl
+    - 'Star Wars: The Mandalorian and Grogu'
+    - The Devil Wears Prada 2
+    - Scary Movie
+    - Mortal Kombat II
