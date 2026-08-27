@@ -71,3 +71,9 @@ the script's stdout/stderr to `round-N.log`.
 ### Where things stand
 - Reviewed/approved SHA: **none** — the branch was never approved. Last reviewed commit `4f08a84`.
 - Suggested next step: apply #1 and #2 (both small), decide #3, checkpoint, run `/cross-review superpowers/specs/2026-08-15-standalone-rebuild-spec.md` once more.
+
+### Post-cap follow-up — 2026-08-27 (user decision)
+- #1 and #2 applied in `a8b2cbf` (user-directed); tests: `test_empty_chart_parse_fails_with_guard_a`,
+  tightened `test_degraded_production_refresh_shows_as_history_gap` to assert on the SVG/table.
+  166 passed. Not yet re-reviewed by Codex.
+- #3 pending user decision.
