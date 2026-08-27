@@ -1,0 +1,163 @@
+"""Pipeline glue: the only module that knows the order of operations (Appendix B)."""
+import json
+from datetime import date, timedelta
+from pathlib import Path
+
+from smw.catalog.normalize import (apply_chart_aliases, build_films, canonical,
+                                   load_overrides, load_preopening)
+from smw.catalog.resolve import load_history, resolve_grosses
+from smw.config.groups import Group, load_group
+from smw.config.season import Season, load_season
+from smw.ingest.boxoffice import chart_floor, fetch_chart, parse_chart, windowed
+from smw.model.project import MovieCatalog, build_catalog
+from smw.model.simulate import MIN_FILMS_FOR_TOP_TEN, SimResult, simulate
+from smw.render.chart import build_history_data
+from smw.render.page import (base_context, build_scenarios_view, build_whatif_data,
+                             make_env, render_history, render_leaderboard,
+                             render_rules, render_scenarios, render_whatif)
+from smw.render.views import build_leaderboard_view
+from smw.score.rules import score_player
+
+fetch = fetch_chart  # network seam; tests monkeypatch this
+
+
+def build_data_json(season, group, catalog, sim, current_points,
+                    non_zero, reason, today) -> dict:
+    players = sorted(group.players)
+    if sim is None:
+        null_map = {u: None for u in players}
+        forecast = {
+            "win_prob": dict(null_map), "tie_prob": dict(null_map),
+            "median_final_pts": dict(null_map), "p10_final_pts": dict(null_map),
+            "p90_final_pts": dict(null_map), "winning_scenarios": dict(null_map),
+        }
+    else:
+        forecast = {
+            "win_prob": sim.win_prob, "tie_prob": sim.tie_prob,
+            "median_final_pts": sim.median_pts, "p10_final_pts": sim.p10_pts,
+            "p90_final_pts": sim.p90_pts,
+            "winning_scenarios": {
+                u: None if sc is None else {
+                    "films": sc.films, "grid": sc.grid, "totals": sc.totals,
+                    "win_pct": sc.win_pct, "margin": sc.margin}
+                for u, sc in sim.scenarios.items()},
+        }
+    out = {
+        "captured_at": today.isoformat(),
+        "current_points": current_points,
+        "forecast_available": sim is not None,
+        "non_zero_projections": non_zero,
+        "projections": [
+            {"movie_title": p.title, "median_in_window_gross": p.median,
+             "sigma": p.sigma, "floor": p.floor}
+            for p in catalog.projections],
+        **forecast,
+    }
+    if sim is None:
+        out["forecast_unavailable_reason"] = reason
+    return out
+
+
+def append_box_office_history(path: Path, grosses: dict[str, float], today: date):
+    with open(path, "a") as f:
+        for title in sorted(grosses):
+            if grosses[title] > 0:
+                f.write(json.dumps({"movie": title, "date": today.isoformat(),
+                                    "cumulative_gross": grosses[title]}) + "\n")
+
+
+def append_forecast_history(path: Path, sim: SimResult, today: date):
+    with open(path, "a") as f:
+        for u in sorted(sim.win_prob):
+            f.write(json.dumps({
+                "date": today.isoformat(), "player": u,
+                "win_prob": sim.win_prob[u],
+                "median_final_pts": sim.median_pts[u],
+                "p10": sim.p10_pts[u], "p90": sim.p90_pts[u]}) + "\n")
+
+
+def _load_forecast_rows(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    return [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+
+
+def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
+    data_dir, out_dir = Path(data_dir), Path(out_dir)
+    season = load_season(data_dir / "season.yaml")
+    groups = [load_group(p) for p in sorted((data_dir / "groups").glob("*.yaml"))]
+    overrides = load_overrides(data_dir / "movies_overrides.yaml")
+    preopening = load_preopening(data_dir / "preopening_projections.yaml")
+    history_path = data_dir / "box_office_history.jsonl"
+    if not history_path.exists():
+        print("warning: no box-office history file yet (normal on the first run)")
+    history = load_history(history_path)
+
+    if (today - timedelta(days=1)) <= season.window_end:
+        raw = apply_chart_aliases(parse_chart(fetch(season.year), season.year), overrides)
+        floor = chart_floor(raw)
+        chart_rows = windowed(raw, season)  # Guards A and B
+    else:
+        # §6.1: chart frozen from window_end + 2 — MUST NOT be read at all.
+        chart_rows, floor = [], 0.0
+
+    grosses, carried, chart_usable = resolve_grosses(
+        season, history, chart_rows, floor, today)
+
+    films = build_films(season, groups, chart_rows, grosses, carried,
+                        overrides, preopening, today)
+    picked = {canonical(t, overrides)
+              for g in groups for p in g.players.values()
+              for t in p.ranked + p.dark_horses}
+    catalog = build_catalog(season, films, history, picked, overrides, today)
+    for w in catalog.warnings:
+        print(f"warning: {w}")
+
+    gross_ranked = sorted(((g, t) for t, g in grosses.items() if g > 0),
+                          key=lambda x: (-x[0], x[1]))
+    actual_top = [t for _, t in gross_ranked[:10]]
+
+    non_zero = sum(1 for p in catalog.projections if p.median > 0)
+    # §10.1: Final first, then the projection count decides Early vs Live.
+    # The structural floor (§9.5) also degrades here: a site build must not crash
+    # merely because the season is young.
+    forecastable = (non_zero >= season.min_projections_for_forecast
+                    and non_zero >= MIN_FILMS_FOR_TOP_TEN)
+    reason = None
+    if not forecastable:
+        reason = (f"only {non_zero} films have non-zero projections "
+                  f"({season.min_projections_for_forecast} required for a "
+                  "meaningful top-ten ranking)")
+
+    env = make_env()
+    for group in groups:
+        # Multi-group output layout is explicitly deferred (§3.6): with one group,
+        # output goes to the output root. Loop kept so roster-dependent work is
+        # already per-group.
+        sim = simulate(season, group, catalog) if forecastable else None
+        current_points = {u: score_player(group.players[u], actual_top)
+                          for u in group.players}
+        ctx = base_context(season, group, "leaderboard", today)
+        view = build_leaderboard_view(season, group, catalog, sim, current_points,
+                                      actual_top, reason, today)
+        render_leaderboard(env, out_dir, ctx, view)
+        render_whatif(env, out_dir, {**ctx, "active": "whatif"},
+                      build_whatif_data(season, group, catalog, sim) if sim else None,
+                      reason)
+        render_scenarios(env, out_dir, {**ctx, "active": "scenarios"},
+                         build_scenarios_view(group, sim) if sim else None, reason)
+        render_history(env, out_dir, {**ctx, "active": "history"},
+                       build_history_data(_load_forecast_rows(
+                           data_dir / "forecast_history.jsonl")))
+        render_rules(env, out_dir, {**ctx, "active": "rules"})
+        (out_dir / "data.json").write_text(json.dumps(
+            build_data_json(season, group, catalog, sim, current_points,
+                            non_zero, reason, today),
+            indent=2, sort_keys=True))
+
+        if not local and sim is not None:
+            append_forecast_history(data_dir / "forecast_history.jsonl", sim, today)
+
+    if not local:
+        # Roster-independent: appended once per build, never once per group.
+        append_box_office_history(history_path, grosses, today)
