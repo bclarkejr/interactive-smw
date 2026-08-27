@@ -100,7 +100,7 @@ def base_context(season: Season, group: Group, active: str, today: date,
             for y, g in site.years],
         "group_options": [
             {"value": f"../{gid}/{filename}", "label": name, "selected": gid == group.group_id}
-            for gid, name in sorted(site.groups, key=lambda t: (t[1], t[0]))],
+            for gid, name in site.groups],
         "forecast_note": site.forecast_note,
     }
 

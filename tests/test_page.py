@@ -54,7 +54,7 @@ from smw.render.page import Site
 
 def test_title_h1_selectors_and_footer(tmp_path, season, group):
     site = Site(years=((2027, "x"), (2026, "testers")),
-                groups=(("aaa", "Zed League"), ("testers", "Test League")),
+                groups=(("testers", "Test League"), ("aaa", "Zed League")),
                 forecast_note="Forecast: 2,000 seeded Monte Carlo seasons over 18 projected films.")
     env = make_env()
     ctx = base_context(season, group, "rules", TODAY, site)

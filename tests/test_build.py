@@ -290,6 +290,7 @@ def test_pages_carry_selectors_and_footer_note(data_dir, tmp_path):
         html = (out / page).read_text()
         assert 'value="../../2026/g/index.html" selected' in html, page
         assert f'value="../h/{page}"' in html and f'value="../g/{page}" selected' in html, page
+        assert html.index(f'value="../h/{page}"') < html.index(f'value="../g/{page}"'), page
         assert "Forecast: unavailable — only 3 films" in html, page
     assert "<title>Leaderboard · Summer Movie Wager 2026 · G</title>" in (out / "index.html").read_text()
 
