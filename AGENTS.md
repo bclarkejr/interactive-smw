@@ -3,7 +3,7 @@
 Summer Movie Wager — Python ≥3.11 static-site generator (batch pipeline, static HTML output). This repo also serves as a learning ground for a fully agentic coding workflow (see CONTRIBUTING.md).
 
 ## Deterministic checks (must pass before any review round)
-- Install: `uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -e '.[dev]'`
+- Install: `uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python --config-settings editable_mode=compat -e '.[dev]'`
 - Test: `.venv/bin/pytest`
 - Lint: not configured
 - Types/Build: not configured
