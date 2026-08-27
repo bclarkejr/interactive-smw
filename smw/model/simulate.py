@@ -86,5 +86,34 @@ def simulate(season: Season, group: Group, catalog: MovieCatalog) -> SimResult:
 
 def _scenarios(season, group, players, titles, top10,
                score_matrix, is_top, winners_per_trial, win_prob):
-    # Task 13 replaces this stub with medoid selection (§9.6).
-    return {u: None for u in players}
+    out: dict[str, Scenario | None] = {}
+    n_films = len(titles)
+    for pi, u in enumerate(players):
+        wins = np.flatnonzero(is_top[pi] & (winners_per_trial == 1))
+        if wins.size == 0:
+            out[u] = None
+            continue
+        # Per-player derived seed keeps scenarios reproducible (§9.6).
+        prng = np.random.default_rng([season.seed, pi])
+        if wins.size > _MEDOID_CAP:
+            wins = np.sort(prng.choice(wins, _MEDOID_CAP, replace=False))
+        # Spearman-footrule rank vectors: top-ten position 1–10, absentees 11,
+        # so films missing from both trials contribute zero distance.
+        R = np.full((wins.size, n_films), 11, dtype=np.int16)
+        rows = np.arange(wins.size)[:, None]
+        R[rows, top10[wins]] = np.arange(1, 11)[None, :]
+        # ponytail: O(W) python loop over an O(W*F) numpy op instead of one giant
+        # (W,W,F) broadcast — 1500² pairs would need ~9 GB broadcast at once.
+        dist_sums = np.array([np.abs(R - R[j]).sum() for j in range(wins.size)])
+        best_trial = int(wins[int(np.argmin(dist_sums))])
+
+        finish = [titles[i] for i in top10[best_trial]]
+        grid = {}
+        for v in players:
+            b = score_breakdown(group.players[v], finish)
+            grid[v] = (b + [0] * 10)[:10]
+        totals = {v: int(score_matrix[players.index(v), best_trial]) for v in players}
+        margin = totals[u] - max(t for v, t in totals.items() if v != u)
+        out[u] = Scenario(films=finish, grid=grid, totals=totals,
+                          win_pct=round(win_prob[u] * 100, 1), margin=margin)
+    return out
