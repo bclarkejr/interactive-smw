@@ -22,6 +22,22 @@ Every exploratory or development run uses `--local`. A production run on an
 off-cadence day skews the observed-decay estimator, which assumes roughly
 weekly snapshots.
 
+### The run date (`--date`)
+
+The run date is the **only** place wall-clock time enters the system. Every
+date-dependent decision — which films are pre-release vs. in theaters, how far
+each decay curve has elapsed, whether the chart is still fetched or frozen, the
+history cutoff, and the `captured_at` / "refreshed" stamps — flows from it.
+
+- `--date YYYY-MM-DD` sets it explicitly.
+- **If `--date` is omitted it defaults to today's calendar date.** So the same
+  `data/` built on two different days legitimately produces two different sites;
+  that is expected, not a bug. Pass `--date` whenever you need a build you can
+  reproduce or compare later (byte-identical output for identical inputs).
+
+    .venv/bin/python -m smw --local --date 2026-08-26   # reproducible dev build
+    .venv/bin/python -m smw --date 2026-09-08           # the final production run
+
 ## Weekly cadence
 
 Refresh manually (never on a schedule — a bad upstream day should be noticed,

@@ -77,3 +77,6 @@ the script's stdout/stderr to `round-N.log`.
   tightened `test_degraded_production_refresh_shows_as_history_gap` to assert on the SVG/table.
   166 passed. Not yet re-reviewed by Codex.
 - #3 pending user decision.
+- #3 **rejected by user** (2026-08-27): spec §1.3 permits wall-clock time to enter via the
+  explicitly passed run day, and only there; a build differing by run date is intended.
+  README now documents `--date`, its default-to-today behaviour, and shows examples.
