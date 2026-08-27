@@ -148,3 +148,15 @@ Last reviewed commit: `a015e4b`. No approved SHA exists.
 | 1 | med | `smw/render/build.py:160` | Persist production refresh dates (4th time) | **Still disputed** (§5 file set, §5.6). | none |
 | 2 | med | `smw/config/groups.py:27` | Roster loader doesn't type-check display_name, players mapping, usernames, or titles | **Valid** | Types validated at load with player-specific errors. Test: `test_bad_types_fail_at_load`. |
 | 3 | med | `smw/catalog/normalize.py:42` | `alias_of` / `release_date` overrides not type-checked | **Valid** | Non-empty string / `date` enforced at load. Test: `test_override_bad_types_fail_at_load`. |
+
+### Loop 3 — Round 3 (cap), 07:42 EDT
+
+- Reviewed head: `a85c6f1` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 1 blocking) · raw: `round-9.json`
+- Deterministic checks before review: 191 passed. The refresh-date dispute (build.py:160) was **not** raised this round.
+- **Cap reached — loop stopped; nothing below changed in code.**
+
+| # | Sev | File | Finding (verbatim summary) | My assessment |
+|---|-----|------|----------------------------|---------------|
+| 1 | med | `smw/config/groups.py:31` | `players: false` becomes an empty roster via `or {}`; a mapping-valued `ranked`/`dark_horses` becomes a tuple of its keys and can pass the count checks | **Agree.** Trivial: default only `None` to `{}`, and require `ranked`/`dark_horses` to be lists. Recommend fixing. |
+
+Last reviewed commit: `a85c6f1`. No approved SHA exists.
