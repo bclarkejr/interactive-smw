@@ -137,7 +137,11 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
         print(f"warning: {season.year}: no box-office history file yet (normal on the first run)")
     history = load_history(history_path)
 
-    if season.window_start <= today - timedelta(days=1) <= season.window_end:
+    live_window = season.window_start <= today - timedelta(days=1) <= season.window_end
+    # A frozen or not-yet-open season renders but persists nothing (§2.2): only a
+    # live-window production run appends history.
+    persist = not local and live_window
+    if live_window:
         raw = apply_chart_aliases(parse_chart(fetch(season.year), season.year), overrides)
         chart_rows = windowed(raw, season)  # Guards A and B — before the floor, so an
         floor = chart_floor(raw)            # empty parse fails with Guard A, not min()
@@ -190,7 +194,7 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
     # Date axis = every production refresh (box-office history), so a degraded
     # refresh shows as a gap in each line rather than vanishing (§12.4).
     refresh_dates = {d.isoformat() for obs in history.values() for d, _ in obs}
-    if not local:
+    if persist:
         refresh_dates.add(today.isoformat())  # this refresh persists after rendering
 
     for group in groups:
@@ -208,7 +212,7 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
         render_scenarios(env, group_out, ctx("scenarios"),
                          build_scenarios_view(group, sim) if sim else None, reason)
         forecast_path = season_dir / "forecast_history" / f"{group.group_id}.jsonl"
-        if not local and sim is not None:
+        if persist and sim is not None:
             # Appended before the history page renders so the page includes this refresh.
             forecast_path.parent.mkdir(exist_ok=True)
             append_forecast_history(forecast_path, sim, today)
@@ -220,6 +224,6 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
                             non_zero, reason, today),
             indent=2, sort_keys=True))
 
-    if not local:
+    if persist:
         # Roster-independent: appended once per season, never once per group.
         append_box_office_history(history_path, grosses, today)

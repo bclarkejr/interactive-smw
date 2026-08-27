@@ -109,6 +109,10 @@ out/
   season is in the Final state (rebuild §10.1) and reads no network, so this is cheap,
   and it is what keeps the year selector (Section 4) consistent without a separate
   index step.
+- A season whose window is not live on the run date (frozen, or not yet open) is
+  rendered but MUST persist nothing: no box-office or forecast rows are appended for
+  it, and its odds axis gains no refresh date. Only the live season's files change on
+  a production run.
 - An empty or missing `data/seasons/` MUST be a build error, not an empty site.
 
 ### 2.3 Root redirect
@@ -150,7 +154,8 @@ the design; everything else is.
      take the mockup's six light and six dark colours **in the mockup's order**;
      `.series-6` and `.series-7` keep the shipped site's two extra colours (a group may
      have up to eight players). Defined in the same three places as the other tokens.
-  2. the selector styling from Section 4.
+  2. the selector styling from Section 4 (`.sel`) and its visually-hidden label rule
+     (`.vh`).
   Nothing else may be added, and nothing in the verbatim block may be edited.
 - Consequently the site's token vocabulary becomes the mockup's: `--bg --surface --ink
   --ink2 --muted --grid --baseline --border --affirm --neg --accent --pill --hl`, plus
@@ -369,11 +374,13 @@ monkeypatched, as the existing build tests do.
 5. A production (non-`--local`) run with a live forecast appends to
    `data/seasons/<year>/forecast_history/<group_id>.jsonl` for each group and nothing
    else; a local run appends nothing. `box_office_history.jsonl` is still appended once
-   per season, not once per group.
+   per season, not once per group. A production run appends nothing to any other
+   season.
 6. `site.css` up to the `site additions` marker equals the mockup's `<style>` block
    after removing `.mocknote`, `.page`/`.page.active`, and the `--s-<username>`
    declarations and normalising whitespace; the additions section contains only
-   `.series-N` rules and the selector rule; `.series-0…5` colours equal the mockup's six,
+   `.series-N` rules and the selector styling from Section 4 (`.sel`) and its
+   visually-hidden label rule (`.vh`); `.series-0…5` colours equal the mockup's six,
    in order, in all three token blocks.
 7. Every page's `<h1>` is `🍿 Summer Movie Wager`; every page contains a year `<select>`
    and a group `<select>` whose option values follow Section 4 and are page-relative,

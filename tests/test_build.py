@@ -278,6 +278,25 @@ def test_every_season_renders_and_redirect_picks_newest(data_dir, tmp_path):
     assert (out / "2025" / "g" / "index.html").exists()
     assert "url=2026/g/index.html" in (out / "index.html").read_text()
 
+def test_production_run_leaves_past_seasons_untouched(data_dir, tmp_path):
+    # §2.2: every season renders on every run, but only the live season persists.
+    old = data_dir.parent / "2025"
+    (old / "groups").mkdir(parents=True)
+    (old / "season.yaml").write_text(
+        "year: 2025\nwindow_start: 2025-05-02\nwindow_end: 2025-09-01\nseed: 7\n"
+        "monte_carlo_trials: 500\n")
+    (old / "groups" / "g.yaml").write_text((data_dir / "groups" / "g.yaml").read_text())
+    rows = [{"movie": f"Film {i:02d}", "date": "2025-09-02", "cumulative_gross": 1e6 * (20 - i)}
+            for i in range(12)]
+    (old / "box_office_history.jsonl").write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    before = (old / "box_office_history.jsonl").read_bytes()
+    _run(data_dir, tmp_path, local=False)
+    assert (old / "box_office_history.jsonl").read_bytes() == before
+    assert not (old / "forecast_history").exists()
+    assert (data_dir / "box_office_history.jsonl").exists()   # the live season still persists
+    html = (tmp_path / "out" / "2025" / "g" / "history.html").read_text()
+    assert "2026-08-15" not in html                            # and no phantom refresh date
+
 def test_missing_seasons_dir_is_a_build_error(tmp_path):
     (tmp_path / "data").mkdir()
     with pytest.raises(ValueError, match="seasons"):

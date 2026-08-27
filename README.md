@@ -83,3 +83,8 @@ The leaderboard has a byte-exact snapshot test. To regenerate deliberately:
 delete `tests/fixtures/snapshot_index.html`, run the test once (it rewrites the
 fixture and fails), **open the file in a browser and look at it**, then re-run
 to lock. A snapshot regenerated without inspection tests nothing.
+
+## Third-party code
+
+`smw/render/static/sortable.min.js` is SortableJS 1.15.6, © 2019 Lebedev Konstantin and
+contributors, MIT licence, vendored and inlined into `whatif.html`.

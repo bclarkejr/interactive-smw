@@ -84,3 +84,9 @@ def test_mockup_geometry_and_elements():
     assert 'class="dl"' in svg and ">alice</text>" in svg
     assert '<line class="xh"' in svg and 'display:none' in svg
     assert 'class="x-label"' not in svg and 'class="direct-label"' not in svg
+
+def test_history_js_geometry_matches_chart_py():
+    from pathlib import Path
+    from smw.render.chart import W, ML, MR
+    js = (Path(__file__).parent.parent / "smw" / "render" / "static" / "history.js").read_text()
+    assert f"var W = {W}, L = {ML}, R = {MR}," in js

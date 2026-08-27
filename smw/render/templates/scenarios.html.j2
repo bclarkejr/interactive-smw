@@ -13,7 +13,7 @@ players have no realistic path to winning.</p>
 {% if t.scenario -%}
 <button type="button" data-tab="{{ loop.index0 }}" aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ t.username }} · {{ t.win_pct }}%</button>
 {% else -%}
-<button type="button" disabled title="No winning path — {{ t.username }} wins in 0 of {{ trials }} simulated seasons">{{ t.username }} · 0.0%</button>
+<button type="button" aria-pressed="false" disabled title="No winning path — {{ t.username }} wins in 0 of {{ trials }} simulated seasons">{{ t.username }} · 0.0%</button>
 {% endif -%}
 {% endfor -%}
 </div>
@@ -33,7 +33,7 @@ players have no realistic path to winning.</p>
 {% endfor -%}
 </tbody>
 <tfoot><tr><td colspan="2" class="t">Total</td>
-{%- for total in t.scenario.totals %}<td class="{% if t.scenario.columns[loop.index0] == t.username %}hlcol{% endif %}{% if loop.first %} crown{% endif %}">{{ total }}</td>{% endfor %}</tr></tfoot>
+{%- for total in t.scenario.totals %}{% set cls = ('hlcol ' if t.scenario.columns[loop.index0] == t.username else '') ~ ('crown' if loop.first else '') %}<td{% if cls.strip() %} class="{{ cls.strip() }}"{% endif %}>{{ total }}</td>{% endfor %}</tr></tfoot>
 </table></div>
 </section>
 {% endif %}{% endfor -%}
