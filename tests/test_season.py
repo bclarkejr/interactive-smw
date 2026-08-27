@@ -29,3 +29,24 @@ def test_inverted_window_raises(tmp_path):
     p.write_text("year: 2026\nwindow_start: 2026-09-07\nwindow_end: 2026-05-01\nseed: 1\n")
     with pytest.raises(ValueError, match="window"):
         load_season(p)
+
+BASE = "year: 2026\nwindow_start: 2026-05-01\nwindow_end: 2026-09-07\nseed: 1\n"
+
+@pytest.mark.parametrize("extra,needle", [
+    ("monte_carlo_trials: 0\n", "monte_carlo_trials"),
+    ("matrix_rows: -3\n", "matrix_rows"),
+    ("chart_contenders: many\n", "chart_contenders"),
+    ("default_wow:\n  wide: 0.5\n", "animated_family"),
+    ("default_wow:\n  wide: 1.5\n  animated_family: 0.6\n", "default_wow.wide"),
+])
+def test_invalid_values_fail_at_load(tmp_path, extra, needle):
+    p = tmp_path / "season.yaml"
+    p.write_text(BASE + extra)
+    with pytest.raises(ValueError, match=needle):
+        load_season(p)
+
+def test_string_dates_rejected(tmp_path):
+    p = tmp_path / "season.yaml"
+    p.write_text('year: 2026\nwindow_start: "May 1"\nwindow_end: 2026-09-07\nseed: 1\n')
+    with pytest.raises(ValueError):
+        load_season(p)

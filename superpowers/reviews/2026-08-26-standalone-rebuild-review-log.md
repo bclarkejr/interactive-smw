@@ -115,3 +115,10 @@ the script's stdout/stderr to `round-N.log`.
 | 2 | med | `smw/config/season.py:38` | `load_season` doesn't validate types/ranges/`default_wow` keys; zero trials or a missing category fails later (division by zero, `KeyError`) instead of at the load boundary | **Agree.** Small: assert positive ints for counts/thresholds, dates for the window, and that `default_wow` has both `wide` and `animated_family` in (0, 1]. Recommend fixing. |
 
 Last reviewed commit: `a015e4b`. No approved SHA exists.
+
+## Loop 3 (user-invoked `/cross-review`, 2026-08-27)
+
+- Pre-round: loop-2 cap finding #2 (Season load validation) fixed — `load_season` now
+  rejects non-date windows, non-integer/non-positive counts, and a `default_wow` missing a
+  category or outside (0, 1]. Tests: `test_invalid_values_fail_at_load`, `test_string_dates_rejected`.
+  Finding #1 (persist refresh dates) remains disputed on spec grounds.
