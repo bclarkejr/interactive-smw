@@ -108,6 +108,26 @@ footer a { color: var(--muted); }
   th, td { padding: 0.25rem 0.35rem; }
   .two-col { grid-template-columns: 1fr !important; }
 }
+
+/* What If? sandbox */
+.two-col { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
+.standings { position: sticky; top: 1rem; background: var(--card);
+  border: 1px solid var(--border); border-radius: 8px; padding: 0.8rem; }
+#film-list { list-style: none; counter-reset: slot; padding: 0; margin: 0; }
+#film-list li { counter-increment: slot; display: flex; align-items: center; gap: 0.4rem;
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.35rem 0.6rem; margin-bottom: 0.3rem; cursor: grab; }
+#film-list li::before { content: counter(slot); color: var(--muted); width: 1.5rem;
+  font-variant-numeric: tabular-nums; }
+#film-list .wi-title { flex: 1; }
+#film-list li button { background: var(--dim); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
+/* pure-CSS top-10 cutoff (§12.2): dashed border + generated label, 11+ dimmed */
+#film-list li:nth-child(10) { border-bottom: 3px dashed var(--muted); }
+#film-list li:nth-child(10)::after { content: "top 10 cutoff"; color: var(--muted);
+  font-size: 0.7rem; }
+#film-list li:nth-child(n+11) { opacity: 0.55; }
+#film-list li.dragging { opacity: 0.4; }
 </style>
 
 </head>

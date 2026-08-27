@@ -9,6 +9,10 @@ from markupsafe import Markup
 
 from smw.config.groups import Group
 from smw.config.season import Season
+from smw.model.project import MovieCatalog
+from smw.model.simulate import SimResult
+from smw.render.views import projected_ranks
+from smw.score.rules import score_player
 
 TEMPLATES = Path(__file__).parent / "templates"
 STATIC = Path(__file__).parent / "static"
@@ -82,3 +86,31 @@ def render_rules(env: Environment, out_dir: Path, ctx: dict) -> None:
 def render_leaderboard(env: Environment, out_dir: Path, ctx: dict, view) -> None:
     write_page(env, "index.html.j2", out_dir, "index.html",
                {**ctx, "title": "Leaderboard", "wide_shell": True, "view": view})
+
+
+def build_whatif_data(season: Season, group: Group,
+                      catalog: MovieCatalog, sim: SimResult) -> dict:
+    ranks = projected_ranks(catalog)
+    films = [t for t, _ in sorted(ranks.items(), key=lambda kv: kv[1])
+             ][: season.matrix_rows]
+    order = sorted(group.players, key=lambda u: (-sim.median_pts[u], u))
+    top10 = films[:10]
+    return {
+        "films": films,
+        "players": [
+            {"name": u,
+             "ranked": list(group.players[u].ranked),
+             "dark": list(group.players[u].dark_horses)}
+            for u in order
+        ],
+        "baseline": {u: score_player(group.players[u], top10) for u in order},
+    }
+
+
+def render_whatif(env: Environment, out_dir: Path, ctx: dict,
+                  data: dict | None, reason: str | None) -> None:
+    write_page(env, "whatif.html.j2", out_dir, "whatif.html", {
+        **ctx, "title": "What If?", "data": data, "reason": reason,
+        "scoring_js": Markup((STATIC / "scoring.js").read_text()),
+        "whatif_js": Markup((STATIC / "whatif.js").read_text()),
+    })
