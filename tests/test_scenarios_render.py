@@ -62,9 +62,25 @@ def test_zero_cells_render_middle_dot_and_no_path_disabled(tmp_path, season, gro
         {"username": "bob", "win_pct": 0.0, "scenario": None},
     ]
     html = _render(tmp_path, season, group, tabs)
-    assert "·" in html          # zero cells as middle dot
+    assert '<td class="mid">·</td>' in html          # zero cells as middle dot
     assert "disabled" in html   # genuinely disabled no-path button
 
 def test_locked_state(tmp_path, season, group):
     html = _render(tmp_path, season, group, None, "only 3 films have projections")
     assert "unlocks once the forecast is live" in html
+
+def test_markup_matches_mockup(tmp_path, season, group, sim):
+    html = _render(tmp_path, season, group, build_scenarios_view(group, sim))
+    for s in ("<h2>🔮 Winning Scenarios</h2>", '<div class="tabs">', '<div class="caption">',
+              '<div class="scroller"><table>', '<th class="hlcol">', 'class="t">Total</td>',
+              " crown", '<th>#</th><th class="t">Movie</th>'):
+        assert s in html, s
+    body = html.split("</style>")[1]
+    for gone in ("tab-row", 'class="tab"', "highlight-col", "cell-none", "cell-pos", "stats-line"):
+        assert gone not in body, gone
+
+def test_disabled_tab_title_names_trials(tmp_path, season, group):
+    tabs = [{"username": "bob", "win_pct": 0.0, "scenario": None}]
+    html = _render(tmp_path, season, group, tabs)
+    assert 'disabled title="No winning path — bob wins in 0 of 2,000 simulated seasons"' in html
+    assert "bob · 0.0%" in html
