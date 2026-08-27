@@ -190,5 +190,13 @@ def test_degraded_production_refresh_shows_as_history_gap(data_dir, tmp_path):
     (data_dir / "season.yaml").write_text(season)  # back to 25 → degraded
     out = _run(data_dir, tmp_path, today=date(2026, 8, 15), local=False)
     html = (out / "history.html").read_text()
-    assert "2026-08-08" in html and "2026-08-15" in html
-    assert 'class="line series-0" d="M' in html and html.count("<circle") == 1
+    svg = html[html.index("<svg"):html.index("</svg>")]
+    assert 'class="x-label"' in svg and "2026-08-15" in svg   # the degraded date is on the axis
+    assert svg.count("<circle") == 1                          # but has no forecast marker
+    assert "<td>2026-08-15</td>" in html                       # and shows in the table
+
+def test_empty_chart_parse_fails_with_guard_a(data_dir, tmp_path, monkeypatch):
+    from smw.ingest.boxoffice import IngestError
+    monkeypatch.setattr(build, "fetch", lambda year: "<html><body>nothing</body></html>")
+    with pytest.raises(IngestError, match="Guard A"):
+        _run(data_dir, tmp_path)

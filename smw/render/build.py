@@ -96,8 +96,8 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
 
     if (today - timedelta(days=1)) <= season.window_end:
         raw = apply_chart_aliases(parse_chart(fetch(season.year), season.year), overrides)
-        floor = chart_floor(raw)
-        chart_rows = windowed(raw, season)  # Guards A and B
+        chart_rows = windowed(raw, season)  # Guards A and B — before the floor, so an
+        floor = chart_floor(raw)            # empty parse fails with Guard A, not min()
     else:
         # §6.1: chart frozen from window_end + 2 — MUST NOT be read at all.
         chart_rows, floor = [], 0.0
@@ -157,6 +157,8 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
         # refresh shows as a gap in each line rather than vanishing (§12.4).
         refresh_dates = {d.isoformat() for obs in load_history(history_path).values()
                          for d, _ in obs}
+        if not local:
+            refresh_dates.add(today.isoformat())  # this refresh persists after rendering
         render_history(env, out_dir, {**ctx, "active": "history"},
                        build_history_data(_load_forecast_rows(
                            data_dir / "forecast_history.jsonl"), refresh_dates))
