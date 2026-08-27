@@ -231,3 +231,14 @@ Last reviewed commit: `8b69f93`. No approved SHA exists.
 | 1 | med | `smw/catalog/normalize.py:137` | Pre-opening estimates accept non-finite floats (`.inf`) and would propagate `Infinity` into projections/data.json | **Valid** | Estimates must be finite. Test: `test_non_finite_estimate_rejected`. |
 | 2 | med | `smw/render/build.py:82` | `forecast_history.jsonl` rows not schema-validated | **Valid** | `_load_forecast_rows` validates object shape, ISO date, player, finite numbers, `win_prob ∈ [0,1]` with `path:line` errors. Test: `test_forecast_history_rows_validated`. |
 | 3 | low | `smw/render/chart.py:95` | Direct labels can be pushed below the viewBox | Taken (cheap): stack shifted up by any overflow and re-separated top-down. Test: `test_direct_labels_stay_inside_viewbox`. |
+
+### Loop 5 — Round 2, 08:24 EDT — **APPROVED**
+
+- Reviewed head: **`bd6c2fe5ca9657c724b04d5a4dd0e5c5d3fa0581`** · model `gpt-5.6-sol/medium` · exit **0** (`approved`, 0 findings)
+- Deterministic checks on that commit: 213 passed (lint/types not configured).
+- `.git/codex-review/feat_standalone-rebuild.result.sha` = `bd6c2fe…`. The approval covers that
+  commit only; this log entry is the only later commit on the branch (workflow documentation,
+  outside the cross-review scope per AGENTS.md).
+
+**Totals across five loops (12 rounds reviewed + this one):** 27 blocking findings fixed,
+2 rejected by user decision (`--date` default; refresh-date persistence), 1 advisory taken.
