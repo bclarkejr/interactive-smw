@@ -45,3 +45,13 @@ Documented in the plan's "Decisions the spec forced" section and the SDD ledger 
 | 2 | med | `smw/config/season.py:78` | Roster filename not checked against `group_id`; duplicate IDs pass loading and clobber the same output dir / forecast file | **Valid** | `load_season_dir` requires `path.stem == group_id` and rejects duplicates. Tests: `test_load_season_dir_rejects_filename_id_mismatch`, `test_load_season_dir_rejects_duplicate_group_ids`. |
 | 3 | med | `smw/render/templates/index.html.j2:32` | Explanatory paragraph is unconditional; in current-points mode it describes projections the table doesn't show (rebuild §10.3) | **Valid** | Live-mode copy kept verbatim; current-points mode gets actuals wording. Test: `test_current_points_mode_has_no_forecast_numbers` extended. |
 | 4 | med | `smw/render/static/sortable.min.js:1` | Banner omits the copyright attribution §5.1 says the banner must retain | **Valid** — upstream's banner names no holder, but the spec requires it | Banner is now `/*! Sortable 1.15.6 - MIT | (c) 2019 Lebedev Konstantin */` (still URL-free); test updated. |
+
+## Round 2 — 2026-08-27
+
+- Reviewed head: `b5d3e32` · model `gpt-5.6-sol/high` · exit **10** (`changes_requested`, 2 blocking)
+- Deterministic checks before review: 252 passed.
+
+| # | Sev | File | Finding (verbatim summary) | Verdict | Action |
+|---|-----|------|----------------------------|---------|--------|
+| 1 | med | `smw/render/static/whatif.js:86` | Points grid reuses the score-sorted `rows`, so its player columns shuffle on every reorder; the mockup keeps the grid in fixed simulated-median order and only re-sorts the standings panel | **Valid** — mockup `renderWhatIf` uses `SIM.cols` for the grid | Grid header/cells now iterate `D.players` (pipeline order = simulated median); the sorted array is used only for `#wiStandings`. Test: `test_grid_columns_follow_player_order_not_standings`. |
+| 2 | med | `smw/render/templates/whatif.html.j2:27` | Inlining SortableJS makes `whatif.html` contain `dragstart`/`dragover`/`touchstart`/`elementFromPoint`, failing criterion 11 as written; tests only checked `whatif.js` | **Valid as a spec conflict** (plan decision D1) — the real 1.15.6 build contains those strings, so the criterion is unsatisfiable against the page | Spec criterion 11 amended: the site's own script (`whatif.js`, and the page with the vendored library block removed) contains none of those strings; the page contains `new Sortable(`; the library is the minified 1.15.6 build. Test `test_page_minus_library_has_no_site_drag_code` asserts it against rendered `whatif.html`. |

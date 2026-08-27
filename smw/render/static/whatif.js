@@ -83,14 +83,14 @@
     var head = document.querySelector("#wiGrid thead tr");
     head.innerHTML = "";
     th(head, "#"); th(head, "Movie", "t");
-    rows.forEach(function (r) { th(head, r.name); });
+    D.players.forEach(function (p) { th(head, p.name); });
     var grid = document.querySelector("#wiGrid tbody");
     grid.innerHTML = "";
     ord.forEach(function (title, i) {
       var tr = document.createElement("tr");
       cell(tr, i + 1); cell(tr, title, "t");
-      rows.forEach(function (r) {
-        var pts = pointsFor(r.picks.ranked, r.picks.dark, title, finish);
+      D.players.forEach(function (p) {
+        var pts = pointsFor(p.ranked, p.dark, title, finish);
         cell(tr, pts === null ? "—" : pts, pts === null ? "dash" : pts > 0 ? "pos" : "zero");
       });
       grid.appendChild(tr);

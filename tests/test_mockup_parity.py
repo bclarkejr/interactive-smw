@@ -106,3 +106,13 @@ def test_self_contained_including_vendored_library(site):
             assert marker not in html, (gid, page, marker)
     root = (site / "index.html").read_text()
     assert "http://" not in root and "https://" not in root
+
+def test_whatif_page_minus_library_has_no_drag_code(site):
+    for gid in ("g", "h"):
+        html = (site / "2026" / gid / "whatif.html").read_text()
+        start = html.index("/*! Sortable 1.15.6")
+        end = html.index("</script>", start)
+        rest = html[:start] + html[end:]
+        assert "new Sortable(" in rest, gid
+        for s in ("dragstart", "dragover", "touchstart", "elementFromPoint"):
+            assert s not in rest, (gid, s)

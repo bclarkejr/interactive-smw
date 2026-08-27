@@ -44,6 +44,21 @@ def test_site_drag_code_is_gone():
         assert s not in js, s
     assert "new Sortable(" in js and "ghostClass" in js and "delayOnTouchOnly" in js
 
+def test_grid_columns_follow_player_order_not_standings():
+    js = (STATIC / "whatif.js").read_text()
+    grid = js[js.index("#wiGrid thead"):]
+    assert "D.players.forEach" in grid          # header + cells iterate pipeline order
+    assert "rows.forEach(function (r) { th(" not in js  # never the score-sorted array
+
+def test_page_minus_library_has_no_site_drag_code(tmp_path, season, group):
+    html = _render(tmp_path, season, group)
+    start = html.index("/*! Sortable 1.15.6")
+    end = html.index("</script>", start)
+    rest = html[:start] + html[end:]
+    assert "new Sortable(" in rest
+    for s in ("dragstart", "dragover", "touchstart", "elementFromPoint"):
+        assert s not in rest, s
+
 def test_vendored_library_is_minified_1_15_6_without_urls():
     lib = (STATIC / "sortable.min.js").read_text()
     assert lib.startswith("/*! Sortable 1.15.6 - MIT | (c) 2019 Lebedev Konstantin */")

@@ -334,6 +334,8 @@ rebuild §13.1 permits.
 - The vendored file's licence banner MUST keep the copyright and licence line and MUST
   contain no URL, so the existing no-external-origins test continues to guard the page
   without an exception.
+- The library's own source is exempt from criterion 11's string check; the site's script
+  is not.
 
 ### 5.2 Behaviour
 
@@ -396,9 +398,12 @@ monkeypatched, as the existing build tests do.
 10. The odds chart SVG has `viewBox="0 0 920 360"`, the mockup's margins, at most 8 x
     labels including the latest date, a broken path at every gap, and direct labels for
     the top four players.
-11. `whatif.html` contains `new Sortable(` and does not contain `dragstart`, `dragover`,
-    `touchstart`, or `elementFromPoint`; the vendored library is the minified 1.15.6
-    build.
+11. `whatif.html` contains `new Sortable(`, and the site's own What If? script contains
+    none of `dragstart`, `dragover`, `touchstart`, or `elementFromPoint` — checked both
+    on `smw/render/static/whatif.js` and on the rendered page with the vendored
+    library's `<script>` block removed (the minified SortableJS build necessarily
+    contains those strings, and Section 5.1 requires it to be inlined verbatim); the
+    vendored library is the minified 1.15.6 build.
 12. The existing self-containment tests (no external origins, no `fetch(`, no
     `XMLHttpRequest`) pass on every page of every group unchanged, including the page
     carrying the vendored library.
