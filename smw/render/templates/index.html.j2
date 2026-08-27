@@ -1,0 +1,124 @@
+{% extends "base.html.j2" %}
+{% block content %}
+{% if view.notice %}<div class="notice">{{ view.notice }}</div>{% endif %}
+
+<h2>{{ view.heading }}</h2>
+<div class="table-scroll">
+<table>
+<thead>
+<tr><th>#</th><th>Film</th>
+  <th class="num">{% if view.mode == "live" %}Projected (in-window){% else %}Gross to date{% endif %}</th>
+  {% for col in view.columns %}<th class="num">{{ col.username }}</th>{% endfor %}
+</tr>
+</thead>
+<tbody>
+{% for row in view.rows %}
+<tr>
+  <td>{{ row.rank }}</td><td>{{ row.title }}</td>
+  <td class="num">{{ row.gross | money }}</td>
+  {% for cell in row.cells %}
+  <td class="num {% if cell.kind == "pts" %}cell-pos{% elif cell.kind == "zero" %}cell-zero{% else %}cell-none{% endif %}">
+    {%- if cell.kind == "pts" %}{{ cell.pts }}{% elif cell.kind == "zero" %}0{% else %}—{% endif -%}
+  </td>
+  {% endfor %}
+</tr>
+{% if view.divider_after and loop.index == view.divider_after %}
+<tr class="divider-row"><td colspan="{{ 3 + view.columns | length }}">Outside the top 10</td></tr>
+{% endif %}
+{% endfor %}
+</tbody>
+<tfoot>
+<tr><td colspan="3">{% if view.mode == "live" %}Projected pts{% else %}Current pts{% endif %}</td>
+  {% for col in view.columns %}<td class="num"><strong>{{ col.footer_pts }}</strong></td>{% endfor %}
+</tr>
+{% if view.mode == "live" %}
+<tr><td colspan="3">Win odds</td>
+  {% for col in view.columns %}<td class="num">{{ col.win_pct }}%</td>{% endfor %}
+</tr>
+{% endif %}
+</tfoot>
+</table>
+</div>
+
+<h2>All Players' Lists</h2>
+{% if view.list_rows %}
+<div class="table-scroll">
+<table>
+<thead><tr><th></th>{% for col in view.columns %}<th>{{ col.username }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for label, picks in view.list_rows %}
+{% if loop.index == 11 %}
+<tr class="divider-row"><td colspan="{{ 1 + view.columns | length }}">Dark Horses</td></tr>
+{% endif %}
+<tr><td>{{ label }}</td>{% for col in view.columns %}<td>{{ picks[col.username] }}</td>{% endfor %}</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endif %}
+
+<h2>Players</h2>
+{% for d in view.details %}
+<details>
+<summary><strong>{{ d.username }}</strong> <span class="stats-line">{{ d.stats_line }}</span></summary>
+<div class="table-scroll">
+<table>
+{% if view.mode == "live" %}
+<thead><tr><th>#</th><th>Movie</th><th class="num">Projected rank</th><th class="num">Diff</th><th class="num">Projected gross</th><th class="num">Pts</th></tr></thead>
+{% else %}
+<thead><tr><th>#</th><th>Movie</th><th class="num">Pts</th></tr></thead>
+{% endif %}
+<tbody>
+{% for row in d.rows + [none] + d.dark_rows %}
+{% if row is none %}
+<tr class="divider-row"><td colspan="{% if view.mode == "live" %}6{% else %}3{% endif %}">Dark Horses</td></tr>
+{% else %}
+<tr>
+  <td>{{ row.label }}</td>
+  <td>{% if row.missing %}<span class="cell-none">{{ row.title }}</span>{% else %}{{ row.title }}{% endif %}</td>
+  {% if view.mode == "live" %}
+  <td class="num">{% if row.projected_rank %}#{{ row.projected_rank }}{% else %}<span class="cell-none">—</span>{% endif %}</td>
+  <td class="num">
+    {%- if row.diff is none %}<span class="cell-none">—</span>
+    {%- elif row.diff > 0 %}<span class="up">▲ {{ row.diff }}</span>
+    {%- elif row.diff < 0 %}<span class="down">▼ {{ -row.diff }}</span>
+    {%- else %}<span class="flat">–</span>{% endif -%}
+  </td>
+  <td class="num">{% if row.gross %}{{ row.gross | money }}{% else %}<span class="cell-none">—</span>{% endif %}</td>
+  {% endif %}
+  <td class="num">{{ row.pts }}</td>
+</tr>
+{% endif %}
+{% endfor %}
+</tbody>
+</table>
+</div>
+</details>
+{% endfor %}
+
+<h2>Films</h2>
+<details>
+<summary>All tracked films ({{ view.films | length }})</summary>
+<div class="table-scroll">
+<table>
+<thead><tr><th>#</th><th>Movie</th><th>Released</th><th>Status</th>
+<th class="num">Projected median (in-window)</th><th class="num">80% range</th>
+<th class="num">Cumulative</th><th>Source</th></tr></thead>
+<tbody>
+{% for f in view.films %}
+<tr>
+  <td>{% if f.rank %}{{ f.rank }}{% else %}<span class="cell-none">—</span>{% endif %}</td>
+  <td>{{ f.title }}</td>
+  <td>{{ f.released }}</td>
+  <td><span class="badge">{{ f.badge }}</span></td>
+  <td class="num">{{ f.median | money }}</td>
+  <td class="num">{{ f.p10 | money }} – {{ f.p90 | money }}</td>
+  <td class="num">{{ f.cumulative | money }}</td>
+  <td class="stats-line">{{ f.source }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</details>
+{% endblock %}

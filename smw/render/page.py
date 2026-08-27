@@ -77,3 +77,8 @@ def write_page(env: Environment, template_name: str, out_dir: Path,
 def render_rules(env: Environment, out_dir: Path, ctx: dict) -> None:
     write_page(env, "rules.html.j2", out_dir, "rules.html",
                {**ctx, "title": "Scoring rules"})
+
+
+def render_leaderboard(env: Environment, out_dir: Path, ctx: dict, view) -> None:
+    write_page(env, "index.html.j2", out_dir, "index.html",
+               {**ctx, "title": "Leaderboard", "wide_shell": True, "view": view})
