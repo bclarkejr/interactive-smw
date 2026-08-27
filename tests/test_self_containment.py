@@ -10,7 +10,7 @@ PAGES = ("index.html", "whatif.html", "scenarios.html", "history.html", "rules.h
 def built_site(tmp_path, monkeypatch):
     monkeypatch.setattr(build, "fetch",
                         lambda year: (FIXTURES / "synthetic_chart.html").read_text())
-    d = tmp_path / "data"
+    d = tmp_path / "data" / "seasons" / "2026"
     (d / "groups").mkdir(parents=True)
     (d / "season.yaml").write_text(
         "year: 2026\nwindow_start: 2026-05-01\nwindow_end: 2026-09-07\n"
@@ -22,8 +22,8 @@ def built_site(tmp_path, monkeypatch):
         " F4, F5, F6, F7, F8, F9, F10]\n"
         "    dark_horses: [D1, D2, Tiny Tail Film]\n")
     out = tmp_path / "out"
-    build.run_build(d, out, date(2026, 8, 15), local=True)
-    return out
+    build.run_build(tmp_path / "data", out, date(2026, 8, 15), local=True)
+    return out / "2026" / "g"
 
 def test_no_external_origin_references(built_site):
     for page in PAGES:
@@ -47,4 +47,6 @@ def test_reproducible_build(built_site, tmp_path, monkeypatch):
     # rebuild with the same data dir the fixture created
     build.run_build(tmp_path / "data", out2, date(2026, 8, 15), local=True)
     for page in PAGES + ("data.json",):
-        assert (built_site / page).read_bytes() == (out2 / page).read_bytes(), page
+        assert (built_site / page).read_bytes() == (out2 / "2026" / "g" / page).read_bytes(), page
+    assert (built_site.parent.parent / "index.html").read_bytes() == \
+        (out2 / "index.html").read_bytes()

@@ -10,7 +10,8 @@ CHART_HTML = (FIXTURES / "synthetic_chart.html").read_text()
 
 @pytest.fixture
 def data_dir(tmp_path):
-    d = tmp_path / "data"
+    # The SEASON directory; run_build gets its grandparent (data/).
+    d = tmp_path / "data" / "seasons" / "2026"
     (d / "groups").mkdir(parents=True)
     (d / "season.yaml").write_text(
         "year: 2026\nwindow_start: 2026-05-01\nwindow_end: 2026-09-07\n"
@@ -28,8 +29,8 @@ def offline_chart(monkeypatch):
 
 def _run(data_dir, tmp_path, today=TODAY, local=True):
     out = tmp_path / "out"
-    build.run_build(data_dir, out, today, local=local)
-    return out
+    build.run_build(data_dir.parent.parent, out, today, local=local)
+    return out / "2026" / "g"
 
 def test_writes_all_pages_and_data_json(data_dir, tmp_path):
     out = _run(data_dir, tmp_path)
@@ -98,7 +99,7 @@ def test_structural_floor_dominates_policy_threshold(data_dir, tmp_path):
 def test_local_run_appends_nothing(data_dir, tmp_path):
     _run(data_dir, tmp_path, local=True)
     assert not (data_dir / "box_office_history.jsonl").exists()
-    assert not (data_dir / "forecast_history.jsonl").exists()
+    assert not (data_dir / "forecast_history" / "g.jsonl").exists()
 
 def test_production_run_appends_box_office_rows(data_dir, tmp_path):
     # §13.5 named gap: a production run appends the expected rows; local appends none.
@@ -110,7 +111,7 @@ def test_production_run_appends_box_office_rows(data_dir, tmp_path):
     assert all(l["date"] == "2026-08-15" for l in lines)
     assert all(l["cumulative_gross"] > 0 for l in lines)
     # degraded run → no forecast history line (the chart gap, §5.6)
-    assert not (data_dir / "forecast_history.jsonl").exists()
+    assert not (data_dir / "forecast_history" / "g.jsonl").exists()
 
 def test_frozen_run_never_fetches(data_dir, tmp_path, monkeypatch):
     def boom(year):
@@ -161,7 +162,7 @@ def test_production_history_page_includes_current_refresh(data_dir, tmp_path):
         (data_dir / "season.yaml").read_text().replace(
             "min_projections_for_forecast: 25", "min_projections_for_forecast: 11"))
     out = _run(data_dir, tmp_path, local=False)
-    assert (data_dir / "forecast_history.jsonl").exists()
+    assert (data_dir / "forecast_history" / "g.jsonl").exists()
     html = (out / "history.html").read_text()
     assert "No forecast history yet" not in html
     assert "2026-08-15" in html
@@ -231,3 +232,67 @@ def test_forecast_history_rows_validated(tmp_path, line, needle):
     p.write_text(line + "\n")
     with pytest.raises(ValueError, match=needle):
         build._load_forecast_rows(p)
+
+def _add_group(data_dir, gid, name):
+    (data_dir / "groups" / f"{gid}.yaml").write_text(
+        f"group_id: {gid}\ndisplay_name: {name}\nplayers:\n"
+        "  bob:\n"
+        "    ranked: [Mid June Comedy, Big Summer Film, Labor Day Opener, F4, F5, F6, F7, F8, F9, F10]\n"
+        "    dark_horses: [D1, D2, Tiny Tail Film]\n")
+
+def test_two_groups_get_their_own_directories(data_dir, tmp_path):
+    _add_group(data_dir, "h", "Second League")
+    out = _run(data_dir, tmp_path).parent
+    for gid, name in (("g", "G"), ("h", "Second League")):
+        for f in ("index.html", "whatif.html", "scenarios.html", "history.html",
+                  "rules.html", "data.json"):
+            assert (out / gid / f).exists(), f"{gid}/{f}"
+        assert name in (out / gid / "index.html").read_text().split("</title>")[0]
+    assert not (out / "index.html").exists()  # nothing written to <out>/<year>/ itself
+
+def test_root_redirect_targets_newest_default_group(data_dir, tmp_path):
+    _add_group(data_dir, "a", "Alpha")
+    (data_dir / "season.yaml").write_text(
+        (data_dir / "season.yaml").read_text() + "default_group: g\n")
+    root = _run(data_dir, tmp_path).parent.parent
+    html = (root / "index.html").read_text()
+    assert 'content="0; url=2026/g/index.html"' in html
+    assert 'href="2026/g/index.html"' in html
+    assert "http://" not in html and "https://" not in html
+
+def test_root_redirect_defaults_to_lexically_first_group(data_dir, tmp_path):
+    _add_group(data_dir, "a", "Alpha")
+    root = _run(data_dir, tmp_path).parent.parent
+    assert "url=2026/a/index.html" in (root / "index.html").read_text()
+
+def test_every_season_renders_and_redirect_picks_newest(data_dir, tmp_path):
+    old = data_dir.parent / "2025"
+    (old / "groups").mkdir(parents=True)
+    (old / "season.yaml").write_text(
+        "year: 2025\nwindow_start: 2025-05-02\nwindow_end: 2025-09-01\nseed: 7\n"
+        "monte_carlo_trials: 500\n")
+    (old / "groups" / "g.yaml").write_text((data_dir / "groups" / "g.yaml").read_text())
+    (old / "box_office_history.jsonl").write_text(  # a Final season carries its frozen chart
+        '{"movie": "Big Summer Film", "date": "2025-09-02", "cumulative_gross": 100.0}\n')
+    out = _run(data_dir, tmp_path).parent.parent
+    assert (out / "2025" / "g" / "index.html").exists()
+    assert "url=2026/g/index.html" in (out / "index.html").read_text()
+
+def test_missing_seasons_dir_is_a_build_error(tmp_path):
+    (tmp_path / "data").mkdir()
+    with pytest.raises(ValueError, match="seasons"):
+        build.run_build(tmp_path / "data", tmp_path / "out", TODAY, local=True)
+
+def test_production_run_appends_forecast_per_group_and_box_office_once(data_dir, tmp_path):
+    _add_group(data_dir, "h", "H")
+    _add_estimates(data_dir, n=8)
+    (data_dir / "season.yaml").write_text(
+        (data_dir / "season.yaml").read_text().replace(
+            "min_projections_for_forecast: 25", "min_projections_for_forecast: 11"))
+    _run(data_dir, tmp_path, local=False)
+    for gid in ("g", "h"):
+        rows = (data_dir / "forecast_history" / f"{gid}.jsonl").read_text().splitlines()
+        assert len(rows) == 1  # one player per group, one refresh
+    assert not (data_dir / "forecast_history.jsonl").exists()
+    bo = (data_dir / "box_office_history.jsonl").read_text().splitlines()
+    assert len(bo) == len({json.loads(l)["movie"] for l in bo})  # once per season, not per group

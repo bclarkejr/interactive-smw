@@ -79,6 +79,14 @@ def write_page(env: Environment, template_name: str, out_dir: Path,
     (Path(out_dir) / filename).write_text(html)
 
 
+def render_redirect(env: Environment, out_dir: Path, target: str) -> None:
+    write_page(env, "redirect.html.j2", out_dir, "index.html", {
+        "css": Markup((STATIC / "site.css").read_text()),
+        "theme_js": Markup((STATIC / "theme.js").read_text()),
+        "target": target,
+    })
+
+
 def render_rules(env: Environment, out_dir: Path, ctx: dict) -> None:
     write_page(env, "rules.html.j2", out_dir, "rules.html",
                {**ctx, "title": "Scoring rules"})
