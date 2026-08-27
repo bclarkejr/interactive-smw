@@ -5,7 +5,7 @@ from pathlib import Path
 
 from smw.catalog.normalize import (apply_chart_aliases, build_films, canonical,
                                    canonical_group, load_overrides, load_preopening)
-from smw.catalog.resolve import load_history, resolve_grosses
+from smw.catalog.resolve import load_history, resolve_grosses, with_snapshot
 from smw.config.groups import Group, load_group
 from smw.config.season import Season, load_season
 from smw.ingest.boxoffice import chart_floor, fetch_chart, parse_chart, windowed
@@ -110,7 +110,9 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
     picked = {canonical(t, overrides)
               for g in groups for p in g.players.values()
               for t in p.ranked + p.dark_horses}
-    catalog = build_catalog(season, films, history, picked, overrides, today)
+    # Today's snapshot joins the series in memory (persisted only for production runs).
+    catalog = build_catalog(season, films, with_snapshot(history, grosses, today),
+                            picked, overrides, today)
     for w in catalog.warnings:
         print(f"warning: {w}")
 
@@ -151,9 +153,13 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
         if not local and sim is not None:
             # Appended before the history page renders so the page includes this refresh.
             append_forecast_history(data_dir / "forecast_history.jsonl", sim, today)
+        # Date axis = every production refresh (box-office history), so a degraded
+        # refresh shows as a gap in each line rather than vanishing (§12.4).
+        refresh_dates = {d.isoformat() for obs in load_history(history_path).values()
+                         for d, _ in obs}
         render_history(env, out_dir, {**ctx, "active": "history"},
                        build_history_data(_load_forecast_rows(
-                           data_dir / "forecast_history.jsonl")))
+                           data_dir / "forecast_history.jsonl"), refresh_dates))
         render_rules(env, out_dir, {**ctx, "active": "rules"})
         (out_dir / "data.json").write_text(json.dumps(
             build_data_json(season, group, catalog, sim, current_points,

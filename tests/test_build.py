@@ -165,3 +165,30 @@ def test_production_history_page_includes_current_refresh(data_dir, tmp_path):
     html = (out / "history.html").read_text()
     assert "No forecast history yet" not in html
     assert "2026-08-15" in html
+
+def test_projection_uses_todays_snapshot_not_just_persisted_history(data_dir, tmp_path):
+    # Observed-decay blend needs ≥3 snapshots; two persisted + today's = 3.
+    hist = [{"movie": "Big Summer Film", "date": "2026-08-01", "cumulative_gross": 100e6},
+            {"movie": "Big Summer Film", "date": "2026-08-08", "cumulative_gross": 200e6}]
+    (data_dir / "box_office_history.jsonl").write_text(
+        "\n".join(json.dumps(r) for r in hist) + "\n")
+    d = json.loads((_run(data_dir, tmp_path) / "data.json").read_text())
+    big = next(p for p in d["projections"] if p["movie_title"] == "Big Summer Film")
+    (data_dir / "box_office_history.jsonl").unlink()
+    d0 = json.loads((_run(data_dir, tmp_path) / "data.json").read_text())
+    big0 = next(p for p in d0["projections"] if p["movie_title"] == "Big Summer Film")
+    assert big["median_in_window_gross"] != big0["median_in_window_gross"]
+
+def test_degraded_production_refresh_shows_as_history_gap(data_dir, tmp_path):
+    # Refresh 1 (live) appends a forecast row; refresh 2 (degraded) appends only
+    # box-office rows; the history page must still list refresh 2's date as a gap.
+    _add_estimates(data_dir, n=8)
+    season = (data_dir / "season.yaml").read_text()
+    (data_dir / "season.yaml").write_text(
+        season.replace("min_projections_for_forecast: 25", "min_projections_for_forecast: 11"))
+    _run(data_dir, tmp_path, today=date(2026, 8, 8), local=False)
+    (data_dir / "season.yaml").write_text(season)  # back to 25 → degraded
+    out = _run(data_dir, tmp_path, today=date(2026, 8, 15), local=False)
+    html = (out / "history.html").read_text()
+    assert "2026-08-08" in html and "2026-08-15" in html
+    assert 'class="line series-0" d="M' in html and html.count("<circle") == 1

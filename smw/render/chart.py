@@ -11,10 +11,12 @@ DIRECT_LABELS = 4
 LABEL_MIN_GAP = 14
 
 
-def build_history_data(rows: list[dict]) -> "dict | None":
+def build_history_data(rows: list[dict], refresh_dates=()) -> "dict | None":
+    """`refresh_dates`: extra axis dates (production refreshes that produced no forecast);
+    they render as gaps, never interpolated (§12.4)."""
     if not rows:
         return None
-    dates = sorted({r["date"] for r in rows})
+    dates = sorted({r["date"] for r in rows} | set(refresh_dates))
     players = sorted({r["player"] for r in rows})
     values: dict[tuple[str, str], float] = {}
     for r in rows:  # file order: later run supersedes a shared date

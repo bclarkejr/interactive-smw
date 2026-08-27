@@ -164,10 +164,14 @@ def canonical_group(group: Group, overrides: dict[str, Override]) -> Group:
     """Alias application point 2 (§6.5) for rosters: every pick is resolved to its
     canonical title so scoring compares like with like."""
     from dataclasses import replace as _replace  # local: keeps the module header stable
-    players = {
-        u: _replace(p,
-                    ranked=tuple(canonical(t, overrides) for t in p.ranked),
-                    dark_horses=tuple(canonical(t, overrides) for t in p.dark_horses))
-        for u, p in group.players.items()
-    }
+    players = {}
+    for u, p in group.players.items():
+        ranked = tuple(canonical(t, overrides) for t in p.ranked)
+        dark = tuple(canonical(t, overrides) for t in p.dark_horses)
+        if len(set(ranked + dark)) != 13:
+            dupes = sorted({t for t in ranked + dark if (ranked + dark).count(t) > 1})
+            raise ValueError(
+                f"{u}: alias_of collapses picks onto the same film: {', '.join(dupes)} "
+                "— all 13 titles must stay distinct after alias resolution")
+        players[u] = _replace(p, ranked=ranked, dark_horses=dark)
     return _replace(group, players=players)

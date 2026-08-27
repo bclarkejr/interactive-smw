@@ -56,3 +56,11 @@ def test_hostile_player_name_is_escaped_in_svg():
     svg = render_chart_svg(build_history_data(rows))
     assert "<script>" not in svg
     assert "&lt;script&gt;" in svg
+
+def test_degraded_refresh_dates_appear_as_gaps():
+    rows = [{"date": "2026-06-01", "player": "a", "win_prob": 0.5},
+            {"date": "2026-06-15", "player": "a", "win_prob": 0.6}]
+    d = build_history_data(rows, refresh_dates={"2026-06-08"})
+    assert d["dates"] == ["2026-06-01", "2026-06-08", "2026-06-15"]
+    assert d["series"][0]["values"] == [0.5, None, 0.6]
+    assert build_history_data([], refresh_dates={"2026-06-08"}) is None

@@ -84,3 +84,10 @@ def test_roster_variant_resolves_to_canonical_gross(season):
     )
     assert "Variant Spelling" not in films
     assert films["Canonical"].cumulative_gross == 42.0
+
+def test_alias_collapsing_two_picks_is_rejected():
+    from smw.catalog.normalize import canonical_group
+    g = _group("Variant", "Canonical")
+    with pytest.raises(ValueError, match="u.*Canonical"):
+        canonical_group(g, {"Variant": Override(alias_of="Canonical")})
+    assert canonical_group(g, {}) == g

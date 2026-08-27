@@ -42,3 +42,16 @@ the script's stdout/stderr to `round-N.log`.
 - After fixes: 160 passed. Real build (`out/`) byte-identical to the round-1 build.
 - Checkpoint commit: see round 2 header.
 
+## Round 2 — 2026-08-26 22:52 EDT
+
+- Reviewed head: `ba071e4` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking) · raw: `round-2.json`
+- Deterministic checks before review: 160 passed.
+
+| # | Sev | File | Finding (verbatim summary) | Verdict | Action |
+|---|-----|------|----------------------------|---------|--------|
+| 1 | med | `smw/render/build.py:113` | Projections built from persisted history only; today's chart snapshot joins the series only after rendering, so the observed-decay blend lags one refresh and local builds never see it | **Valid** | New `resolve.with_snapshot()` folds today's resolved grosses into an in-memory series (same-date max, sorted); `run_build` passes that to `build_catalog`. Persistence unchanged (production only). Tests: `test_with_snapshot_merges_today_by_max`, `test_projection_uses_todays_snapshot_not_just_persisted_history`. |
+| 2 | med | `smw/render/chart.py:17` | Date axis derived from forecast rows only, so a degraded production refresh vanishes and lines connect across it instead of showing the §12.4 gap | **Valid** | `build_history_data(rows, refresh_dates)` unions production refresh dates (from box-office history) into the axis; missing forecasts map to `None` → path break. Tests: `test_degraded_refresh_dates_appear_as_gaps`, `test_degraded_production_refresh_shows_as_history_gap`. |
+| 3 | med | `smw/catalog/normalize.py:167` | `alias_of` can collapse two distinct roster titles onto one film after load-time validation, double-counting it | **Valid** | `canonical_group` re-validates the 13-distinct rule after resolution and raises naming the player and the collision. Test: `test_alias_collapsing_two_picks_is_rejected`. |
+
+- After fixes: 165 passed. Real build (`out/`) unchanged.
+

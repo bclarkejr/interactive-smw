@@ -72,3 +72,13 @@ def test_chart_usable_on_window_end_plus_one(season):
     _, _, usable = resolve_grosses(season, {}, [_row("A", 1.0)],
                                    floor=1.0, today=date(2026, 9, 8))
     assert usable
+
+def test_with_snapshot_merges_today_by_max():
+    from smw.catalog.resolve import with_snapshot
+    h = {"A": [(date(2026, 6, 1), 100.0), (date(2026, 6, 8), 150.0)],
+         "Old": [(date(2026, 6, 1), 5.0)]}
+    out = with_snapshot(h, {"A": 140.0, "New": 20.0, "Zero": 0.0}, date(2026, 6, 8))
+    assert out["A"] == [(date(2026, 6, 1), 100.0), (date(2026, 6, 8), 150.0)]  # max wins
+    assert out["New"] == [(date(2026, 6, 8), 20.0)]
+    assert out["Old"] == h["Old"]
+    assert "Zero" not in out
