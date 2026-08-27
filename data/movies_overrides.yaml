@@ -1,0 +1,8 @@
+# Film corrections (spec §5.4). Keys per entry: category, alias_of, release_date, status.
+# Classify EVERY picked film explicitly, including genuinely `wide` ones (§8).
+"Toy Story 5":
+  category: animated_family
+"Minions & Monsters":
+  category: animated_family
+"Moana":
+  category: animated_family

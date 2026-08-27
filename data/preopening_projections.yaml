@@ -1,0 +1,10 @@
+# Pre-release analyst estimates (spec §5.3). An entry is used only when
+# opening_weekend_estimate, total_domestic_estimate, and confidence are all present.
+"Toy Story 5":
+  release_date: 2026-06-19
+  opening_weekend_estimate: 168_000_000
+  total_domestic_estimate: 559_000_000
+  confidence: med
+  source: "Box Office Theory"
+  as_of: 2026-04-23
+  notes: ""
