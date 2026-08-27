@@ -38,7 +38,8 @@
         if (!sib) return;
         list.insertBefore(li, pair[1] < 0 ? sib : sib.nextElementSibling);
         rescore();
-        b.focus();  // the <li> moved, not rebuilt: repeated presses keep walking the film
+        // keep focus on the film: this arrow if still enabled, else its sibling
+        (b.disabled ? (pair[1] < 0 ? mv.lastElementChild : mv.firstElementChild) : b).focus();
       });
       mv.appendChild(b);
     });
