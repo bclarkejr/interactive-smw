@@ -22,3 +22,5 @@ include = ["smw*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]  # py3.12.13 skips the setuptools "hidden" editable .pth
+
