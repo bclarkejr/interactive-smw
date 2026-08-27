@@ -59,6 +59,18 @@ def test_no_external_references(tmp_path, season, group):
     html = _render(tmp_path, season, group)
     assert "http://" not in html and "https://" not in html
 
+def test_leaderboard_structure_matches_mockup(tmp_path, season, group):
+    html = _render(tmp_path, season, group)
+    for s in ("<h2>🏆 Projected Standings</h2>", "<h2>📋 All Players' Lists</h2>",
+              "<h2>👤 Per-Player Detail</h2>", "<h2>🎞️ Films</h2>",
+              'id="matrix"', 'id="lists"', "Rows: top 15 films by projected median",
+              "Show all tracked films", "projections, ranges, provenance",
+              '<tr class="odds">', '<tr class="divider">', 'class="scroller" style="border:none"',
+              '<th class="t">Slot</th>', "Dark horses", '<th class="t">Movie</th>'):
+        assert s in html, s
+    for gone in (".num", "table-scroll", "cell-pos", "divider-row", "stats-line"):
+        assert gone not in html.split("</style>")[1], gone
+
 def test_leaderboard_snapshot(tmp_path, season, group):
     """Byte-exact snapshot (§13.5). REGENERATION RITUAL: delete
     tests/fixtures/snapshot_index.html, run this test once (it rewrites the fixture

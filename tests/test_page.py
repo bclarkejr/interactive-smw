@@ -19,11 +19,11 @@ def test_json_embed_escapes_script_breakout():
     assert "</script" not in out
     assert "\\u003c/script" in out
 
-def test_fmt_money():
-    assert fmt_money(1_234_000_000) == "$1.2B"
+def test_fmt_money_matches_mockup():
+    assert fmt_money(1_020_000_000) == "$1.02B"
+    assert fmt_money(498_000_000) == "$498.0M"
     assert fmt_money(310_491_022) == "$310.5M"
-    assert fmt_money(468_000) == "$468K"
-    assert fmt_money(0) == "$0"
+    assert fmt_money(468_000) == "$0.5M"
 
 def test_theme_script_in_head_before_body(tmp_path, season, group):
     html = _render_rules(tmp_path, season, group)
