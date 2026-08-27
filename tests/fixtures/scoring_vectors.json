@@ -1,0 +1,37 @@
+[
+  {
+    "name": "perfect season",
+    "ranked": ["A","B","C","D","E","F","G","H","I","J"],
+    "dark_horses": ["X","Y","Z"],
+    "finish": ["A","B","C","D","E","F","G","H","I","J"],
+    "expected": 106
+  },
+  {
+    "name": "endpoints plus dark horse",
+    "ranked": ["A","B","C","D","E","F","G","H","I","J"],
+    "dark_horses": ["X","Y","Z"],
+    "finish": ["A","Q","R","S","T","U","V","W","X","J"],
+    "expected": 27
+  },
+  {
+    "name": "every distance rung",
+    "ranked": ["A","B","C","D","E","F","G","H","I","J"],
+    "dark_horses": ["X","Y","Z"],
+    "finish": ["B","A","E","C","J","D","S","T","U","V"],
+    "expected": 34
+  },
+  {
+    "name": "partial finish early season",
+    "ranked": ["A","B","C","D","E","F","G","H","I","J"],
+    "dark_horses": ["X","Y","Z"],
+    "finish": ["C","X","A"],
+    "expected": 11
+  },
+  {
+    "name": "nothing hits",
+    "ranked": ["A","B","C","D","E","F","G","H","I","J"],
+    "dark_horses": ["X","Y","Z"],
+    "finish": ["Q","R","S","T","U","V","W","N","O","P"],
+    "expected": 0
+  }
+]
