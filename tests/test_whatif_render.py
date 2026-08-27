@@ -1,4 +1,5 @@
 from datetime import date
+from pathlib import Path
 from smw.model.simulate import simulate
 from smw.render.page import base_context, build_whatif_data, make_env, render_whatif
 from tests.test_views import _catalog
@@ -16,19 +17,38 @@ def _render(tmp_path, season, group, locked=False):
         render_whatif(env, tmp_path, ctx, data, None)
     return (tmp_path / "whatif.html").read_text()
 
+STATIC = Path(__file__).parent.parent / "smw" / "render" / "static"
+
 def test_locked_state_notice(tmp_path, season, group):
     html = _render(tmp_path, season, group, locked=True)
     assert "unlocks once the forecast is live" in html
     assert "only 3 films" in html
-    assert 'id="film-list"' not in html  # no sandbox markup (the CSS still mentions it)
+    assert 'id="wiList"' not in html and "new Sortable(" not in html
 
 def test_embedded_data_and_scripts(tmp_path, season, group):
     html = _render(tmp_path, season, group)
     assert "window.WHATIF" in html
     assert "rankedPickPoints" in html   # scoring.js inlined
-    assert "aria-live" in html          # polite live region
-    assert "If it ends this way" in html
-    assert "can't be dragged in and score 0" in html
+    assert "new Sortable(" in html and "Sortable 1.15.6 - MIT" in html
+    assert 'aria-live="polite"' in html
+    for s in ("<h2>🎬 What If? sandbox</h2>", "player's score recompute",
+              "If it ends this way…", "↺ Reset to projected order",
+              "Films outside the projected top 15 can't be dragged in and score 0.",
+              "<h2>Points by film, for this order</h2>", 'id="wiStandings"', 'id="wiGrid"',
+              '<th>Place</th><th class="t">Player</th><th>Pts</th><th>vs proj.</th>'):
+        assert s in html, s
+
+def test_site_drag_code_is_gone():
+    js = (STATIC / "whatif.js").read_text()
+    for s in ("dragstart", "dragover", "touchstart", "elementFromPoint", "draggable"):
+        assert s not in js, s
+    assert "new Sortable(" in js and "ghostClass" in js and "delayOnTouchOnly" in js
+
+def test_vendored_library_is_minified_1_15_6_without_urls():
+    lib = (STATIC / "sortable.min.js").read_text()
+    assert lib.startswith("/*! Sortable 1.15.6 - MIT */")
+    assert "://" not in lib and "</script" not in lib
+    assert lib.count("\n") < 5   # minified
 
 def test_data_shape(season, group):
     cat = _catalog()

@@ -150,6 +150,7 @@ def render_whatif(env: Environment, out_dir: Path, ctx: dict,
                   data: dict | None, reason: str | None) -> None:
     write_page(env, "whatif.html.j2", out_dir, "whatif.html", {
         **ctx, "title": "What If?", "data": data, "reason": reason,
+        "sortable_js": Markup((STATIC / "sortable.min.js").read_text()),
         "scoring_js": Markup((STATIC / "scoring.js").read_text()),
         "whatif_js": Markup((STATIC / "whatif.js").read_text()),
     })

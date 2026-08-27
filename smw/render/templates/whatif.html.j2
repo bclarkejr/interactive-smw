@@ -4,32 +4,27 @@
 <div class="locked">Not enough films have projections yet to simulate win
 probabilities — {{ reason }}. This view unlocks once the forecast is live.</div>
 {% else %}
-<h2>🎬 What If?</h2>
-<p class="stats-line">Drag films into any finish order — or use the ▲ ▼ buttons —
-and watch every score recompute.</p>
-<div class="two-col">
+<h2>🎬 What If? sandbox</h2>
+<p class="sub">Drag the films into any finish order — or use the ▲▼ buttons — and watch every
+player's score recompute.</p>
+<div class="wi">
   <div>
-    <ol id="film-list"></ol>
-    <button type="button" id="reset-order">Reset to projected order</button>
-    <p class="stats-line">Films outside the projected top {{ data.films | length }}
-    can't be dragged in and score 0.</p>
+    <ol class="wi-list" id="wiList"></ol>
+    <p class="small">Films outside the projected top {{ data.films | length }} can't be dragged in and score 0.</p>
   </div>
-  <div class="standings" aria-live="polite">
+  <div class="wi-panel">
     <h3>If it ends this way…</h3>
-    <table>
-      <thead><tr><th>#</th><th>Player</th><th class="num">Pts</th><th class="num">Δ</th></tr></thead>
-      <tbody id="standings-body"></tbody>
-    </table>
+    <div aria-live="polite"><table id="wiStandings">
+      <thead><tr><th>Place</th><th class="t">Player</th><th>Pts</th><th>vs proj.</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <button id="wiReset" type="button">↺ Reset to projected order</button>
   </div>
 </div>
-<h3>Points by film</h3>
-<div class="table-scroll">
-<table>
-  <thead><tr id="points-grid-head"></tr></thead>
-  <tbody id="points-grid-body"></tbody>
-</table>
-</div>
+<h2>Points by film, for this order</h2>
+<div class="scroller"><table id="wiGrid"><thead><tr></tr></thead><tbody></tbody></table></div>
 <script>window.WHATIF = {{ data | json_embed }};</script>
+<script>{{ sortable_js }}</script>
 <script>{{ scoring_js }}</script>
 <script>{{ whatif_js }}</script>
 {% endif %}
