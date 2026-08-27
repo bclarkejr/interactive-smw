@@ -64,7 +64,7 @@ fi
 HEAD_SHA="$(git rev-parse HEAD)"
 [ "$(cat "$STATE_DIR/$BRANCH_KEY.approved-sha" 2>/dev/null)" = "$HEAD_SHA" ] && exit 0
 
-if [ "$ROUNDS" -ge 3 ]; then
+if [ "$ROUNDS" -ge 10 ]; then
   mkdir -p .codex/arbitration
   # Stamp the commit the findings belong to, and leave `decision` empty for
   # the human — codex-review-resolve.sh accept requires both to be filled in
@@ -77,7 +77,7 @@ if [ "$ROUNDS" -ge 3 ]; then
   fi
   touch "$STATE_DIR/$KEY.unresolved"
   cat <<JSON
-{"continue": false, "stopReason": "Cross-review cap (3 rounds) reached WITHOUT approval. Unresolved findings saved to .codex/arbitration/$BRANCH_KEY.json — fill in its \"decision\" field, commit it, then run scripts/codex-review-resolve.sh accept (or retry after fixing the findings)."}
+{"continue": false, "stopReason": "Cross-review cap (10 rounds) reached WITHOUT approval. Unresolved findings saved to .codex/arbitration/$BRANCH_KEY.json — fill in its \"decision\" field, commit it, then run scripts/codex-review-resolve.sh accept (or retry after fixing the findings)."}
 JSON
   exit 0                                          # structured stop: control returns to the human, visibly
 fi

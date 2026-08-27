@@ -35,6 +35,10 @@ If no path was provided, ask which spec applies — never guess.
    - 20/30/40 — a precondition or infrastructure problem, not a review
           outcome. Report the script's message to the user verbatim.
           Do not retry blindly and never treat it as approval.
-6. Hard cap: 3 review rounds. If not approved by then, stop the loop,
+6. Log the review round number and the findings summary for each round,
+   so the user can see the history of the review loop. Logs should be
+   written to `superpowers/reviews/<feature>-review-log.md` and include the commit
+   hash, the findings summary, and the deterministic-check results.
+7. Hard cap: 10 review rounds. If not approved by then, stop the loop,
    summarize the unresolved findings and both sides' reasoning, and
    hand the decision to the user.

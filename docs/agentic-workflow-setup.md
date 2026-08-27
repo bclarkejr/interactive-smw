@@ -14,7 +14,7 @@ you're copying it elsewhere.
 | `.codex/review-rubric.md` | The reviewer's contract: what to evaluate, severity definitions, what blocks, and the instruction to treat repo contents as untrusted data. |
 | `.codex/review.schema.json` | JSON Schema for the review verdict. Passed to `codex exec --output-schema`, so the reviewer can only answer in a parseable shape. |
 | `scripts/codex-review.sh` | The single entry point. Checks preconditions, invokes `codex exec`, validates the JSON, maps the result to an exit code: 0 approved, 10 changes requested, 20 invalid output, 30 reviewer failure, 40 precondition failure. |
-| `scripts/codex-review-gate.sh` | Optional Claude Code Stop hook. Wraps the same script, tracks round counts, blocks with exit 2, escalates to `.codex/arbitration/` at the 3-round cap. Not registered — see decision 4. |
+| `scripts/codex-review-gate.sh` | Optional Claude Code Stop hook. Wraps the same script, tracks round counts, blocks with exit 2, escalates to `.codex/arbitration/` at the 10-round cap. Not registered — see decision 4. |
 | `scripts/codex-review-resolve.sh` | Recovery after the cap: `retry` restarts the loop at round zero, `accept` releases the gate on the strength of a committed arbitration decision. |
 | `.claude/skills/cross-review/SKILL.md` | The `/cross-review <spec>` skill. Records the active spec, runs checks, checkpoints, calls the script, and drives the fix loop on exit code 10. |
 | `README.md` | Repo orientation: the two purposes, where the spec/plan/workflow docs live, quick start. |
@@ -31,7 +31,7 @@ you're copying it elsewhere.
             └─ jq validates result.json
             └─ exit code 0 / 10 / 20 / 30 / 40
       └─ skill branches on the exit code; on 10 it fixes findings,
-         re-checkpoints, and re-runs (3 rounds max)
+         re-checkpoints, and re-runs (10 rounds max)
 ```
 
 The optional Stop hook wraps the *same* `codex-review.sh`, so a review behaves
@@ -140,8 +140,9 @@ lowered* them. We're deliberately keeping the guide's direction for consistency,
 should be evaluated per-branch after a few real reviews — the setup makes flipping it a
 one-variable change.
 
-The 3-round cap is within community norms (reported practice is 3–5 rounds before
-escalating to a human).
+The 10-round cap exceeds community norms (reported practice is 3–5 rounds before
+escalating to a human). However, we're experimenting with the workflow and want to
+see how an excessive review might go.
 
 ### 7. Schema note: `additionalProperties: false` everywhere
 
@@ -249,7 +250,7 @@ file to that path, and exits 0 (or nonzero, to simulate an infrastructure failur
 With the stub in place you can drive every branch of `codex-review.sh` and the gate
 deterministically and for free: valid approval, blocking finding, malformed output,
 reviewer failure, clean/empty diff, dirty tree, bad spec path, missing base ref, the
-three-round cap, arbitration re-entry, both recovery modes, and concurrency across
+ten-round cap, arbitration re-entry, both recovery modes, and concurrency across
 branches. Only the "deliberately flawed code" case needs the real Codex.
 
 **Results (2026-08-26, fake `codex` stub, scratch clone, `REVIEW_BASE=main`) — 25/25 PASS.**
@@ -270,7 +271,7 @@ Case Z below additionally used the **real** Codex.
 | G | spec missing / outside `superpowers/specs/` | 40 | 40 (both) | PASS |
 | H | bogus `REVIEW_BASE` | 40 | 40, "base ref not found" | PASS |
 | I | gate, no active spec | 0 | 0, silent | PASS |
-| J | gate ×3 changes_requested, then cap | 2,2,2 then `{"continue": false}` | as expected; `.codex/arbitration/<branch>.json` + `.unresolved` created | PASS |
+| J | gate ×10 changes_requested, then cap | 2,2,2,2,2,2,2,2,2,2 then `{"continue": false}` | as expected; `.codex/arbitration/<branch>.json` + `.unresolved` created | PASS |
 | K | re-entry after cap | stop again, file untouched | arbitration-pending stop; `git diff` empty | PASS |
 | L | `resolve retry` → approved gate | state cleared, 0 | cleared, 0 | PASS |
 | M | cap → `resolve accept` → gate | 0, codex not invoked | 0, stub never ran | PASS |

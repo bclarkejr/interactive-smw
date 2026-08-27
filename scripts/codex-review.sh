@@ -25,7 +25,7 @@ set -uo pipefail
 SPEC_PATH="${1:-}"
 REVIEW_BASE="${REVIEW_BASE:-origin/main}"      # this repo's default branch is main
 MODEL="${CODEX_REVIEW_MODEL:-gpt-5.6-sol}"
-EFFORT="${CODEX_REVIEW_EFFORT:-medium}"
+EFFORT="${CODEX_REVIEW_EFFORT:-high}"
 
 # Small helper so every failure path prints a consistent message to
 # stderr and exits with the documented code, instead of repeating
