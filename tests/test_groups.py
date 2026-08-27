@@ -46,3 +46,12 @@ def test_empty_players_is_legal(tmp_path):
 def test_group_id_must_be_slug(tmp_path, gid):
     with pytest.raises(ValueError, match="group_id"):
         load_group(_write(tmp_path, VALID.replace("group_id: testers", f'group_id: "{gid}"')))
+
+@pytest.mark.parametrize("bad,needle", [
+    (VALID.replace("[F1, F2,", "[1, F2,"), "non-empty string"),
+    (VALID.replace('display_name: "Test League"', "display_name: 7"), "display_name"),
+    (VALID.replace("players:\n  alice:\n", "players:\n  alice: nope\n") .replace("    ranked", "#").replace("    dark", "#"), "alice"),
+])
+def test_bad_types_fail_at_load(tmp_path, bad, needle):
+    with pytest.raises(ValueError, match=needle):
+        load_group(_write(tmp_path, bad))

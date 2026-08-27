@@ -137,3 +137,14 @@ Last reviewed commit: `a015e4b`. No approved SHA exists.
 | 5 | med | `smw/config/groups.py:36` | `group_id` not validated as a directory-safe slug (§3.3) | **Valid** | `[a-z0-9][a-z0-9_-]*` enforced. Test: `test_group_id_must_be_slug`. |
 
 - After fixes: see next round header for test count.
+
+### Loop 3 — Round 2, 07:38 EDT
+
+- Reviewed head: `005073d` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking) · raw: `round-8.json`
+- Deterministic checks before review: 186 passed.
+
+| # | Sev | File | Finding (verbatim summary) | Verdict | Action |
+|---|-----|------|----------------------------|---------|--------|
+| 1 | med | `smw/render/build.py:160` | Persist production refresh dates (4th time) | **Still disputed** (§5 file set, §5.6). | none |
+| 2 | med | `smw/config/groups.py:27` | Roster loader doesn't type-check display_name, players mapping, usernames, or titles | **Valid** | Types validated at load with player-specific errors. Test: `test_bad_types_fail_at_load`. |
+| 3 | med | `smw/catalog/normalize.py:42` | `alias_of` / `release_date` overrides not type-checked | **Valid** | Non-empty string / `date` enforced at load. Test: `test_override_bad_types_fail_at_load`. |

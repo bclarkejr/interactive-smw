@@ -39,6 +39,11 @@ def load_overrides(path: Path) -> dict[str, Override]:
             raise ValueError(f"{path}: '{title}' category must be one of {sorted(_CATEGORIES)}")
         if status is not None and status not in _STATUSES:
             raise ValueError(f"{path}: '{title}' status must be one of {sorted(_STATUSES)}")
+        alias, rel = fields_.get("alias_of"), fields_.get("release_date")
+        if alias is not None and (not isinstance(alias, str) or not alias.strip()):
+            raise ValueError(f"{path}: '{title}' alias_of must be a non-empty string")
+        if rel is not None and not isinstance(rel, date):
+            raise ValueError(f"{path}: '{title}' release_date must be a date (YYYY-MM-DD)")
         out[title] = Override(**fields_)
     # §5.4 allows alias_of alongside other corrections: fold a variant entry's
     # category/release_date/status onto its canonical title so nothing is lost.

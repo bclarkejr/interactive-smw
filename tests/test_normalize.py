@@ -108,3 +108,13 @@ def test_preopening_bad_types_fail_at_load(tmp_path, body, needle):
     p.write_text('"X":\n' + body)
     with pytest.raises(ValueError, match=needle):
         load_preopening(p)
+
+@pytest.mark.parametrize("body,needle", [
+    ('  alias_of: 12\n', "alias_of"),
+    ('  release_date: "July 10"\n', "release_date"),
+])
+def test_override_bad_types_fail_at_load(tmp_path, body, needle):
+    p = tmp_path / "o.yaml"
+    p.write_text('"X":\n' + body)
+    with pytest.raises(ValueError, match=needle):
+        load_overrides(p)
