@@ -122,3 +122,18 @@ Last reviewed commit: `a015e4b`. No approved SHA exists.
   rejects non-date windows, non-integer/non-positive counts, and a `default_wow` missing a
   category or outside (0, 1]. Tests: `test_invalid_values_fail_at_load`, `test_string_dates_rejected`.
   Finding #1 (persist refresh dates) remains disputed on spec grounds.
+
+### Loop 3 — Round 1, 07:33 EDT
+
+- Reviewed head: `24095da` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 5 blocking) · raw: `round-7.json`
+- Deterministic checks before review: 175 passed. (User's uncommitted `scripts/codex-review.sh` effort bump stashed at user's direction; reviews stay at medium.)
+
+| # | Sev | File | Finding (verbatim summary) | Verdict | Action |
+|---|-----|------|----------------------------|---------|--------|
+| 1 | med | `smw/render/build.py:160` | Persist production refresh dates (3rd time) | **Still disputed** on spec grounds (§5 file set, §5.6). User decision pending. | none |
+| 2 | med | `smw/catalog/normalize.py:136` | Override metadata on an `alias_of` variant entry (category/date/status) is discarded because lookups use the canonical title | **Valid** | `load_overrides` folds variant metadata onto the canonical entry; conflicting values raise. Tests: `test_alias_entry_metadata_folds_onto_canonical`, `test_alias_entry_conflicting_metadata_rejected`. |
+| 3 | med | `smw/config/season.py:55` | `matrix_rows < 10` accepted, so the leaderboard/What If finish order would have fewer than ten films | **Valid** | `matrix_rows >= 10` enforced at load. Test: `test_matrix_rows_below_ten_rejected`. |
+| 4 | med | `smw/catalog/normalize.py:96` | Pre-opening entries not type-checked; quoted numbers / string dates fail later | **Valid** | Dates, numbers, strings validated at load with path+title in the error. Test: `test_preopening_bad_types_fail_at_load`. |
+| 5 | med | `smw/config/groups.py:36` | `group_id` not validated as a directory-safe slug (§3.3) | **Valid** | `[a-z0-9][a-z0-9_-]*` enforced. Test: `test_group_id_must_be_slug`. |
+
+- After fixes: see next round header for test count.

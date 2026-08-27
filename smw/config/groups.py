@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -22,6 +23,9 @@ def load_group(path: Path) -> Group:
     raw = yaml.safe_load(Path(path).read_text())
     if not isinstance(raw, dict) or "group_id" not in raw or "display_name" not in raw:
         raise ValueError(f"{path}: group file needs group_id and display_name")
+    gid = raw["group_id"]
+    if not isinstance(gid, str) or not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", gid):
+        raise ValueError(f"{path}: group_id must be a slug of [a-z0-9_-] (used as a directory name)")
     players: dict[str, PlayerPicks] = {}
     for username, picks in (raw.get("players") or {}).items():
         ranked = tuple(picks.get("ranked") or [])

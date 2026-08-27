@@ -50,3 +50,9 @@ def test_string_dates_rejected(tmp_path):
     p.write_text('year: 2026\nwindow_start: "May 1"\nwindow_end: 2026-09-07\nseed: 1\n')
     with pytest.raises(ValueError):
         load_season(p)
+
+def test_matrix_rows_below_ten_rejected(tmp_path):
+    p = tmp_path / "season.yaml"
+    p.write_text(BASE + "matrix_rows: 9\n")
+    with pytest.raises(ValueError, match="matrix_rows"):
+        load_season(p)

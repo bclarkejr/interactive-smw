@@ -40,6 +40,19 @@ def load_overrides(path: Path) -> dict[str, Override]:
         if status is not None and status not in _STATUSES:
             raise ValueError(f"{path}: '{title}' status must be one of {sorted(_STATUSES)}")
         out[title] = Override(**fields_)
+    # §5.4 allows alias_of alongside other corrections: fold a variant entry's
+    # category/release_date/status onto its canonical title so nothing is lost.
+    for title, ov in list(out.items()):
+        if not ov.alias_of:
+            continue
+        target = out.get(ov.alias_of, Override())
+        merged = {}
+        for key in ("category", "release_date", "status"):
+            mine, theirs = getattr(ov, key), getattr(target, key)
+            if mine is not None and theirs is not None and mine != theirs:
+                raise ValueError(f"{path}: '{title}' and '{ov.alias_of}' give conflicting {key}")
+            merged[key] = theirs if theirs is not None else mine
+        out[ov.alias_of] = replace(target, **merged)
     return out
 
 
@@ -93,6 +106,18 @@ def load_preopening(path: Path) -> dict[str, PreopeningEstimate]:
         unknown = set(fields_) - known
         if unknown:
             raise ValueError(f"{path}: '{title}' has unknown key(s): {', '.join(sorted(unknown))}")
+        for key in ("release_date", "as_of"):
+            v = fields_.get(key)
+            if v is not None and not isinstance(v, date):
+                raise ValueError(f"{path}: '{title}' {key} must be a date (YYYY-MM-DD)")
+        for key in ("opening_weekend_estimate", "total_domestic_estimate"):
+            v = fields_.get(key)
+            if v is not None and (isinstance(v, bool) or not isinstance(v, (int, float))):
+                raise ValueError(f"{path}: '{title}' {key} must be a number, not {type(v).__name__}")
+        for key in ("source", "notes"):
+            v = fields_.get(key)
+            if v is not None and not isinstance(v, str):
+                raise ValueError(f"{path}: '{title}' {key} must be a string")
         out[title] = PreopeningEstimate(**fields_)
     return out
 

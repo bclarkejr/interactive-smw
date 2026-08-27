@@ -81,3 +81,30 @@ def test_release_date_override_applied_to_chart_rows_before_window_filter(season
     rows = apply_chart_aliases([ChartRow("Misdated", 9.0, date(2026, 4, 24), False)], ov)
     assert rows[0].release_date == date(2026, 5, 8)
     assert [r.title for r in windowed(rows, season)] == ["Misdated"]
+
+def test_alias_entry_metadata_folds_onto_canonical(tmp_path):
+    p = tmp_path / "o.yaml"
+    p.write_text('"Variant":\n  alias_of: "Canon"\n  category: animated_family\n  release_date: 2026-07-10\n'
+                 '"Canon":\n  status: closed\n')
+    ov = load_overrides(p)
+    assert ov["Canon"] == Override(category="animated_family", release_date=date(2026, 7, 10),
+                                   status="closed")
+    assert ov["Variant"].alias_of == "Canon"
+
+def test_alias_entry_conflicting_metadata_rejected(tmp_path):
+    p = tmp_path / "o.yaml"
+    p.write_text('"Variant":\n  alias_of: "Canon"\n  category: animated_family\n'
+                 '"Canon":\n  category: wide\n')
+    with pytest.raises(ValueError, match="conflicting category"):
+        load_overrides(p)
+
+@pytest.mark.parametrize("body,needle", [
+    ('  opening_weekend_estimate: "168000000"\n', "opening_weekend_estimate"),
+    ('  release_date: "June 19"\n', "release_date"),
+    ('  source: 42\n', "source"),
+])
+def test_preopening_bad_types_fail_at_load(tmp_path, body, needle):
+    p = tmp_path / "pre.yaml"
+    p.write_text('"X":\n' + body)
+    with pytest.raises(ValueError, match=needle):
+        load_preopening(p)

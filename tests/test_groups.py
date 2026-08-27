@@ -41,3 +41,8 @@ def test_duplicate_title_rejected(tmp_path):
 def test_empty_players_is_legal(tmp_path):
     g = load_group(_write(tmp_path, "group_id: t\ndisplay_name: T\nplayers: {}\n"))
     assert g.players == {}
+
+@pytest.mark.parametrize("gid", ["../other", "a/b", "", "Has Space", "UPPER"])
+def test_group_id_must_be_slug(tmp_path, gid):
+    with pytest.raises(ValueError, match="group_id"):
+        load_group(_write(tmp_path, VALID.replace("group_id: testers", f'group_id: "{gid}"')))

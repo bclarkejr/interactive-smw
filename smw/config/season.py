@@ -54,6 +54,8 @@ def _validate(s: Season, where: str) -> None:
         v = getattr(s, name)
         if not isinstance(v, int) or isinstance(v, bool) or v <= 0:
             raise ValueError(f"{where}: {name} must be a positive integer")
+    if s.matrix_rows < 10:
+        raise ValueError(f"{where}: matrix_rows must be at least 10 (the scored top ten)")
     if not isinstance(s.default_wow, dict) or set(s.default_wow) != {"wide", "animated_family"}:
         raise ValueError(f"{where}: default_wow must define exactly wide and animated_family")
     for cat, w in s.default_wow.items():
