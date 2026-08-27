@@ -58,17 +58,24 @@ choice: the weekend is fully reported. Commit the updated `data/` and `out/`.
   final weekend yet; wait and re-run later the same day (same-day re-runs are
   safe — history merges by max).
 - If the deadline is missed there is no recovery in code: final figures must be
-  appended to `data/box_office_history.jsonl` by hand.
+  appended to `data/seasons/2026/box_office_history.jsonl` by hand.
 
 ## Operator files (maintained through the season)
 
-- `data/preopening_projections.yaml` — analyst estimates. The build's
+- `data/seasons/<year>/preopening_projections.yaml` — analyst estimates. The build's
   "no projection" warnings are your to-do list.
-- `data/movies_overrides.yaml` — categories (classify EVERY picked film,
+- `data/seasons/<year>/movies_overrides.yaml` — categories (classify EVERY picked film,
   including genuinely wide ones), title aliases, date/status corrections.
   A Guard C failure prints the exact alias block to add here.
-- `data/groups/*.yaml` — rosters; locked once the window opens.
-- `data/season.yaml` — dates, thresholds, seed.
+- `data/seasons/<year>/groups/*.yaml` — rosters; locked once the window opens.
+- `data/seasons/<year>/season.yaml` — dates, thresholds, seed, `default_group`
+  (the group the root redirect and the year selector land on).
+
+## Site layout
+
+The build renders every season under `data/seasons/` to `out/<year>/<group_id>/`
+(five pages + `data.json` each) and writes `out/index.html`, a redirect to the newest
+season's `default_group`. Pages link relatively, so the site works from any base path.
 
 ## Snapshot ritual
 

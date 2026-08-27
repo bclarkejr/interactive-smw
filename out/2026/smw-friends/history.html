@@ -3,8 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="refresh" content="0; url=2026/smw-friends/index.html">
-<title>Summer Movie Wager</title>
+<title>Odds Over Time · Summer Movie Wager 2026 · The Friends League</title>
 <script>/* Theme resolution runs in the head, before body paint (spec §13.2). */
 (function(){try{var t=localStorage.getItem('smw-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
 document.addEventListener("DOMContentLoaded",function(){
@@ -174,7 +173,40 @@ footer.site{margin-top:48px;border-top:1px solid var(--grid);padding-top:14px;fo
 </head>
 <body>
 <div class="wrap">
-<p><a href="2026/smw-friends/index.html">Summer Movie Wager</a></p>
+
+<header class="site">
+  <div>
+    <h1>🍿 Summer Movie Wager</h1>
+    <div class="sub">Wager window: May 1 – Sep 7, 2026 &nbsp;·&nbsp; <span class="small">Refreshed Aug 27, 2026</span>
+      <label class="vh" for="yearSelect">Season</label>
+      <select id="yearSelect" class="sel" onchange="location.href=this.value"><option value="../../2026/smw-friends/index.html" selected>2026</option></select>
+      <label class="vh" for="groupSelect">Group</label>
+      <select id="groupSelect" class="sel" onchange="location.href=this.value"><option value="../filmcast/history.html">The Filmcast</option><option value="../smw-friends/history.html" selected>The Friends League</option></select>
+    </div>
+  </div>
+  <button id="themeToggle" type="button" aria-label="Toggle color theme">◐ Theme</button>
+</header>
+
+<nav class="pills" aria-label="Site">
+  <a href="index.html">🏆 Leaderboard</a>
+  <a href="whatif.html">🎬 What If?</a>
+  <a href="scenarios.html">🔮 Winning Scenarios</a>
+  <a href="history.html" aria-current="page">📈 Odds Over Time</a>
+  </nav>
+
+
+
+<div class="locked">No forecast history yet — this chart fills in after the first
+production refresh.</div>
+
+
+
+<footer class="site">
+  Raw numbers: <a href="data.json">data.json</a> &nbsp;·&nbsp;
+  <a href="rules.html">Scoring rules</a> &nbsp;·&nbsp;
+  <span class="small">Forecast: 10,000 seeded Monte Carlo seasons over 30 projected films.</span>
+</footer>
+
 </div>
 </body>
 </html>
