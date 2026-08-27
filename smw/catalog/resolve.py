@@ -56,7 +56,7 @@ def resolve_grosses(
 
     carried = {t for t in grosses if t not in chart_titles}
 
-    if chart_usable:
+    if chart_usable and chart_rows:  # no chart → nothing to be absent from (Guard A covers empty)
         impossible = sorted(t for t in carried if grosses[t] >= floor)
         if impossible:
             blocks = "\n\n".join(
