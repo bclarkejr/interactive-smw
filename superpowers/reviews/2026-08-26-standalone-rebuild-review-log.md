@@ -187,3 +187,18 @@ Last reviewed commit: `a85c6f1`. No approved SHA exists.
 | 1 | high | `smw/model/preopening.py:41` | Mode B only rejects releases after `window_end`; a zero-gross film released *before* `window_start` with an estimate projects a full run | **Valid** — real regression risk (an April title with an estimate could enter the simulated top ten) | `project_preopening` returns `(0,0)` outside the inclusive window; `_project_one` labels it `release before window` (badge "won't score"). Tests: `test_release_before_window_scores_zero` (Apr 30 vs May 1), `test_pre_window_release_with_estimate_projects_zero`. |
 | 2 | med | `smw/catalog/normalize.py:106` | Title keys / document shape of the operator files not validated | **Valid** | `_title_mapping()` validates both files at load. Test: `test_bad_document_shapes_fail_at_load`. |
 | 3 | low | `smw/render/chart.py:95` | Direct labels only nudge downward and can leave the viewBox | Advisory; not addressed this round. | none |
+
+### Loop 4 — Round 3 (cap), 08:05 EDT
+
+- Reviewed head: `8b69f93` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking + 1 low) · raw: `round-12.json`
+- Deterministic checks before review: 200 passed.
+- **Cap reached — loop stopped; nothing below changed in code.**
+
+| # | Sev | File | Finding (verbatim summary) | My assessment |
+|---|-----|------|----------------------------|---------------|
+| 1 | med | `smw/render/build.py:160` | Persist production refresh dates (6th time; dropped in 2 of the last 5 rounds) | Still disputed on spec grounds (§5 file set, §5.6). Needs a spec decision. |
+| 2 | med | `smw/catalog/normalize.py:88` | `apply_chart_aliases` prefers the variant entry via `or`, so a `release_date` stored on the canonical entry is ignored for an aliased chart row | **Agree.** Since `load_overrides` already folds variant metadata onto the canonical entry, the fix is to look up the canonical entry only (one line) + a test. |
+| 3 | med | `smw/catalog/resolve.py:22` | Box-office history rows not schema-validated (negative gross, non-string title, bad date) | **Agree.** ~8 lines in `load_history` + tests. |
+| 4 | low | `smw/render/chart.py:95` | Direct labels can be nudged below the viewBox | Advisory; cheap clamp if wanted. |
+
+Last reviewed commit: `8b69f93`. No approved SHA exists.
