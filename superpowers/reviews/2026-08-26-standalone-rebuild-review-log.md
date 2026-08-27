@@ -92,3 +92,13 @@ the script's stdout/stderr to `round-N.log`.
 | 2 | med | `smw/catalog/normalize.py:52` | A `release_date` override is applied only after `windowed()`, so it cannot rescue a row the source misdated outside the window | **Valid** | `apply_chart_aliases` now also applies `release_date` overrides (keyed on upstream or canonical title) before the window filter. Tests: `test_release_date_override_applied_to_chart_rows_before_window_filter`, `test_chart_release_date_override_rescues_out_of_window_row`. |
 
 - After fixes: 169 passed. Real build unchanged.
+
+### Loop 2 — Round 2, 07:27 EDT
+
+- Reviewed head: `fffe0e3` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking) · raw: `round-5.json`
+- Deterministic checks before review: 169 passed.
+
+| # | Sev | File | Finding (verbatim summary) | Verdict | Action |
+|---|-----|------|----------------------------|---------|--------|
+| 1 | med | `smw/render/build.py:160` | Refresh dates are rebuilt from positive-gross box-office rows; a degraded production run with zero grosses (pre-season) leaves no durable record, so later builds drop that date and the line connects across it | **Disputed (scope), not fixed.** Factually correct for one case: a *production* run before any gross exists *and* below the forecast threshold. But spec §5 enumerates the persisted files and §5.6 states a degraded run appends nothing — the gap is the intended signal. Persisting run dates needs a new data file the spec doesn't define. Pre-season production runs are also not part of the documented weekly cadence. Left for the user: either accept the edge or add a `refresh_history.jsonl` (spec change). | none |
+| 2 | med | `smw/__main__.py:8` | `--date` defaults to `date.today()` | **Rejected by user (2026-08-27)** — spec §1.3 permits wall-clock time to enter via the explicitly passed run day and only there; day-to-day differences are intended. AGENTS.md convention reworded to make the CLI default explicit so the reviewer stops re-raising it. | AGENTS.md wording only |

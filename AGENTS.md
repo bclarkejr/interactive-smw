@@ -9,7 +9,7 @@ Summer Movie Wager — Python ≥3.11 static-site generator (batch pipeline, sta
 - Types/Build: not configured
 
 ## Conventions
-- Reproducible output: identical inputs must produce byte-identical HTML across builds; nothing reads wall-clock time except an explicitly passed `--date`.
+- Reproducible output: identical inputs (including the run date) must produce byte-identical HTML across builds. The run date is the only wall-clock input: the CLI takes it via `--date` and, by design, defaults it to today's calendar date when the flag is omitted — that default is not a defect.
 - Self-contained pages: zero network requests from published pages — all CSS/JS inlined, no remote fonts (system font stack), no runtime fetch, no external links in output.
 - No module-level date or threshold constants in projection, simulation, or render layers. Game/model constants (point values, day-of-week weights, sigma tables) are allowed as module constants; dates and tunables are not.
 - No type may carry film data and roster data together. `score`, `simulate`, `render` take `(Season, Group, MovieCatalog)` and never read global state; `render()` takes an output directory parameter.
