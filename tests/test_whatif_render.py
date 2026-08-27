@@ -20,7 +20,7 @@ def test_locked_state_notice(tmp_path, season, group):
     html = _render(tmp_path, season, group, locked=True)
     assert "unlocks once the forecast is live" in html
     assert "only 3 films" in html
-    assert "film-list" not in html  # no sandbox content in locked state
+    assert 'id="film-list"' not in html  # no sandbox markup (the CSS still mentions it)
 
 def test_embedded_data_and_scripts(tmp_path, season, group):
     html = _render(tmp_path, season, group)
