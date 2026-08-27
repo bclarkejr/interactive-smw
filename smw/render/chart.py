@@ -2,6 +2,7 @@
 lines of path arithmetic beats a charting library that would be the page's largest
 dependency by an order of magnitude."""
 import math
+from html import escape
 
 W, H = 660, 300
 ML, MR, MT, MB = 48, 118, 12, 30  # right margin leaves room for direct labels
@@ -61,7 +62,7 @@ def render_chart_svg(data: dict) -> str:
     idxs = sorted(set(range(0, n, step)) | {n - 1})[-MAX_X_LABELS:]
     for i in idxs:
         parts.append(f'<text class="x-label" x="{_x(i, n):.1f}" y="{H - 8}" '
-                     f'text-anchor="middle">{dates[i]}</text>')
+                     f'text-anchor="middle">{escape(str(dates[i]))}</text>')
     # one path per series; a None breaks the line (§12.4 — a gap means no forecast
     # was produced; drawing through it would assert a number never computed)
     for s in series:
@@ -96,6 +97,6 @@ def render_chart_svg(data: dict) -> str:
         parts.append(f'<rect class="swatch series-{s["color"]}" x="{x}" '
                      f'y="{y - 8:.1f}" width="8" height="8"/>')
         parts.append(f'<text class="direct-label" x="{x + 12}" y="{y:.1f}">'
-                     f'{s["name"]} {round(v * 100)}%</text>')
+                     f'{escape(str(s["name"]))} {round(v * 100)}%</text>')
     parts.append("</svg>")
     return "".join(parts)

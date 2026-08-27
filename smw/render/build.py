@@ -4,7 +4,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from smw.catalog.normalize import (apply_chart_aliases, build_films, canonical,
-                                   load_overrides, load_preopening)
+                                   canonical_group, load_overrides, load_preopening)
 from smw.catalog.resolve import load_history, resolve_grosses
 from smw.config.groups import Group, load_group
 from smw.config.season import Season, load_season
@@ -87,6 +87,7 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
     season = load_season(data_dir / "season.yaml")
     groups = [load_group(p) for p in sorted((data_dir / "groups").glob("*.yaml"))]
     overrides = load_overrides(data_dir / "movies_overrides.yaml")
+    groups = [canonical_group(g, overrides) for g in groups]  # §6.5 point 2
     preopening = load_preopening(data_dir / "preopening_projections.yaml")
     history_path = data_dir / "box_office_history.jsonl"
     if not history_path.exists():
@@ -121,13 +122,14 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
     # §10.1: Final first, then the projection count decides Early vs Live.
     # The structural floor (§9.5) also degrades here: a site build must not crash
     # merely because the season is young.
-    forecastable = (non_zero >= season.min_projections_for_forecast
-                    and non_zero >= MIN_FILMS_FOR_TOP_TEN)
+    final = today > season.window_end + timedelta(days=1)
+    forecastable = non_zero >= MIN_FILMS_FOR_TOP_TEN and (
+        final or non_zero >= season.min_projections_for_forecast)
     reason = None
     if not forecastable:
         reason = (f"only {non_zero} films have non-zero projections "
-                  f"({season.min_projections_for_forecast} required for a "
-                  "meaningful top-ten ranking)")
+                  f"({MIN_FILMS_FOR_TOP_TEN if final else season.min_projections_for_forecast}"
+                  " required for a meaningful top-ten ranking)")
 
     env = make_env()
     for group in groups:
@@ -146,6 +148,9 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
                       reason)
         render_scenarios(env, out_dir, {**ctx, "active": "scenarios"},
                          build_scenarios_view(group, sim) if sim else None, reason)
+        if not local and sim is not None:
+            # Appended before the history page renders so the page includes this refresh.
+            append_forecast_history(data_dir / "forecast_history.jsonl", sim, today)
         render_history(env, out_dir, {**ctx, "active": "history"},
                        build_history_data(_load_forecast_rows(
                            data_dir / "forecast_history.jsonl")))
@@ -154,9 +159,6 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
             build_data_json(season, group, catalog, sim, current_points,
                             non_zero, reason, today),
             indent=2, sort_keys=True))
-
-        if not local and sim is not None:
-            append_forecast_history(data_dir / "forecast_history.jsonl", sim, today)
 
     if not local:
         # Roster-independent: appended once per build, never once per group.

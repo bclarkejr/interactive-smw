@@ -158,3 +158,16 @@ def build_films(
         films.append(Film(title=title, release_date=release, status=status,
                           category=category, cumulative_gross=gross, estimate=est))
     return films
+
+
+def canonical_group(group: Group, overrides: dict[str, Override]) -> Group:
+    """Alias application point 2 (§6.5) for rosters: every pick is resolved to its
+    canonical title so scoring compares like with like."""
+    from dataclasses import replace as _replace  # local: keeps the module header stable
+    players = {
+        u: _replace(p,
+                    ranked=tuple(canonical(t, overrides) for t in p.ranked),
+                    dark_horses=tuple(canonical(t, overrides) for t in p.dark_horses))
+        for u, p in group.players.items()
+    }
+    return _replace(group, players=players)

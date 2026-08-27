@@ -1,7 +1,7 @@
 """Projection dispatch by status; display bands; operator warnings (spec §7.1, §7.5–7.6, §8)."""
 import math
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 
 from smw.catalog.normalize import Film, Override
 from smw.config.season import Season
@@ -38,7 +38,9 @@ def bands(median: float, sigma: float, floor: float) -> tuple[float, float]:
 
 def _project_one(film: Film, season: Season,
                  history: dict[str, list[tuple[date, float]]], today: date) -> Projection:
-    if film.status == "closed":
+    if film.status == "closed" or today > season.window_end + timedelta(days=1):
+        # §10.1 Final: grosses are frozen, so every projection collapses to the actual;
+        # a pre-release estimate can no longer earn anything inside the window.
         median, sigma, floor, source = (film.cumulative_gross, 0.0,
                                         film.cumulative_gross, "final gross")
     elif film.status == "in_theaters":

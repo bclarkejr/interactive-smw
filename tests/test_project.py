@@ -76,3 +76,16 @@ def test_observed_history_feeds_blend(season):
     with_hist = _catalog(season, [_film(gross=220.0)], history=history)
     without = _catalog(season, [_film(gross=220.0)])
     assert with_hist.projections[0].median != without.projections[0].median
+
+def test_final_state_collapses_every_projection(season):
+    est = PreopeningEstimate(release_date=date(2026, 9, 1),
+                             opening_weekend_estimate=70_000_000,
+                             total_domestic_estimate=200_000_000, confidence="high")
+    films = [_film(title="Playing", gross=50.0),
+             _film(title="Never Opened", status="pre_release",
+                   release=date(2026, 9, 1), estimate=est)]
+    cat = _catalog(season, films, today=season.window_end + timedelta(days=2))
+    for p in cat.projections:
+        assert p.sigma == 0.0 and p.source == "final gross"
+    assert cat.projections[0].median == 50.0
+    assert cat.projections[1].median == 0.0

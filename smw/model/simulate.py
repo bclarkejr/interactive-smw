@@ -53,6 +53,8 @@ def simulate(season: Season, group: Group, catalog: MovieCatalog) -> SimResult:
             f"only {len(projected)} films have projections; "
             f"{MIN_FILMS_FOR_TOP_TEN} are required to rank a top ten"
         )
+    if not group.players:  # §10.2: an empty roster renders empty, never raises
+        return SimResult({}, {}, {}, {}, {}, {})
     titles = [p.title for p in projected]
     samples = _sample(season, projected)
     top10 = np.argsort(-samples, axis=1)[:, :10]          # (trials, 10) film indices

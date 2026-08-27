@@ -50,3 +50,9 @@ def test_x_labels_thinned_to_eight_max_including_latest():
     labels = svg.count('class="x-label"')
     assert labels <= 8
     assert "2026-06-28" in svg
+
+def test_hostile_player_name_is_escaped_in_svg():
+    rows = [{"date": "2026-06-01", "player": "<script>x</script>", "win_prob": 0.5}]
+    svg = render_chart_svg(build_history_data(rows))
+    assert "<script>" not in svg
+    assert "&lt;script&gt;" in svg

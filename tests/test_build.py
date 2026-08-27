@@ -125,3 +125,43 @@ def test_frozen_run_never_fetches(data_dir, tmp_path, monkeypatch):
 def test_missing_history_file_is_warning_not_error(data_dir, tmp_path, capsys):
     _run(data_dir, tmp_path)
     assert "history" in capsys.readouterr().out.lower()
+
+def test_roster_alias_scores_against_canonical_title(data_dir, tmp_path):
+    # §6.5 point 2: a roster's variant spelling must score like the canonical title.
+    baseline = json.loads((_run(data_dir, tmp_path) / "data.json").read_text())
+    (data_dir / "movies_overrides.yaml").write_text(
+        '"Big Summer Movie":\n  alias_of: "Big Summer Film"\n')
+    g = (data_dir / "groups" / "g.yaml").read_text()
+    (data_dir / "groups" / "g.yaml").write_text(
+        g.replace("ranked: [Big Summer Film,", "ranked: [Big Summer Movie,"))
+    d = json.loads((_run(data_dir, tmp_path) / "data.json").read_text())
+    assert baseline["current_points"]["alice"] > 0
+    assert d["current_points"]["alice"] == baseline["current_points"]["alice"]
+
+def test_final_state_collapses_projections_and_forecasts(data_dir, tmp_path, monkeypatch):
+    # §10.1 Final: chart frozen, every projection == frozen gross with sigma 0, and the
+    # standings run regardless of the 25-film policy threshold.
+    monkeypatch.setattr(build, "fetch", lambda year: (_ for _ in ()).throw(AssertionError()))
+    rows = [{"movie": f"Film {i:02d}", "date": "2026-09-08", "cumulative_gross": 1e6 * (20 - i)}
+            for i in range(12)]
+    (data_dir / "box_office_history.jsonl").write_text(
+        "\n".join(json.dumps(r) for r in rows) + "\n")
+    _add_estimates(data_dir, n=3)  # zero-gross films with estimates: must NOT project
+    out = _run(data_dir, tmp_path, today=date(2026, 9, 9))
+    d = json.loads((out / "data.json").read_text())
+    assert d["forecast_available"] is True
+    assert all(p["sigma"] == 0.0 and p["median_in_window_gross"] == p["floor"]
+               for p in d["projections"])
+    assert all(p["median_in_window_gross"] == 0.0 for p in d["projections"]
+               if p["movie_title"].startswith("Estimated Film"))
+
+def test_production_history_page_includes_current_refresh(data_dir, tmp_path):
+    _add_estimates(data_dir, n=8)
+    (data_dir / "season.yaml").write_text(
+        (data_dir / "season.yaml").read_text().replace(
+            "min_projections_for_forecast: 25", "min_projections_for_forecast: 11"))
+    out = _run(data_dir, tmp_path, local=False)
+    assert (data_dir / "forecast_history.jsonl").exists()
+    html = (out / "history.html").read_text()
+    assert "No forecast history yet" not in html
+    assert "2026-08-15" in html

@@ -67,3 +67,8 @@ def test_dominant_player_wins(season, group):
     # alice picked M01..M10 in order == projection order; she must dominate.
     r = simulate(season, group, _catalog())
     assert r.win_prob["alice"] > 0.9
+
+def test_empty_group_returns_empty_result(season):
+    from smw.config.groups import Group
+    r = simulate(season, Group("g", "G", {}), _catalog())
+    assert r.win_prob == {} and r.scenarios == {}
