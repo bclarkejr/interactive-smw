@@ -1,0 +1,70 @@
+import pytest
+from smw.config.groups import load_group
+
+VALID = """\
+group_id: testers
+display_name: "Test League"
+players:
+  alice:
+    ranked: [F1, F2, F3, F4, F5, F6, F7, F8, F9, F10]
+    dark_horses: [D1, D2, D3]
+"""
+
+def _write(tmp_path, text):
+    p = tmp_path / "g.yaml"
+    p.write_text(text)
+    return p
+
+def test_valid_group_loads(tmp_path):
+    g = load_group(_write(tmp_path, VALID))
+    assert g.group_id == "testers"
+    assert g.display_name == "Test League"
+    assert g.players["alice"].ranked == tuple(f"F{i}" for i in range(1, 11))
+    assert g.players["alice"].dark_horses == ("D1", "D2", "D3")
+    assert g.players["alice"].username == "alice"
+
+def test_wrong_ranked_count_names_player(tmp_path):
+    bad = VALID.replace(", F10]", "]")
+    with pytest.raises(ValueError, match="alice.*10 ranked"):
+        load_group(_write(tmp_path, bad))
+
+def test_wrong_dark_horse_count_names_player(tmp_path):
+    bad = VALID.replace(", D3]", "]")
+    with pytest.raises(ValueError, match="alice.*3 dark horse"):
+        load_group(_write(tmp_path, bad))
+
+def test_duplicate_title_rejected(tmp_path):
+    bad = VALID.replace("dark_horses: [D1, D2, D3]", "dark_horses: [D1, D2, F1]")
+    with pytest.raises(ValueError, match="alice.*distinct"):
+        load_group(_write(tmp_path, bad))
+
+def test_empty_players_is_legal(tmp_path):
+    g = load_group(_write(tmp_path, "group_id: t\ndisplay_name: T\nplayers: {}\n"))
+    assert g.players == {}
+
+@pytest.mark.parametrize("gid", ["../other", "a/b", "", "Has Space", "UPPER"])
+def test_group_id_must_be_slug(tmp_path, gid):
+    with pytest.raises(ValueError, match="group_id"):
+        load_group(_write(tmp_path, VALID.replace("group_id: testers", f'group_id: "{gid}"')))
+
+@pytest.mark.parametrize("bad,needle", [
+    (VALID.replace("[F1, F2,", "[1, F2,"), "non-empty string"),
+    (VALID.replace('display_name: "Test League"', "display_name: 7"), "display_name"),
+    (VALID.replace("players:\n  alice:\n", "players:\n  alice: nope\n") .replace("    ranked", "#").replace("    dark", "#"), "alice"),
+])
+def test_bad_types_fail_at_load(tmp_path, bad, needle):
+    with pytest.raises(ValueError, match=needle):
+        load_group(_write(tmp_path, bad))
+
+def test_players_false_is_rejected_not_empty(tmp_path):
+    with pytest.raises(ValueError, match="players"):
+        load_group(_write(tmp_path, "group_id: t\ndisplay_name: T\nplayers: false\n"))
+
+def test_players_null_is_empty(tmp_path):
+    assert load_group(_write(tmp_path, "group_id: t\ndisplay_name: T\nplayers:\n")).players == {}
+
+def test_mapping_valued_picks_rejected(tmp_path):
+    bad = VALID.replace("ranked: [F1, F2, F3, F4, F5, F6, F7, F8, F9, F10]",
+                        "ranked: {F1: 1, F2: 2, F3: 3, F4: 4, F5: 5, F6: 6, F7: 7, F8: 8, F9: 9, F10: 10}")
+    with pytest.raises(ValueError, match="ranked must be a YAML list"):
+        load_group(_write(tmp_path, bad))

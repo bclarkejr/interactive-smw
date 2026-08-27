@@ -1,0 +1,54 @@
+{% extends "base.html.j2" %}
+{% block content %}
+{% if tabs is none %}
+<div class="locked">Not enough films have projections yet to simulate win
+probabilities — {{ reason }}. This view unlocks once the forecast is live.</div>
+{% else %}
+<h2>🔮 Winning Scenarios</h2>
+<p class="stats-line">Pick a player to see the single most-likely top-10 box-office
+finish order that crowns them champion — and exactly how everyone's predictions score
+against it. Grayed-out players have no realistic path to winning.</p>
+<div class="tab-row" role="tablist">
+{% for t in tabs %}
+  {% if t.scenario %}
+  <button type="button" class="tab" data-tab="{{ loop.index0 }}"
+    aria-pressed="{{ 'true' if loop.first else 'false' }}">
+    {{ t.username }} <span class="stats-line">{{ t.win_pct }}%</span></button>
+  {% else %}
+  <button type="button" class="tab" disabled
+    title="{{ t.username }} wins in none of the simulated seasons">
+    {{ t.username }} <span class="stats-line">0%</span></button>
+  {% endif %}
+{% endfor %}
+</div>
+{% for t in tabs %}{% if t.scenario %}
+<section class="scenario-panel" data-panel="{{ loop.index0 }}"
+  {% if not loop.first %}hidden{% endif %}>
+<p>{{ t.scenario.caption }}</p>
+<div class="table-scroll">
+<table>
+<thead><tr><th>#</th><th>Film</th>
+{% for u in t.scenario.columns %}
+<th class="num {% if u == t.username %}highlight-col{% endif %}">{{ u }}</th>
+{% endfor %}</tr></thead>
+<tbody>
+{% for row in t.scenario.rows %}
+<tr><td>{{ loop.index }}</td><td>{{ row.title }}</td>
+{% for c in row.cells %}
+<td class="num {% if t.scenario.columns[loop.index0] == t.username %}highlight-col{% endif %}">
+  {%- if c > 0 %}<span class="cell-pos">{{ c }}</span>{% else %}<span class="cell-none">·</span>{% endif -%}
+</td>
+{% endfor %}</tr>
+{% endfor %}
+</tbody>
+<tfoot><tr><td colspan="2">Total</td>
+{% for total in t.scenario.totals %}
+<td class="num"><strong>{% if loop.first %}👑 {% endif %}{{ total }}</strong></td>
+{% endfor %}</tr></tfoot>
+</table>
+</div>
+</section>
+{% endif %}{% endfor %}
+<script>{{ scenarios_js }}</script>
+{% endif %}
+{% endblock %}

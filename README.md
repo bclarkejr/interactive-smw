@@ -1,36 +1,78 @@
-# Interactive SMW
+# Summer Movie Wager — Tracker & Forecaster
 
-This repo has two purposes.
+Static-site tracker and Monte Carlo forecaster for a season-long box-office
+prediction game. One network dependency (Box Office Mojo's yearly chart),
+no server, no build toolchain. Output in `out/` is generated — never hand-edit it.
 
-**1. Build the Summer Movie Wager website.** A Python static-site generator for a
-season-long box-office prediction game: ingest the yearly chart, project each film's
-final in-window gross, Monte-Carlo-simulate the season, and render a small
-self-contained static site with win probabilities, projected scores, and per-player
-breakdowns. The full specification lives in
-[`superpowers/specs/`](superpowers/specs/); the task-by-task implementation plan lives
-in [`superpowers/plans/`](superpowers/plans/).
+This repo also serves as a learning ground for a fully agentic coding workflow —
+see `CONTRIBUTING.md` and `AGENTS.md`.
 
-**2. Learn a fully agentic coding workflow.** Claude Code writes the code; GPT Codex
-reviews the committed changes against the spec and a version-controlled review
-contract; blocking findings go back to Claude for fixes. The workflow is documented in
-[CONTRIBUTING.md](CONTRIBUTING.md); how it was set up in this repo, and why each
-decision went the way it did, is in
-[docs/agentic-workflow-setup.md](docs/agentic-workflow-setup.md).
+## Setup
 
-**The application code isn't written yet.** What exists today is the spec, the plan,
-and the review harness.
+    uv venv --python 3.12 .venv
+    uv pip install --python .venv/bin/python --config-settings editable_mode=compat -e '.[dev]'
 
-## Quick start
+## Running
 
-Prerequisites: `claude` (Claude Code CLI), `codex` (Codex CLI) — both installed and
-authenticated — and `jq`.
+    .venv/bin/pytest                       # tests run BEFORE any production build
+    .venv/bin/python -m smw --local        # dev run: writes out/, appends NO history
+    .venv/bin/python -m smw                # production run: also appends history files
 
-Work on a feature branch, implement against a spec, checkpoint-commit, then:
+Every exploratory or development run uses `--local`. A production run on an
+off-cadence day skews the observed-decay estimator, which assumes roughly
+weekly snapshots.
 
-```
-/cross-review superpowers/specs/<feature>.md
-```
+### The run date (`--date`)
 
-That runs the deterministic checks, hands the committed diff to Codex, and loops on
-blocking findings (3 rounds max). See [CONTRIBUTING.md](CONTRIBUTING.md) for the full
-day-to-day workflow and merge criteria.
+The run date is the **only** place wall-clock time enters the system. Every
+date-dependent decision — which films are pre-release vs. in theaters, how far
+each decay curve has elapsed, whether the chart is still fetched or frozen, the
+history cutoff, and the `captured_at` / "refreshed" stamps — flows from it.
+
+- `--date YYYY-MM-DD` sets it explicitly.
+- **If `--date` is omitted it defaults to today's calendar date.** So the same
+  `data/` built on two different days legitimately produces two different sites;
+  that is expected, not a bug. Pass `--date` whenever you need a build you can
+  reproduce or compare later (byte-identical output for identical inputs).
+
+    .venv/bin/python -m smw --local --date 2026-08-26   # reproducible dev build
+    .venv/bin/python -m smw --date 2026-09-08           # the final production run
+
+## Weekly cadence
+
+Refresh manually (never on a schedule — a bad upstream day should be noticed,
+not committed), roughly weekly, on a consistent weekday. Monday is the natural
+choice: the weekend is fully reported. Commit the updated `data/` and `out/`.
+
+## ⚠️ End-of-season protocol (hard deadline, no recovery path)
+
+- **The final production run MUST happen on `window_end + 1 day`**
+  (for 2026: run on **2026-09-08**). That is the single day the chart reports
+  exactly through the window's last day.
+- Running on `window_end` is too early — it misses the final day (Labor Day,
+  typically substantial grosses).
+- Running on `window_end + 2` or later is too late — the chart is frozen by
+  design and the site stays at whatever the previous run recorded.
+- **Before accepting the final run, verify the top titles actually advanced**
+  versus the previous run. Identical figures mean the source has not posted the
+  final weekend yet; wait and re-run later the same day (same-day re-runs are
+  safe — history merges by max).
+- If the deadline is missed there is no recovery in code: final figures must be
+  appended to `data/box_office_history.jsonl` by hand.
+
+## Operator files (maintained through the season)
+
+- `data/preopening_projections.yaml` — analyst estimates. The build's
+  "no projection" warnings are your to-do list.
+- `data/movies_overrides.yaml` — categories (classify EVERY picked film,
+  including genuinely wide ones), title aliases, date/status corrections.
+  A Guard C failure prints the exact alias block to add here.
+- `data/groups/*.yaml` — rosters; locked once the window opens.
+- `data/season.yaml` — dates, thresholds, seed.
+
+## Snapshot ritual
+
+The leaderboard has a byte-exact snapshot test. To regenerate deliberately:
+delete `tests/fixtures/snapshot_index.html`, run the test once (it rewrites the
+fixture and fails), **open the file in a browser and look at it**, then re-run
+to lock. A snapshot regenerated without inspection tests nothing.
