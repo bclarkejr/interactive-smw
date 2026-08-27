@@ -1,28 +1,22 @@
 {% extends "base.html.j2" %}
 {% block content %}
-<h2>Scoring rules</h2>
-<p>Before the season, each player submits <strong>10 ranked picks</strong> — the films they
-believe will gross the most at the domestic box office during the wager window, in
-predicted finish order — plus <strong>3 dark horses</strong>, unordered. All 13 titles must
-be distinct. Rosters lock when the window opens.</p>
-<p>The actual top ten is the ten films with the highest domestic gross earned
-<em>inside the window</em>, ranked descending. Money earned before or after the window
-does not count.</p>
-<h3>Ranked picks</h3>
-<table>
-<thead><tr><th>Condition</th><th>Points</th></tr></thead>
-<tbody>
-<tr><td>Not in the top ten</td><td>0</td></tr>
-<tr><td>Exact match at position 1 or position 10</td><td>13</td></tr>
-<tr><td>Exact match at positions 2–9</td><td>10</td></tr>
-<tr><td>In the top ten, off by exactly 1 position</td><td>7</td></tr>
-<tr><td>In the top ten, off by exactly 2 positions</td><td>5</td></tr>
-<tr><td>In the top ten, off by 3 or more positions</td><td>3</td></tr>
-</tbody>
-</table>
-<h3>Dark horses</h3>
-<p>Each dark horse that finishes anywhere in the top ten scores <strong>1 point</strong>.</p>
-<h3>Winning</h3>
-<p>Highest total wins. The maximum possible score is 109. There is
-<strong>no tiebreaker</strong> — tied players share the placement.</p>
+<h2>📜 Scoring rules</h2>
+<p>Before the window opens, each player locks <strong>10 ranked picks</strong> — the films they
+believe will gross the most at the domestic box office between <strong>{{ window_and }}</strong>, in predicted finish order — plus <strong>3 dark horses</strong>, unordered.
+All 13 titles must be distinct. Only films released inside the window count, and only money
+earned through Labor Day counts.</p>
+<div class="scroller"><table>
+  <thead><tr><th class="t">Ranked pick, vs. the actual top ten</th><th>Points</th></tr></thead>
+  <tbody>
+    <tr><td class="t">Exact match at position 1 or position 10</td><td class="pos">13</td></tr>
+    <tr><td class="t">Exact match at positions 2–9</td><td class="pos">10</td></tr>
+    <tr><td class="t">In the top ten, off by exactly 1 position</td><td class="pos">7</td></tr>
+    <tr><td class="t">In the top ten, off by exactly 2 positions</td><td class="pos">5</td></tr>
+    <tr><td class="t">In the top ten, off by 3 or more positions</td><td class="pos">3</td></tr>
+    <tr><td class="t">Not in the top ten</td><td class="zero">0</td></tr>
+    <tr><td class="t">🐴 Dark horse anywhere in the top ten</td><td class="pos">1</td></tr>
+  </tbody>
+</table></div>
+<p class="small">Maximum possible score: 13 + 10×8 + 13 + 3 = <strong>109</strong>.
+Highest total wins; there is no tiebreaker — tied players share the placement.</p>
 {% endblock %}

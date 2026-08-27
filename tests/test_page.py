@@ -80,3 +80,12 @@ def test_single_option_selectors_still_render(tmp_path, season, group):
     assert html.count("<select") == 2
     assert 'value="../../2026/testers/index.html" selected' in html
     assert 'value="../testers/rules.html" selected' in html
+
+def test_rules_page_matches_mockup(tmp_path, season, group):
+    html = _render_rules(tmp_path, season, group)
+    for s in ("<h2>📜 Scoring rules</h2>", "between <strong>May 1 and Sep 7, 2026</strong>",
+              '<th class="t">Ranked pick, vs. the actual top ten</th><th>Points</th>',
+              "🐴 Dark horse anywhere in the top ten", '<td class="zero">0</td>',
+              "13 + 10×8 + 13 + 3 = <strong>109</strong>", "no tiebreaker — tied players share the placement.",
+              '<div class="scroller"><table>'):
+        assert s in html, s
