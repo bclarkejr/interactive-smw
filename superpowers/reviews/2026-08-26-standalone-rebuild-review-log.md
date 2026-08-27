@@ -80,3 +80,15 @@ the script's stdout/stderr to `round-N.log`.
 - #3 **rejected by user** (2026-08-27): spec §1.3 permits wall-clock time to enter via the
   explicitly passed run day, and only there; a build differing by run date is intended.
   README now documents `--date`, its default-to-today behaviour, and shows examples.
+
+## Loop 2 (user-invoked `/cross-review`, 2026-08-27) — Round 1, 07:20 EDT
+
+- Reviewed head: `0209fce` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking) · raw: `round-4.json`
+- Deterministic checks before review: 166 passed. (Stray untracked `uv.lock` parked outside the repo to satisfy the clean-tree check.)
+
+| # | Sev | File | Finding (verbatim summary) | Verdict | Action |
+|---|-----|------|----------------------------|---------|--------|
+| 1 | med | `smw/render/build.py:97` | Pre-season builds fetch the chart, find no in-window rows, and trip Guard B — violating §10's "must work before the season starts" | **Valid** | Chart fetched only when `window_start ≤ today−1 ≤ window_end`; before the window there can be no in-window row, so the fetch is skipped. Test: `test_pre_season_build_never_fetches_and_renders`. |
+| 2 | med | `smw/catalog/normalize.py:52` | A `release_date` override is applied only after `windowed()`, so it cannot rescue a row the source misdated outside the window | **Valid** | `apply_chart_aliases` now also applies `release_date` overrides (keyed on upstream or canonical title) before the window filter. Tests: `test_release_date_override_applied_to_chart_rows_before_window_filter`, `test_chart_release_date_override_rescues_out_of_window_row`. |
+
+- After fixes: 169 passed. Real build unchanged.

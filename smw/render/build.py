@@ -94,12 +94,14 @@ def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
         print("warning: no box-office history file yet (normal on the first run)")
     history = load_history(history_path)
 
-    if (today - timedelta(days=1)) <= season.window_end:
+    if season.window_start <= today - timedelta(days=1) <= season.window_end:
         raw = apply_chart_aliases(parse_chart(fetch(season.year), season.year), overrides)
         chart_rows = windowed(raw, season)  # Guards A and B — before the floor, so an
         floor = chart_floor(raw)            # empty parse fails with Guard A, not min()
     else:
-        # §6.1: chart frozen from window_end + 2 — MUST NOT be read at all.
+        # §6.1: chart frozen from window_end + 2 — MUST NOT be read at all. Before the
+        # window opens no in-window row can exist either (§10.1 pre-season is just
+        # Early/Live on analyst numbers), so skip the fetch instead of tripping Guard B.
         chart_rows, floor = [], 0.0
 
     grosses, carried, chart_usable = resolve_grosses(

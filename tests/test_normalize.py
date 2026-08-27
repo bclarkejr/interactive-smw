@@ -74,3 +74,10 @@ def test_bad_confidence_raises(tmp_path):
     p.write_text('"X":\n  confidence: certain\n')
     with pytest.raises(ValueError, match="confidence"):
         load_preopening(p)
+
+def test_release_date_override_applied_to_chart_rows_before_window_filter(season):
+    from smw.ingest.boxoffice import windowed
+    ov = {"Misdated": Override(release_date=date(2026, 5, 8))}
+    rows = apply_chart_aliases([ChartRow("Misdated", 9.0, date(2026, 4, 24), False)], ov)
+    assert rows[0].release_date == date(2026, 5, 8)
+    assert [r.title for r in windowed(rows, season)] == ["Misdated"]

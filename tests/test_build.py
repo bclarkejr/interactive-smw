@@ -200,3 +200,22 @@ def test_empty_chart_parse_fails_with_guard_a(data_dir, tmp_path, monkeypatch):
     monkeypatch.setattr(build, "fetch", lambda year: "<html><body>nothing</body></html>")
     with pytest.raises(IngestError, match="Guard A"):
         _run(data_dir, tmp_path)
+
+def test_pre_season_build_never_fetches_and_renders(data_dir, tmp_path, monkeypatch):
+    # §10.1: pre-season is not a state of its own; before window_start there is no
+    # in-window row to fetch, so the chart is skipped rather than tripping Guard B.
+    def boom(year):
+        raise AssertionError("chart fetched before the window opened")
+    monkeypatch.setattr(build, "fetch", boom)
+    out = _run(data_dir, tmp_path, today=date(2026, 4, 15))
+    d = json.loads((out / "data.json").read_text())
+    assert d["current_points"] == {"alice": 0}
+    assert d["forecast_available"] is False
+
+def test_chart_release_date_override_rescues_out_of_window_row(data_dir, tmp_path):
+    # Spring Holdover is dated Apr 10 upstream; an operator override moves it in-window.
+    (data_dir / "movies_overrides.yaml").write_text(
+        '"Spring Holdover":\n  release_date: 2026-05-08\n')
+    d = json.loads((_run(data_dir, tmp_path) / "data.json").read_text())
+    assert any(p["movie_title"] == "Spring Holdover" and p["floor"] == 150e6
+               for p in d["projections"])

@@ -49,7 +49,15 @@ def canonical(title: str, overrides: dict[str, Override]) -> str:
 
 
 def apply_chart_aliases(rows: list[ChartRow], overrides: dict[str, Override]) -> list[ChartRow]:
-    return [replace(r, title=canonical(r.title, overrides)) for r in rows]
+    """Alias application point 1 (§6.5) plus release-date corrections, both keyed on the
+    upstream title — applied BEFORE the window filter so a bad upstream date can be rescued."""
+    out = []
+    for r in rows:
+        ov = overrides.get(r.title) or overrides.get(canonical(r.title, overrides))
+        out.append(replace(
+            r, title=canonical(r.title, overrides),
+            release_date=ov.release_date if ov and ov.release_date else r.release_date))
+    return out
 
 
 @dataclass(frozen=True)
