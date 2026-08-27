@@ -176,3 +176,14 @@ Last reviewed commit: `a85c6f1`. No approved SHA exists.
 |---|-----|------|----------------------------|---------|--------|
 | 1 | med | `smw/catalog/resolve.py:83` | `with_snapshot` keeps history rows dated after the run date, so a back-dated build blends look-ahead grosses | **Valid** (introduced by the loop-1 round-2 fix) | Observations after `today` dropped before the snapshot is folded in. Test: `test_with_snapshot_drops_observations_after_today`. |
 | 2 | med | `smw/render/build.py:160` | Persist production refresh dates (5th time) | **Still disputed** (§5 file set, §5.6). | none |
+
+### Loop 4 — Round 2, 08:00 EDT
+
+- Reviewed head: `495fae4` (includes the user's full 8-player rosters and the regenerated `out/`) · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking + 1 low) · raw: `round-11.json`
+- Deterministic checks before review: 195 passed. Refresh-date dispute not raised.
+
+| # | Sev | File | Finding (verbatim summary) | Verdict | Action |
+|---|-----|------|----------------------------|---------|--------|
+| 1 | high | `smw/model/preopening.py:41` | Mode B only rejects releases after `window_end`; a zero-gross film released *before* `window_start` with an estimate projects a full run | **Valid** — real regression risk (an April title with an estimate could enter the simulated top ten) | `project_preopening` returns `(0,0)` outside the inclusive window; `_project_one` labels it `release before window` (badge "won't score"). Tests: `test_release_before_window_scores_zero` (Apr 30 vs May 1), `test_pre_window_release_with_estimate_projects_zero`. |
+| 2 | med | `smw/catalog/normalize.py:106` | Title keys / document shape of the operator files not validated | **Valid** | `_title_mapping()` validates both files at load. Test: `test_bad_document_shapes_fail_at_load`. |
+| 3 | low | `smw/render/chart.py:95` | Direct labels only nudge downward and can leave the viewBox | Advisory; not addressed this round. | none |

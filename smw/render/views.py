@@ -105,7 +105,7 @@ def _film_rows(catalog: MovieCatalog, ranks: dict[str, int]) -> list[FilmRow]:
     rows = []
     for f in ordered:
         p = proj_by_title[f.title]
-        if p.source == "release after window":
+        if p.source in ("release after window", "release before window"):
             badge = "won't score"
         elif p.source == "no analyst entry":
             badge = "no projection"

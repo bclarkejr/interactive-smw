@@ -15,6 +15,20 @@ _STATUSES = {"pre_release", "in_theaters", "closed"}
 _CONFIDENCES = {"high", "med", "low"}
 
 
+def _title_mapping(raw, path: Path) -> dict:
+    """Both operator files are `title -> mapping`; validate that shape at the boundary."""
+    if raw is None:
+        return {}
+    if not isinstance(raw, dict):
+        raise ValueError(f"{path}: expected a mapping of film title -> fields")
+    for title, fields_ in raw.items():
+        if not isinstance(title, str) or not title.strip():
+            raise ValueError(f"{path}: film titles must be non-empty strings, got {title!r}")
+        if fields_ is not None and not isinstance(fields_, dict):
+            raise ValueError(f"{path}: '{title}' must map to a mapping of fields")
+    return raw
+
+
 @dataclass(frozen=True)
 class Override:
     category: str | None = None
@@ -27,7 +41,7 @@ def load_overrides(path: Path) -> dict[str, Override]:
     path = Path(path)
     if not path.exists():
         return {}
-    raw = yaml.safe_load(path.read_text()) or {}
+    raw = _title_mapping(yaml.safe_load(path.read_text()), path)
     out: dict[str, Override] = {}
     for title, fields_ in raw.items():
         fields_ = fields_ or {}
@@ -100,7 +114,7 @@ def load_preopening(path: Path) -> dict[str, PreopeningEstimate]:
     path = Path(path)
     if not path.exists():
         return {}
-    raw = yaml.safe_load(path.read_text()) or {}
+    raw = _title_mapping(yaml.safe_load(path.read_text()), path)
     out: dict[str, PreopeningEstimate] = {}
     known = {f.name for f in fields(PreopeningEstimate)}
     for title, fields_ in raw.items():

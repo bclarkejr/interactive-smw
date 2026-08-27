@@ -118,3 +118,12 @@ def test_override_bad_types_fail_at_load(tmp_path, body, needle):
     p.write_text('"X":\n' + body)
     with pytest.raises(ValueError, match=needle):
         load_overrides(p)
+
+@pytest.mark.parametrize("text", ["2026:\n  category: wide\n", "- just a list\n", '"X": 5\n'])
+def test_bad_document_shapes_fail_at_load(tmp_path, text):
+    p = tmp_path / "f.yaml"
+    p.write_text(text)
+    with pytest.raises(ValueError):
+        load_preopening(p)
+    with pytest.raises(ValueError):
+        load_overrides(p)

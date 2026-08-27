@@ -38,8 +38,8 @@ def project_preopening(
     category_wow: float,
     season: Season,
 ) -> tuple[float, float]:
-    if release_date > season.window_end:
-        return 0.0, 0.0
+    if not (season.window_start <= release_date <= season.window_end):
+        return 0.0, 0.0  # a film released outside the window earns nothing inside it
     w = derive_wow(opening, total, season.preopening_run_weeks, category_wow)
     week_1 = opening / OPENING_WEEK_SHARE
     in_window_days = (season.window_end - release_date).days + 1

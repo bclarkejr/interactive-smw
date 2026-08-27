@@ -45,3 +45,9 @@ def test_late_window_release_projects_partial(season):
     rel = season.window_end - timedelta(days=21)
     median, _ = project_preopening(rel, 140_000_000, 400_000_000, "med", 0.55, season)
     assert 140_000_000 < median < 400_000_000
+
+def test_release_before_window_scores_zero(season):
+    before = project_preopening(date(2026, 4, 30), 70e6, 200e6, "high", 0.55, season)
+    on_open = project_preopening(date(2026, 5, 1), 70e6, 200e6, "high", 0.55, season)
+    assert before == (0.0, 0.0)
+    assert on_open[0] > 0

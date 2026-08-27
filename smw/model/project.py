@@ -51,6 +51,8 @@ def _project_one(film: Film, season: Season,
     elif film.estimate is not None and film.estimate.is_complete():
         if film.release_date > season.window_end:
             median, sigma, floor, source = 0.0, 0.0, 0.0, "release after window"
+        elif film.release_date < season.window_start:
+            median, sigma, floor, source = 0.0, 0.0, 0.0, "release before window"
         else:
             median, sigma = project_preopening(
                 film.release_date,

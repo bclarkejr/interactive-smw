@@ -89,3 +89,11 @@ def test_final_state_collapses_every_projection(season):
         assert p.sigma == 0.0 and p.source == "final gross"
     assert cat.projections[0].median == 50.0
     assert cat.projections[1].median == 0.0
+
+def test_pre_window_release_with_estimate_projects_zero(season):
+    est = PreopeningEstimate(release_date=date(2026, 4, 24),
+                             opening_weekend_estimate=70_000_000,
+                             total_domestic_estimate=200_000_000, confidence="high")
+    cat = _catalog(season, [_film(status="pre_release", release=date(2026, 4, 24), estimate=est)])
+    p = cat.projections[0]
+    assert (p.median, p.source) == (0.0, "release before window")
