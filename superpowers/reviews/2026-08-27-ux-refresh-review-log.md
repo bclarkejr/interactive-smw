@@ -55,3 +55,9 @@ Documented in the plan's "Decisions the spec forced" section and the SDD ledger 
 |---|-----|------|----------------------------|---------|--------|
 | 1 | med | `smw/render/static/whatif.js:86` | Points grid reuses the score-sorted `rows`, so its player columns shuffle on every reorder; the mockup keeps the grid in fixed simulated-median order and only re-sorts the standings panel | **Valid** — mockup `renderWhatIf` uses `SIM.cols` for the grid | Grid header/cells now iterate `D.players` (pipeline order = simulated median); the sorted array is used only for `#wiStandings`. Test: `test_grid_columns_follow_player_order_not_standings`. |
 | 2 | med | `smw/render/templates/whatif.html.j2:27` | Inlining SortableJS makes `whatif.html` contain `dragstart`/`dragover`/`touchstart`/`elementFromPoint`, failing criterion 11 as written; tests only checked `whatif.js` | **Valid as a spec conflict** (plan decision D1) — the real 1.15.6 build contains those strings, so the criterion is unsatisfiable against the page | Spec criterion 11 amended: the site's own script (`whatif.js`, and the page with the vendored library block removed) contains none of those strings; the page contains `new Sortable(`; the library is the minified 1.15.6 build. Test `test_page_minus_library_has_no_site_drag_code` asserts it against rendered `whatif.html`. |
+
+## Round 3 — 2026-08-27
+
+- Reviewed head: `179ea81` · model `gpt-5.6-sol/high` · exit **0** (`approved`, 0 blocking)
+- Deterministic checks before review: 255 passed.
+- Approval covers `179ea81`; the only later commit is this log entry (workflow documentation, outside the cross-review requirement per AGENTS.md).
