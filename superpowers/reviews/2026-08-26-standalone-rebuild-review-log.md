@@ -3,8 +3,9 @@
 Spec: `superpowers/specs/2026-08-15-standalone-rebuild-spec.md`
 Reviewer: Codex via `scripts/codex-review.sh` (model/effort printed per round).
 Deterministic checks: `.venv/bin/pytest` (lint/types not configured).
-Raw reviewer output per round is copied verbatim to `round-N.json` in this directory;
-the script's stdout/stderr to `round-N.log`.
+This file is the only review record kept. (Raw per-round `round-N.json` / `round-N.log`
+copies were kept for loops 1–4 and deleted on 2026-08-27 at the user's direction; the
+script still leaves its latest result in `.git/codex-review/`, untracked.)
 
 ## Implementation notes before review (deviations from the plan, all deliberate)
 
@@ -28,7 +29,7 @@ the script's stdout/stderr to `round-N.log`.
 
 ## Round 1 — 2026-08-26 22:48 EDT
 
-- Reviewed head: `2710923` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 5 blocking) · raw: `round-1.json`
+- Reviewed head: `2710923` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 5 blocking)
 - Deterministic checks before review: 154 passed.
 
 | # | Sev | File | Finding (verbatim summary) | Verdict | Action |
@@ -44,7 +45,7 @@ the script's stdout/stderr to `round-N.log`.
 
 ## Round 2 — 2026-08-26 22:52 EDT
 
-- Reviewed head: `ba071e4` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking) · raw: `round-2.json`
+- Reviewed head: `ba071e4` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking)
 - Deterministic checks before review: 160 passed.
 
 | # | Sev | File | Finding (verbatim summary) | Verdict | Action |
@@ -57,7 +58,7 @@ the script's stdout/stderr to `round-N.log`.
 
 ## Round 3 (cap) — 2026-08-26 22:56 EDT
 
-- Reviewed head: `4f08a84` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking) · raw: `round-3.json`
+- Reviewed head: `4f08a84` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking)
 - Deterministic checks before review: 165 passed.
 - **Hard cap of 3 rounds reached — loop stopped. Nothing below has been changed in code.**
   Each finding is assessed here for the user to decide; `4f08a84` is the last reviewed commit.
@@ -83,7 +84,7 @@ the script's stdout/stderr to `round-N.log`.
 
 ## Loop 2 (user-invoked `/cross-review`, 2026-08-27) — Round 1, 07:20 EDT
 
-- Reviewed head: `0209fce` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking) · raw: `round-4.json`
+- Reviewed head: `0209fce` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking)
 - Deterministic checks before review: 166 passed. (Stray untracked `uv.lock` parked outside the repo to satisfy the clean-tree check.)
 
 | # | Sev | File | Finding (verbatim summary) | Verdict | Action |
@@ -95,7 +96,7 @@ the script's stdout/stderr to `round-N.log`.
 
 ### Loop 2 — Round 2, 07:27 EDT
 
-- Reviewed head: `fffe0e3` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking) · raw: `round-5.json`
+- Reviewed head: `fffe0e3` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking)
 - Deterministic checks before review: 169 passed.
 
 | # | Sev | File | Finding (verbatim summary) | Verdict | Action |
@@ -105,7 +106,7 @@ the script's stdout/stderr to `round-N.log`.
 
 ### Loop 2 — Round 3 (cap), 07:30 EDT
 
-- Reviewed head: `a015e4b` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking) · raw: `round-6.json`
+- Reviewed head: `a015e4b` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking)
 - Deterministic checks before review: 169 passed. The `--date` finding did not recur after the AGENTS.md clarification.
 - **Cap reached — loop stopped; nothing below changed in code.**
 
@@ -125,7 +126,7 @@ Last reviewed commit: `a015e4b`. No approved SHA exists.
 
 ### Loop 3 — Round 1, 07:33 EDT
 
-- Reviewed head: `24095da` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 5 blocking) · raw: `round-7.json`
+- Reviewed head: `24095da` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 5 blocking)
 - Deterministic checks before review: 175 passed. (User's uncommitted `scripts/codex-review.sh` effort bump stashed at user's direction; reviews stay at medium.)
 
 | # | Sev | File | Finding (verbatim summary) | Verdict | Action |
@@ -140,7 +141,7 @@ Last reviewed commit: `a015e4b`. No approved SHA exists.
 
 ### Loop 3 — Round 2, 07:38 EDT
 
-- Reviewed head: `005073d` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking) · raw: `round-8.json`
+- Reviewed head: `005073d` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking)
 - Deterministic checks before review: 186 passed.
 
 | # | Sev | File | Finding (verbatim summary) | Verdict | Action |
@@ -151,7 +152,7 @@ Last reviewed commit: `a015e4b`. No approved SHA exists.
 
 ### Loop 3 — Round 3 (cap), 07:42 EDT
 
-- Reviewed head: `a85c6f1` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 1 blocking) · raw: `round-9.json`
+- Reviewed head: `a85c6f1` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 1 blocking)
 - Deterministic checks before review: 191 passed. The refresh-date dispute (build.py:160) was **not** raised this round.
 - **Cap reached — loop stopped; nothing below changed in code.**
 
@@ -169,7 +170,7 @@ Last reviewed commit: `a85c6f1`. No approved SHA exists.
 
 ### Loop 4 — Round 1, 07:56 EDT
 
-- Reviewed head: `3105ffc` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking) · raw: `round-10.json`
+- Reviewed head: `3105ffc` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking)
 - Deterministic checks before review: 194 passed.
 
 | # | Sev | File | Finding (verbatim summary) | Verdict | Action |
@@ -179,7 +180,7 @@ Last reviewed commit: `a85c6f1`. No approved SHA exists.
 
 ### Loop 4 — Round 2, 08:00 EDT
 
-- Reviewed head: `495fae4` (includes the user's full 8-player rosters and the regenerated `out/`) · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking + 1 low) · raw: `round-11.json`
+- Reviewed head: `495fae4` (includes the user's full 8-player rosters and the regenerated `out/`) · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking + 1 low)
 - Deterministic checks before review: 195 passed. Refresh-date dispute not raised.
 
 | # | Sev | File | Finding (verbatim summary) | Verdict | Action |
@@ -190,7 +191,7 @@ Last reviewed commit: `a85c6f1`. No approved SHA exists.
 
 ### Loop 4 — Round 3 (cap), 08:05 EDT
 
-- Reviewed head: `8b69f93` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking + 1 low) · raw: `round-12.json`
+- Reviewed head: `8b69f93` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 3 blocking + 1 low)
 - Deterministic checks before review: 200 passed.
 - **Cap reached — loop stopped; nothing below changed in code.**
 
@@ -202,3 +203,10 @@ Last reviewed commit: `a85c6f1`. No approved SHA exists.
 | 4 | low | `smw/render/chart.py:95` | Direct labels can be nudged below the viewBox | Advisory; cheap clamp if wanted. |
 
 Last reviewed commit: `8b69f93`. No approved SHA exists.
+
+### Decisions recorded 2026-08-27 (user)
+- **Refresh-date persistence: denied.** There will be no persisted refresh/run-date record.
+  The rule is now stated in AGENTS.md (Conventions) so the reviewer stops raising it.
+- Raw `round-N.json` / `round-N.log` files removed; this log is the sole review history.
+- Loop-4 cap findings #2 (`apply_chart_aliases` canonical `release_date`) and #3
+  (`load_history` row validation) are queued, awaiting the user's go-ahead for the next loop.
