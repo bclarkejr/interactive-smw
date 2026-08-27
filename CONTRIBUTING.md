@@ -15,7 +15,7 @@ This document is the day-to-day guide. For how the harness was set up, what was 
 
 `AGENTS.md` holds the shared agent context — deterministic-check commands, conventions, review protocol — and `CLAUDE.md` imports it. `.codex/review-rubric.md` and `.codex/review.schema.json` are the reviewer's contract. `scripts/codex-review.sh` is the single entry point used by the skill, the optional Stop hook, and (eventually) CI, so a review behaves identically everywhere; it exits **0** approved, **10** changes requested, **20** invalid reviewer output, **30** reviewer infra failure, **40** precondition failure. `/cross-review <spec>` (`.claude/skills/cross-review/SKILL.md`) drives the loop.
 
-Session state lives in `.git/codex-review/`, keyed by branch (and by session for round counters), so concurrent sessions can't associate the wrong spec or findings with a review. Every verdict is stamped with the commit it reviewed (`<branch>.result.sha`, also printed as `head=` in the script's output) — an approval belongs to that revision and nothing later. At the 3-round cap, unresolved findings are written to the **tracked** `.codex/arbitration/<branch>.json` so they travel with the branch and are visible in any checkout or PR; that file carries `reviewed_head`, an empty `decision` for the human to fill in, and the findings.
+Session state lives in `.git/codex-review/`, keyed by branch (and by session for round counters), so concurrent sessions can't associate the wrong spec or findings with a review. Every verdict is stamped with the commit it reviewed (`<branch>.result.sha`, also printed as `head=` in the script's output) — an approval belongs to that revision and nothing later. At the 10-round cap, unresolved findings are written to the **tracked** `.codex/arbitration/<branch>.json` so they travel with the branch and are visible in any checkout or PR; that file carries `reviewed_head`, an empty `decision` for the human to fill in, and the findings.
 
 The Stop hook (`scripts/codex-review-gate.sh`) is a **local convenience** that runs the loop automatically on finish — it is not the merge-enforcement mechanism, and it is not registered by default. See setup-doc decision 4.
 
@@ -29,7 +29,7 @@ The Stop hook (`scripts/codex-review-gate.sh`) is a **local convenience** that r
 6. Run `/cross-review superpowers/specs/<feature>.md`.
 7. Fix blocking (high/med) findings. If you believe a finding is factually wrong, say so with reasoning instead of "fixing" it.
 8. Re-run checks and create another checkpoint commit.
-9. Repeat review, up to the 3-round cap.
+9. Repeat review, up to the 10-round cap.
 10. Hand unresolved disagreements to a human — fill in the `decision` field of `.codex/arbitration/<branch>.json` and commit it, then run `scripts/codex-review-resolve.sh accept` (or `retry` after fixing the findings instead). `accept` refuses unless the decision is non-empty, committed, and the only thing that changed since `reviewed_head` — arbitration covers the reviewed code, not code added afterwards.
 11. Merge only when **both** deterministic checks and the review requirement (approval or recorded arbitration) pass, **on the current HEAD**.
 
@@ -48,7 +48,7 @@ When CI is added, move this boundary there: run the deterministic checks **and**
 ## Cost & model notes
 
 - Every review round adds a full model pass. Cost depends on diff size, how much of the repository the reviewer explores, model tier, reasoning effort, and number of rounds — a small targeted review and a multi-round investigation differ enormously. **Measure quality, latency, and cost on representative changes before fixing defaults.**
-- Defaults are configurable: `CODEX_REVIEW_MODEL` (quality-first default: `gpt-5.6-sol`) and `CODEX_REVIEW_EFFORT` (`medium` baseline; raise it only after testing shows it earns its cost). Use a lighter tier (e.g. Terra) for spec-lint passes.
+- Defaults are configurable: `CODEX_REVIEW_MODEL` (quality-first default: `gpt-5.6-sol`) and `CODEX_REVIEW_EFFORT` (`high` baseline). Use a lighter tier (e.g. Terra) for spec-lint passes.
 - Direction matters: Claude-writes/Codex-reviews behaves differently from the reverse. This repo standardizes on Claude as writer; experiment per-branch if curious.
 
 ## Troubleshooting
@@ -57,6 +57,6 @@ When CI is added, move this boundary there: run the deterministic checks **and**
 - **Exit 40, base ref not found:** `git fetch origin`, or export `REVIEW_BASE=origin/<your-default-branch>`.
 - **Hook doesn't fire:** hooks load at session start — restart Claude Code after editing `.claude/settings.json`; verify with `/hooks`.
 - **Endless style disagreements:** that's a rubric/conventions gap — add the contested rule to `AGENTS.md` so both agents inherit it.
-- **Stuck after the cap / arbitration:** never hand-delete individual state files — use `scripts/codex-review-resolve.sh retry` (findings fixed, review again) or `accept` (recorded arbitration substitutes for approval). Removing only the `.unresolved` marker leaves the counter at 3 and re-triggers the cap.
+- **Stuck after the cap / arbitration:** never hand-delete individual state files — use `scripts/codex-review-resolve.sh retry` (findings fixed, review again) or `accept` (recorded arbitration substitutes for approval). Removing only the `.unresolved` marker leaves the counter at 10 and re-triggers the cap.
 - **Checks section still TODO:** reviews will run, but merge readiness is resting on model review alone — filling in real test/lint commands is the highest-leverage improvement once the stack is decided.
 - **Changing the harness itself:** edit the real files (`.codex/`, `scripts/`, `.claude/skills/cross-review/`) and re-run the smoke tests in the setup doc. This document describes the workflow; it is not a copy of the harness.

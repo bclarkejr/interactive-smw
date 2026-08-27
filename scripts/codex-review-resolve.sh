@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Usage: scripts/codex-review-resolve.sh retry|accept
 #
-# Recovery tool for after the gate's 3-round cap has been hit. The cap
+# Recovery tool for after the gate's 10-round cap has been hit. The cap
 # deliberately leaves both the round counter and the `.unresolved`
 # marker in place (see codex-review-gate.sh), so clearing them back out
 # has to be an explicit, intentional action rather than something that
