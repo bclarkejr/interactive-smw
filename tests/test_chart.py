@@ -65,6 +65,11 @@ def test_degraded_refresh_dates_appear_as_gaps():
     assert d["series"][0]["values"] == [0.5, None, 0.6]
     assert build_history_data([], refresh_dates={"2026-06-08"}) is None
 
+def test_refresh_dates_before_first_forecast_are_dropped():
+    rows = [{"date": "2026-06-29", "player": "a", "win_prob": 0.5}]
+    d = build_history_data(rows, refresh_dates={"2026-05-04", "2026-07-06"})
+    assert d["dates"] == ["2026-06-29", "2026-07-06"]
+
 def test_direct_labels_stay_inside_viewbox():
     import re
     from smw.render.chart import H, MB, LABEL_MIN_GAP

@@ -16,7 +16,13 @@ def build_history_data(rows: list[dict], refresh_dates=()) -> "dict | None":
     they render as gaps, never interpolated (§12.4)."""
     if not rows:
         return None
-    dates = sorted({r["date"] for r in rows} | set(refresh_dates))
+    
+    # The logic with first is meant to only start the x-axis at the first date that has a forecast.
+    # Otherwise, the graph will start at the first date of the wager, even though we know that the
+    # first half of the wager will never have a forecast, since too few movies will have been released.
+    first = min(r["date"] for r in rows)
+
+    dates = sorted({r["date"] for r in rows} | {d for d in refresh_dates if d >= first})
     players = sorted({r["player"] for r in rows})
     values: dict[tuple[str, str], float] = {}
     for r in rows:  # file order: later run supersedes a shared date
