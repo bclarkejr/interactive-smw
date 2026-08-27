@@ -1,5 +1,6 @@
 """Gross resolution: history + live chart merged by max, carry-forward, Guard C (spec §6.1–6.3)."""
 import json
+import math
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -16,12 +17,11 @@ def load_history(path: Path) -> dict[str, list[tuple[date, float]]]:
     if not path.exists():
         return {}
     per_date: dict[str, dict[date, float]] = {}
-    for line in path.read_text().splitlines():
+    for n, line in enumerate(path.read_text().splitlines(), start=1):
         if not line.strip():
             continue
-        row = json.loads(line)
-        d = date.fromisoformat(row["date"])
-        gross = float(row["cumulative_gross"])
+        row = _history_row(line, path, n)
+        d, gross = row["date"], row["cumulative_gross"]
         by_date = per_date.setdefault(row["movie"], {})
         # §5.5: same-date rows collapse to the max, so a same-day re-run can never
         # inflate a film's snapshot count or skew the observed-decay weight.
@@ -30,6 +30,28 @@ def load_history(path: Path) -> dict[str, list[tuple[date, float]]]:
         title: sorted(by_date.items())
         for title, by_date in per_date.items()
     }
+
+
+def _history_row(line: str, path: Path, n: int) -> dict:
+    """Schema check at the load boundary (§5.5): movie str, ISO date, finite gross ≥ 0."""
+    try:
+        row = json.loads(line)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"{path}:{n}: not valid JSON ({e.msg})") from None
+    if not isinstance(row, dict):
+        raise ValueError(f"{path}:{n}: each line must be a JSON object")
+    movie = row.get("movie")
+    if not isinstance(movie, str) or not movie.strip():
+        raise ValueError(f"{path}:{n}: 'movie' must be a non-empty string")
+    try:
+        d = date.fromisoformat(row.get("date"))
+    except (TypeError, ValueError):
+        raise ValueError(f"{path}:{n}: 'date' must be YYYY-MM-DD") from None
+    gross = row.get("cumulative_gross")
+    if isinstance(gross, bool) or not isinstance(gross, (int, float)) \
+            or not math.isfinite(gross) or gross < 0:
+        raise ValueError(f"{path}:{n}: 'cumulative_gross' must be a finite number >= 0")
+    return {"movie": movie, "date": d, "cumulative_gross": float(gross)}
 
 
 def resolve_grosses(

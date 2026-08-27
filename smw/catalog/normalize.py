@@ -85,9 +85,12 @@ def apply_chart_aliases(rows: list[ChartRow], overrides: dict[str, Override]) ->
     upstream title — applied BEFORE the window filter so a bad upstream date can be rescued."""
     out = []
     for r in rows:
-        ov = overrides.get(r.title) or overrides.get(canonical(r.title, overrides))
+        title = canonical(r.title, overrides)
+        # load_overrides folds a variant entry's corrections onto the canonical entry,
+        # so the canonical entry is the single source of truth for release_date.
+        ov = overrides.get(title)
         out.append(replace(
-            r, title=canonical(r.title, overrides),
+            r, title=title,
             release_date=ov.release_date if ov and ov.release_date else r.release_date))
     return out
 

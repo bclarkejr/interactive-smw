@@ -210,3 +210,13 @@ Last reviewed commit: `8b69f93`. No approved SHA exists.
 - Raw `round-N.json` / `round-N.log` files removed; this log is the sole review history.
 - Loop-4 cap findings #2 (`apply_chart_aliases` canonical `release_date`) and #3
   (`load_history` row validation) are queued, awaiting the user's go-ahead for the next loop.
+
+## Loop 5 (user: "fix #2 and #3 and start a new review loop", 2026-08-27)
+
+- Pre-round: loop-4 cap #2 fixed — `apply_chart_aliases` reads `release_date` from the
+  canonical entry only (variant metadata is already folded there at load). Test:
+  `test_chart_alias_uses_canonical_release_date`. Loop-4 cap #3 fixed — `load_history`
+  validates each JSONL row (object; non-empty string movie; ISO date; finite gross ≥ 0)
+  with `path:line` errors. Test: `test_history_rows_validated_at_load`.
+- Refresh-date persistence is now denied in AGENTS.md; any recurrence is recorded as
+  "denied by convention", not fixed.

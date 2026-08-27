@@ -90,3 +90,17 @@ def test_with_snapshot_drops_observations_after_today():
     out = with_snapshot(h, {"A": 150.0}, date(2026, 6, 8))
     assert out["A"] == [(date(2026, 6, 1), 100.0), (date(2026, 6, 8), 150.0)]
     assert "Future" not in out
+
+@pytest.mark.parametrize("line,needle", [
+    ('{"movie": 5, "date": "2026-06-01", "cumulative_gross": 1}', "movie"),
+    ('{"movie": "A", "date": "June 1", "cumulative_gross": 1}', "date"),
+    ('{"movie": "A", "date": "2026-06-01", "cumulative_gross": -1}', "cumulative_gross"),
+    ('{"movie": "A", "date": "2026-06-01", "cumulative_gross": "1"}', "cumulative_gross"),
+    ('["not", "an", "object"]', "object"),
+    ('{not json', "JSON"),
+])
+def test_history_rows_validated_at_load(tmp_path, line, needle):
+    p = tmp_path / "h.jsonl"
+    p.write_text(line + "\n")
+    with pytest.raises(ValueError, match=needle):
+        load_history(p)

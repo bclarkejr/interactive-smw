@@ -127,3 +127,10 @@ def test_bad_document_shapes_fail_at_load(tmp_path, text):
         load_preopening(p)
     with pytest.raises(ValueError):
         load_overrides(p)
+
+def test_chart_alias_uses_canonical_release_date(tmp_path):
+    p = tmp_path / "o.yaml"
+    p.write_text('"Variant":\n  alias_of: "Canon"\n"Canon":\n  release_date: 2026-05-08\n')
+    ov = load_overrides(p)
+    rows = apply_chart_aliases([ChartRow("Variant", 9.0, date(2026, 4, 24), False)], ov)
+    assert rows[0].title == "Canon" and rows[0].release_date == date(2026, 5, 8)
