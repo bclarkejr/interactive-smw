@@ -41,10 +41,10 @@ def json_embed(obj) -> Markup:
 
 def fmt_money(x: float) -> str:
     """Mockup formats: $498.0M, $1.02B."""
-    x = float(x)
-    if x >= 1e9:
-        return f"${x / 1e9:.2f}B"
-    return f"${x / 1e6:.1f}M"
+    m = round(float(x) / 1e6, 1)
+    if m >= 1000:
+        return f"${m / 1000:.2f}B"
+    return f"${m:.1f}M"
 
 
 def make_env() -> Environment:

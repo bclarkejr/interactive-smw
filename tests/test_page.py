@@ -24,6 +24,8 @@ def test_fmt_money_matches_mockup():
     assert fmt_money(498_000_000) == "$498.0M"
     assert fmt_money(310_491_022) == "$310.5M"
     assert fmt_money(468_000) == "$0.5M"
+    assert fmt_money(999_960_000) == "$1.00B"
+    assert fmt_money(999_940_000) == "$999.9M"
 
 def test_theme_script_in_head_before_body(tmp_path, season, group):
     html = _render_rules(tmp_path, season, group)
