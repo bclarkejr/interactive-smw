@@ -102,3 +102,16 @@ the script's stdout/stderr to `round-N.log`.
 |---|-----|------|----------------------------|---------|--------|
 | 1 | med | `smw/render/build.py:160` | Refresh dates are rebuilt from positive-gross box-office rows; a degraded production run with zero grosses (pre-season) leaves no durable record, so later builds drop that date and the line connects across it | **Disputed (scope), not fixed.** Factually correct for one case: a *production* run before any gross exists *and* below the forecast threshold. But spec §5 enumerates the persisted files and §5.6 states a degraded run appends nothing — the gap is the intended signal. Persisting run dates needs a new data file the spec doesn't define. Pre-season production runs are also not part of the documented weekly cadence. Left for the user: either accept the edge or add a `refresh_history.jsonl` (spec change). | none |
 | 2 | med | `smw/__main__.py:8` | `--date` defaults to `date.today()` | **Rejected by user (2026-08-27)** — spec §1.3 permits wall-clock time to enter via the explicitly passed run day and only there; day-to-day differences are intended. AGENTS.md convention reworded to make the CLI default explicit so the reviewer stops re-raising it. | AGENTS.md wording only |
+
+### Loop 2 — Round 3 (cap), 07:30 EDT
+
+- Reviewed head: `a015e4b` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking) · raw: `round-6.json`
+- Deterministic checks before review: 169 passed. The `--date` finding did not recur after the AGENTS.md clarification.
+- **Cap reached — loop stopped; nothing below changed in code.**
+
+| # | Sev | File | Finding (verbatim summary) | My assessment |
+|---|-----|------|----------------------------|---------------|
+| 1 | med | `smw/render/build.py:160` | Same as loop-2 round-2 #1: a degraded production run before any gross leaves no durable date, so later charts connect across it | Still disputed on spec grounds (§5 file set, §5.6 "degraded run appends nothing"). Fixing requires a spec addition (a persisted refresh-date file). **User decision.** |
+| 2 | med | `smw/config/season.py:38` | `load_season` doesn't validate types/ranges/`default_wow` keys; zero trials or a missing category fails later (division by zero, `KeyError`) instead of at the load boundary | **Agree.** Small: assert positive ints for counts/thresholds, dates for the window, and that `default_wow` has both `wide` and `animated_family` in (0, 1]. Recommend fixing. |
+
+Last reviewed commit: `a015e4b`. No approved SHA exists.
