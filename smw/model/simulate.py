@@ -113,7 +113,7 @@ def _scenarios(season, group, players, titles, top10,
             b = score_breakdown(group.players[v], finish)
             grid[v] = (b + [0] * 10)[:10]
         totals = {v: int(score_matrix[players.index(v), best_trial]) for v in players}
-        margin = totals[u] - max(t for v, t in totals.items() if v != u)
+        margin = totals[u] - max((t for v, t in totals.items() if v != u), default=0)
         out[u] = Scenario(films=finish, grid=grid, totals=totals,
                           win_pct=round(win_prob[u] * 100, 1), margin=margin)
     return out
