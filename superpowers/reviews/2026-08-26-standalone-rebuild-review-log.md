@@ -160,3 +160,9 @@ Last reviewed commit: `a015e4b`. No approved SHA exists.
 | 1 | med | `smw/config/groups.py:31` | `players: false` becomes an empty roster via `or {}`; a mapping-valued `ranked`/`dark_horses` becomes a tuple of its keys and can pass the count checks | **Agree.** Trivial: default only `None` to `{}`, and require `ranked`/`dark_horses` to be lists. Recommend fixing. |
 
 Last reviewed commit: `a85c6f1`. No approved SHA exists.
+
+## Loop 4 (user: "fix and review once more", 2026-08-27)
+
+- Pre-round: loop-3 cap finding fixed — `players` defaults to `{}` only when null, any other
+  non-mapping is rejected; `ranked`/`dark_horses` must be YAML lists. Tests:
+  `test_players_false_is_rejected_not_empty`, `test_players_null_is_empty`, `test_mapping_valued_picks_rejected`.

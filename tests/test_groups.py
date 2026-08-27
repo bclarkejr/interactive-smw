@@ -55,3 +55,16 @@ def test_group_id_must_be_slug(tmp_path, gid):
 def test_bad_types_fail_at_load(tmp_path, bad, needle):
     with pytest.raises(ValueError, match=needle):
         load_group(_write(tmp_path, bad))
+
+def test_players_false_is_rejected_not_empty(tmp_path):
+    with pytest.raises(ValueError, match="players"):
+        load_group(_write(tmp_path, "group_id: t\ndisplay_name: T\nplayers: false\n"))
+
+def test_players_null_is_empty(tmp_path):
+    assert load_group(_write(tmp_path, "group_id: t\ndisplay_name: T\nplayers:\n")).players == {}
+
+def test_mapping_valued_picks_rejected(tmp_path):
+    bad = VALID.replace("ranked: [F1, F2, F3, F4, F5, F6, F7, F8, F9, F10]",
+                        "ranked: {F1: 1, F2: 2, F3: 3, F4: 4, F5: 5, F6: 6, F7: 7, F8: 8, F9: 9, F10: 10}")
+    with pytest.raises(ValueError, match="ranked must be a YAML list"):
+        load_group(_write(tmp_path, bad))
