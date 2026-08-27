@@ -1,0 +1,19 @@
+group_id: filmcast-friends
+display_name: "The Friends League"
+players:
+  bclarke:
+    ranked:
+      - Toy Story 5
+      - "Spider-Man: Brand New Day"
+      - Minions & Monsters
+      - The Devil Wears Prada 2
+      - The Odyssey
+      - Moana
+      - "Star Wars: The Mandalorian and Grogu"
+      - Supergirl
+      - Disclosure Day
+      - Mortal Kombat II
+    dark_horses:
+      - Backrooms
+      - Scary Movie
+      - Evil Dead Burn
