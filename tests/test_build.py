@@ -219,3 +219,15 @@ def test_chart_release_date_override_rescues_out_of_window_row(data_dir, tmp_pat
     d = json.loads((_run(data_dir, tmp_path) / "data.json").read_text())
     assert any(p["movie_title"] == "Spring Holdover" and p["floor"] == 150e6
                for p in d["projections"])
+
+@pytest.mark.parametrize("line,needle", [
+    ('{"date": "2026-06-01", "player": "", "win_prob": 0.5, "median_final_pts": 1, "p10": 1, "p90": 1}', "player"),
+    ('{"date": "June", "player": "a", "win_prob": 0.5, "median_final_pts": 1, "p10": 1, "p90": 1}', "date"),
+    ('{"date": "2026-06-01", "player": "a", "win_prob": 1.5, "median_final_pts": 1, "p10": 1, "p90": 1}', "win_prob"),
+    ('{"date": "2026-06-01", "player": "a", "win_prob": 0.5, "median_final_pts": "x", "p10": 1, "p90": 1}', "median_final_pts"),
+])
+def test_forecast_history_rows_validated(tmp_path, line, needle):
+    p = tmp_path / "f.jsonl"
+    p.write_text(line + "\n")
+    with pytest.raises(ValueError, match=needle):
+        build._load_forecast_rows(p)

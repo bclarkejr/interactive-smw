@@ -220,3 +220,14 @@ Last reviewed commit: `8b69f93`. No approved SHA exists.
   with `path:line` errors. Test: `test_history_rows_validated_at_load`.
 - Refresh-date persistence is now denied in AGENTS.md; any recurrence is recorded as
   "denied by convention", not fixed.
+
+### Loop 5 — Round 1, 08:18 EDT
+
+- Reviewed head: `02a3bb7` · model `gpt-5.6-sol/medium` · exit **10** (`changes_requested`, 2 blocking + 1 low)
+- Deterministic checks before review: 207 passed. Refresh-date persistence not raised.
+
+| # | Sev | File | Finding (verbatim summary) | Verdict | Action |
+|---|-----|------|----------------------------|---------|--------|
+| 1 | med | `smw/catalog/normalize.py:137` | Pre-opening estimates accept non-finite floats (`.inf`) and would propagate `Infinity` into projections/data.json | **Valid** | Estimates must be finite. Test: `test_non_finite_estimate_rejected`. |
+| 2 | med | `smw/render/build.py:82` | `forecast_history.jsonl` rows not schema-validated | **Valid** | `_load_forecast_rows` validates object shape, ISO date, player, finite numbers, `win_prob ∈ [0,1]` with `path:line` errors. Test: `test_forecast_history_rows_validated`. |
+| 3 | low | `smw/render/chart.py:95` | Direct labels can be pushed below the viewBox | Taken (cheap): stack shifted up by any overflow and re-separated top-down. Test: `test_direct_labels_stay_inside_viewbox`. |

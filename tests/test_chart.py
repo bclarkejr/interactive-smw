@@ -64,3 +64,12 @@ def test_degraded_refresh_dates_appear_as_gaps():
     assert d["dates"] == ["2026-06-01", "2026-06-08", "2026-06-15"]
     assert d["series"][0]["values"] == [0.5, None, 0.6]
     assert build_history_data([], refresh_dates={"2026-06-08"}) is None
+
+def test_direct_labels_stay_inside_viewbox():
+    import re
+    from smw.render.chart import H, MB, LABEL_MIN_GAP
+    rows = [{"date": "2026-06-01", "player": p, "win_prob": 0.01} for p in "abcd"]
+    svg = render_chart_svg(build_history_data(rows))
+    ys = sorted(float(y) for y in re.findall(r'class="direct-label" x="[\d.]+" y="([\d.]+)"', svg))
+    assert len(ys) == 4 and ys[-1] <= H - MB
+    assert all(b - a >= LABEL_MIN_GAP - 1e-9 for a, b in zip(ys, ys[1:]))

@@ -95,6 +95,18 @@ def render_chart_svg(data: dict) -> str:
         while any(abs(y - py) < LABEL_MIN_GAP for py in placed):
             y += LABEL_MIN_GAP
         placed.append(y)
+    # Keep the stack inside the plot: shift everything up by any overflow, then
+    # re-separate from the top down so the minimum gap survives the shift.
+    bottom, top = H - MB - 4, MT + 10
+    overflow = max(0.0, max(placed, default=0.0) - bottom)
+    placed = sorted(py - overflow for py in placed)
+    for k in range(len(placed)):
+        floor_y = top if k == 0 else placed[k - 1] + LABEL_MIN_GAP
+        placed[k] = max(placed[k], floor_y)
+    label_y = dict(zip(sorted(range(len(placed)), key=lambda k: _y(latest[k][1], ymax)),
+                       placed))
+    for k, (s, v, last_i) in enumerate(latest[:DIRECT_LABELS]):
+        y = label_y[k]
         x = W - MR + 8
         parts.append(f'<rect class="swatch series-{s["color"]}" x="{x}" '
                      f'y="{y - 8:.1f}" width="8" height="8"/>')

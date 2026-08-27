@@ -1,4 +1,5 @@
 """Catalog normalization: overrides, aliases, analyst estimates, film records (spec §5.3–5.4, §6.2, §6.5)."""
+import math
 from dataclasses import dataclass, fields, replace
 from datetime import date
 from pathlib import Path
@@ -134,8 +135,9 @@ def load_preopening(path: Path) -> dict[str, PreopeningEstimate]:
                 raise ValueError(f"{path}: '{title}' {key} must be a date (YYYY-MM-DD)")
         for key in ("opening_weekend_estimate", "total_domestic_estimate"):
             v = fields_.get(key)
-            if v is not None and (isinstance(v, bool) or not isinstance(v, (int, float))):
-                raise ValueError(f"{path}: '{title}' {key} must be a number, not {type(v).__name__}")
+            if v is not None and (isinstance(v, bool) or not isinstance(v, (int, float))
+                                  or not math.isfinite(v)):
+                raise ValueError(f"{path}: '{title}' {key} must be a finite number")
         for key in ("source", "notes"):
             v = fields_.get(key)
             if v is not None and not isinstance(v, str):

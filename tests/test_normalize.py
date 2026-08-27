@@ -134,3 +134,9 @@ def test_chart_alias_uses_canonical_release_date(tmp_path):
     ov = load_overrides(p)
     rows = apply_chart_aliases([ChartRow("Variant", 9.0, date(2026, 4, 24), False)], ov)
     assert rows[0].title == "Canon" and rows[0].release_date == date(2026, 5, 8)
+
+def test_non_finite_estimate_rejected(tmp_path):
+    p = tmp_path / "pre.yaml"
+    p.write_text('"X":\n  opening_weekend_estimate: .inf\n')
+    with pytest.raises(ValueError, match="finite"):
+        load_preopening(p)

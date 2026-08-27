@@ -1,5 +1,6 @@
 """Pipeline glue: the only module that knows the order of operations (Appendix B)."""
 import json
+import math
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -77,9 +78,34 @@ def append_forecast_history(path: Path, sim: SimResult, today: date):
 
 
 def _load_forecast_rows(path: Path) -> list[dict]:
+    """Schema check at the load boundary (§5.6): date, player, win_prob in [0, 1],
+    finite point values."""
     if not path.exists():
         return []
-    return [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+    rows = []
+    for n, line in enumerate(path.read_text().splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"{path}:{n}: not valid JSON ({e.msg})") from None
+        if not isinstance(row, dict):
+            raise ValueError(f"{path}:{n}: each line must be a JSON object")
+        try:
+            date.fromisoformat(row.get("date"))
+        except (TypeError, ValueError):
+            raise ValueError(f"{path}:{n}: 'date' must be YYYY-MM-DD") from None
+        if not isinstance(row.get("player"), str) or not row["player"].strip():
+            raise ValueError(f"{path}:{n}: 'player' must be a non-empty string")
+        for key in ("win_prob", "median_final_pts", "p10", "p90"):
+            v = row.get(key)
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v):
+                raise ValueError(f"{path}:{n}: '{key}' must be a finite number")
+        if not 0.0 <= row["win_prob"] <= 1.0:
+            raise ValueError(f"{path}:{n}: 'win_prob' must be within [0, 1]")
+        rows.append(row)
+    return rows
 
 
 def run_build(data_dir: Path, out_dir: Path, today: date, local: bool) -> None:
