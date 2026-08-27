@@ -114,3 +114,35 @@ def render_whatif(env: Environment, out_dir: Path, ctx: dict,
         "scoring_js": Markup((STATIC / "scoring.js").read_text()),
         "whatif_js": Markup((STATIC / "whatif.js").read_text()),
     })
+
+
+def build_scenarios_view(group: Group, sim: SimResult) -> list[dict]:
+    tabs = []
+    order = sorted(group.players, key=lambda u: (-sim.win_prob[u], u))
+    for u in order:
+        sc = sim.scenarios[u]
+        entry = {"username": u, "win_pct": round(sim.win_prob[u] * 100, 1),
+                 "scenario": None}
+        if sc is not None:
+            cols = sorted(sc.totals, key=lambda v: (-sc.totals[v], v))
+            entry["scenario"] = {
+                "caption": (
+                    f"Most likely finish in which {u} wins the wager 🏆 — {u} edges "
+                    f"the field by just {sc.margin} pt"
+                    f"{'s' if sc.margin != 1 else ''}; they win ~{entry['win_pct']}% "
+                    "of all sims."),
+                "columns": cols,
+                "rows": [{"title": t, "cells": [sc.grid[v][i] for v in cols]}
+                         for i, t in enumerate(sc.films)],
+                "totals": [sc.totals[v] for v in cols],
+            }
+        tabs.append(entry)
+    return tabs
+
+
+def render_scenarios(env: Environment, out_dir: Path, ctx: dict,
+                     tabs: "list[dict] | None", reason: str | None) -> None:
+    write_page(env, "scenarios.html.j2", out_dir, "scenarios.html", {
+        **ctx, "title": "Winning Scenarios", "tabs": tabs, "reason": reason,
+        "scenarios_js": Markup((STATIC / "scenarios.js").read_text()),
+    })

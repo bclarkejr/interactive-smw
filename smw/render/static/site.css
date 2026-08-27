@@ -98,3 +98,11 @@ footer a { color: var(--muted); }
   font-size: 0.7rem; }
 #film-list li:nth-child(n+11) { opacity: 0.55; }
 #film-list li.dragging { opacity: 0.4; }
+
+/* Winning Scenarios tabs */
+.tab-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.8rem 0; }
+.tab { padding: 0.35rem 0.8rem; border-radius: 999px; background: var(--card);
+  color: var(--ink); border: 1px solid var(--border); cursor: pointer; }
+.tab[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tab:disabled { opacity: 0.45; cursor: not-allowed; }
+th.highlight-col, td.highlight-col { background: var(--dim); }
