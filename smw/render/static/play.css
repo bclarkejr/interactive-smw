@@ -1,1 +1,14 @@
-/* Play-along pages only (play-along spec §5); inlined after site.css. */
+/* Play-along pages only (play-along spec §5); inlined after site.css.
+   No section[hidden] rule: the UA sheet's [hidden] beats its section display. */
+tr.me td{background:var(--hl)}
+code{background:var(--pill);border-radius:4px;padding:1px 5px;font-size:.9em}
+.join-grid{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;max-width:640px}
+.join-grid label{text-align:right;color:var(--ink2)}
+.join-grid input{background:var(--surface);color:var(--ink);border:1px solid var(--border);
+  border-radius:8px;padding:8px 10px;font:inherit;width:100%}
+.join-grid .div{grid-column:1/-1;border-bottom:2px dashed var(--baseline);color:var(--muted);
+  padding:8px 0 4px;font-size:.85rem}
+.join-actions{margin:16px 0}
+.join-actions button,#joinCopy{background:var(--accent);color:#fff;border:0;border-radius:999px;
+  padding:8px 18px;font:inherit;cursor:pointer}
+.join-error{color:var(--neg);margin:8px 0}
