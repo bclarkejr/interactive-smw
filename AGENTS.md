@@ -5,6 +5,7 @@ Summer Movie Wager — Python ≥3.11 static-site generator (batch pipeline, sta
 ## Deterministic checks (must pass before any review round)
 - Install: `uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python --config-settings editable_mode=compat -e '.[dev]'`
 - Test: `.venv/bin/pytest`
+- Worker test: `cd worker && npm ci && npm test` (Node ≥20; the players API in `worker/` has its own suite)
 - Lint: not configured
 - Types/Build: not configured
 

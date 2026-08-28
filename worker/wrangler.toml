@@ -1,0 +1,11 @@
+name = "smw-players"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+[vars]
+SEASON_YEAR = "2026"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "smw-players"
+database_id = "replace-with-the-id-printed-by-wrangler-d1-create"
