@@ -8,7 +8,7 @@ function rankedPickPoints(predicted, actual) {
   return 3;
 }
 function positionMap(topTitles) {
-  var pos = {};
+  var pos = Object.create(null);   // titles are user data: no inherited Object keys
   for (var i = 0; i < topTitles.length; i++) pos[topTitles[i]] = i + 1;
   return pos;
 }
@@ -28,5 +28,6 @@ function scorePlayer(ranked, dark, topTitles) {
   return total;
 }
 if (typeof module !== "undefined") {
-  module.exports = { rankedPickPoints: rankedPickPoints, scorePlayer: scorePlayer };
+  module.exports = { rankedPickPoints: rankedPickPoints, scorePlayer: scorePlayer,
+                     pointsFor: pointsFor };
 }

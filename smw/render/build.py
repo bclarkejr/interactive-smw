@@ -8,7 +8,9 @@ from smw.catalog.normalize import (apply_chart_aliases, build_films, canonical,
                                    canonical_group, load_overrides, load_preopening)
 from smw.catalog.resolve import load_history, resolve_grosses, with_snapshot
 from smw.config.groups import Group
+from smw.config.play import load_play
 from smw.config.season import Season, load_season_dir
+from smw.ingest import players as players_api
 from smw.ingest.boxoffice import chart_floor, fetch_chart, parse_chart, windowed
 from smw.model.project import MovieCatalog, build_catalog
 from smw.model.simulate import MIN_FILMS_FOR_TOP_TEN, SimResult, simulate
@@ -17,10 +19,12 @@ from smw.render.page import (Site, base_context, build_scenarios_view, build_wha
                              make_env, render_history, render_leaderboard,
                              render_redirect, render_rules, render_scenarios,
                              render_whatif)
+from smw.render.play import build_play_data, play_context, render_join, render_play
 from smw.render.views import build_leaderboard_view
 from smw.score.rules import score_player
 
 fetch = fetch_chart  # network seam; tests monkeypatch this
+fetch_players = players_api.fetch_players  # play-along network seam; tests monkeypatch this
 
 
 def build_data_json(season, group, catalog, sim, current_points,
@@ -137,6 +141,16 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
         print(f"warning: {season.year}: no box-office history file yet (normal on the first run)")
     history = load_history(history_path)
 
+    play_cfg = load_play(season_dir / "play.yaml")
+    play_titles: set[str] = set()
+    if play_cfg is not None:
+        try:
+            play_titles = {canonical(t, overrides)
+                           for t in players_api.picked_titles(fetch_players(play_cfg.api_base_url))}
+        except Exception as e:  # noqa: BLE001 — play-along §6.3: optional dependency, warn and continue
+            print(f"warning: {season.year}: players API unreachable ({e}); "
+                  "play-along picks are not in this build's catalog")
+
     fetch_window = season.window_start <= today - timedelta(days=1) <= season.window_end
     # Persist from opening day through the final eligible run (window_end + 1); the chart
     # fetch keeps its yesterday-based boundary (§6.1). A frozen or not-yet-open season
@@ -157,7 +171,7 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
         season, history, chart_rows, floor, today)
 
     films = build_films(season, groups, chart_rows, grosses, carried,
-                        overrides, preopening, today)
+                        overrides, preopening, today, extra_titles=play_titles)
     picked = {canonical(t, overrides)
               for g in groups for p in g.players.values()
               for t in p.ranked + p.dark_horses}
@@ -225,6 +239,15 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
             build_data_json(season, group, catalog, sim, current_points,
                             non_zero, reason, today),
             indent=2, sort_keys=True))
+
+    if play_cfg is not None:
+        # Play-along pages are season-scoped (play-along spec §4.1, decision 2): one pair per
+        # year, next to the group directories. Never scored server-side (§6.5).
+        play_data = build_play_data(season, catalog, actual_top, forecastable, reason,
+                                    today, play_cfg, season_over=final)
+        pctx = play_context(season, today, f"{season.default_group}/rules.html")
+        render_play(env, out_dir, pctx, play_data)
+        render_join(env, out_dir, pctx, play_data, season_over=final)
 
     if persist:
         # Roster-independent: appended once per season, never once per group.

@@ -1,0 +1,29 @@
+{% extends "play_base.html.j2" %}
+{% block content %}
+{% if data.state == "early" -%}
+<p class="small">No projections yet — {{ data.reason }}. Standings show current points only until the forecast is live.</p>
+{% endif -%}
+<section id="playLoading"><p class="small">Loading players…</p></section>
+<section id="playError" hidden><div class="locked">Couldn't load players — try again in a minute.</div></section>
+<section id="playNotFound" hidden><div class="locked">No player named <strong id="playMissingName"></strong> — check the spelling, or <a href="join.html">join below</a>.</div></section>
+<section id="playExplainer" hidden>
+  <h2>🎟 Play along</h2>
+  <p>Pick the summer's top ten grossing films in order, plus three dark horses, and follow your
+  standings all season. Anyone can play, any time — <a href="join.html">join here</a>. Your picks
+  are final once submitted; your personal page lives at <code>play.html?user=your-name</code>, and
+  <code>play.html?follow=a,b,c</code> shows any group of players you name.</p>
+</section>
+<section id="playBoard" hidden>
+  <h2 id="playHeading">🏆 Standings</h2>
+  <p id="playUnknown" class="small" hidden></p>
+  <div class="scroller"><table id="playTable"><thead><tr></tr></thead><tbody></tbody></table></div>
+</section>
+<section id="playDetail" hidden>
+  <h2 id="playDetailHeading"></h2>
+  <p id="playJoined" class="small"></p>
+  <div class="scroller"><table id="playPicks"><thead><tr></tr></thead><tbody></tbody></table></div>
+</section>
+<script>window.PLAY={{ data | json_embed }};</script>
+<script>{{ scoring_js }}</script>
+<script>{{ play_js }}</script>
+{% endblock %}

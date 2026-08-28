@@ -229,3 +229,7 @@ __marimo__/
 
 # Git worktrees
 .worktrees/
+
+# Cloudflare Worker
+worker/node_modules/
+worker/.wrangler/

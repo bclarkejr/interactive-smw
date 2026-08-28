@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }} · Summer Movie Wager {{ year }}</title>
+<script>{{ theme_js }}</script>
+<style>{{ css }}
+{{ play_css }}</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <div>
+    <h1>🍿 Summer Movie Wager</h1>
+    <div class="sub">Play along &nbsp;·&nbsp; Wager window: {{ window_label }}</div>
+  </div>
+  <button id="themeToggle" type="button" aria-label="Toggle color theme">◐ Theme</button>
+</header>
+
+<nav class="pills" aria-label="Play along">
+  <a href="play.html"{% if active == "play" %} aria-current="page"{% endif %}>🎟 Play Along</a>
+  <a href="join.html"{% if active == "join" %} aria-current="page"{% endif %}>✍️ Join</a>
+</nav>
+
+{% block content %}{% endblock %}
+
+<footer class="site">
+  <a href="{{ rules_href }}">Scoring rules</a> &nbsp;·&nbsp;
+  <span class="small">Films &amp; projections as of {{ refreshed }} · players live.</span>
+</footer>
+
+</div>
+</body>
+</html>

@@ -305,6 +305,41 @@ def test_production_run_leaves_past_seasons_untouched(data_dir, tmp_path):
     html = (tmp_path / "out" / "2025" / "g" / "history.html").read_text()
     assert "2026-08-15" not in html                            # and no phantom refresh date
 
+PLAY_YAML = "api_base_url: https://smw-players.example.workers.dev\ndefault_group: [alice]\n"
+
+def test_play_picks_enter_the_catalog(data_dir, tmp_path, monkeypatch):
+    # Play-along §6.3: a pick that fell out of the top-contenders slice is rescued.
+    # §6.5: an anonymous title the build knows nothing about never reaches data.json.
+    (data_dir / "season.yaml").write_text(
+        (data_dir / "season.yaml").read_text() + "chart_contenders: 3\n")
+    (data_dir / "groups" / "g.yaml").write_text(
+        (data_dir / "groups" / "g.yaml").read_text()
+        .replace("[D1, D2, Tiny Tail Film]", "[D1, D2, D3]"))
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    monkeypatch.setattr(build, "fetch_players", lambda url: [
+        {"username": "zed", "joined_at": "2026-08-01T00:00:00Z",
+         "ranked": ["Big Summer Film"] + [f"P{i}" for i in range(9)],
+         "dark_horses": ["Tiny Tail Film", "Deep Play Pick", "P9"]}])
+    out = _run(data_dir, tmp_path)
+    titles = {p["movie_title"] for p in json.loads((out / "data.json").read_text())["projections"]}
+    assert "Tiny Tail Film" in titles      # on the chart, below the 3 contenders
+    assert "Deep Play Pick" not in titles  # known to neither chart nor estimates
+
+def test_players_api_failure_warns_and_continues(data_dir, tmp_path, monkeypatch, capsys):
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    def boom(url):
+        raise ConnectionError("dns")
+    monkeypatch.setattr(build, "fetch_players", boom)
+    out = _run(data_dir, tmp_path)
+    assert (out / "index.html").exists()          # friends site still publishes (§6.3)
+    assert "players API unreachable" in capsys.readouterr().out
+
+def test_no_play_yaml_means_no_players_fetch(data_dir, tmp_path, monkeypatch):
+    def boom(url):
+        raise AssertionError("must not be called")
+    monkeypatch.setattr(build, "fetch_players", boom)
+    _run(data_dir, tmp_path)
+
 def test_missing_seasons_dir_is_a_build_error(tmp_path):
     (tmp_path / "data").mkdir()
     with pytest.raises(ValueError, match="seasons"):
@@ -334,3 +369,29 @@ def test_production_run_appends_forecast_per_group_and_box_office_once(data_dir,
     assert not (data_dir / "forecast_history.jsonl").exists()
     bo = (data_dir / "box_office_history.jsonl").read_text().splitlines()
     assert len(bo) == len({json.loads(l)["movie"] for l in bo})  # once per season, not per group
+
+def test_play_pages_built_only_with_play_yaml(data_dir, tmp_path, monkeypatch):
+    monkeypatch.setattr(build, "fetch_players", lambda url: [])
+    out = _run(data_dir, tmp_path).parent
+    assert not (out / "play.html").exists() and not (out / "join.html").exists()
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    out = _run(data_dir, tmp_path).parent
+    assert (out / "play.html").exists() and (out / "join.html").exists()
+    html = (out / "play.html").read_text()
+    assert 'href="g/rules.html"' in html                     # season's default group's rules
+    assert '"default_group":["alice"]' in html
+    assert '"build_date":"2026-08-15"' in html
+
+def test_play_page_state_follows_the_forecast_gate(data_dir, tmp_path, monkeypatch):
+    monkeypatch.setattr(build, "fetch_players", lambda url: [])
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    out = _run(data_dir, tmp_path).parent                    # 3 projections < 25 → early
+    assert '"state":"early"' in (out / "play.html").read_text()
+
+def test_join_page_locks_after_the_season(data_dir, tmp_path, monkeypatch):
+    monkeypatch.setattr(build, "fetch_players", lambda url: [])
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    out = _run(data_dir, tmp_path, today=date(2026, 9, 9)).parent   # window_end + 2 → Final
+    html = (out / "join.html").read_text()
+    assert "Season's over" in html and 'id="joinForm"' not in html
+    assert '"state":"final"' in (out / "play.html").read_text()
