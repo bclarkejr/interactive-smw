@@ -33,5 +33,12 @@
     "dark_horses": ["X","Y","Z"],
     "finish": ["Q","R","S","T","U","V","W","N","O","P"],
     "expected": 0
+  },
+  {
+    "name": "prototype-named titles are not positions",
+    "ranked": ["toString","constructor","valueOf","hasOwnProperty","__proto__","isPrototypeOf","propertyIsEnumerable","toLocaleString","A","B"],
+    "dark_horses": ["__defineGetter__","__lookupGetter__","toSource"],
+    "finish": ["Q","R","S","T","U","V","W","N","O","P"],
+    "expected": 0
   }
 ]

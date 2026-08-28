@@ -71,6 +71,13 @@ test("unknown default-group names are dropped silently", () => {
   assert.deepEqual(v.unknown, []);
 });
 
+test("an empty follow replaces the default group, leaving only the user", () => {
+  const v = P.composeView({ user: "alice", follow: [] }, ALL, ["bob", "carol"]);
+  assert.equal(v.state, "user");
+  assert.deepEqual(v.players.map((p) => p.username), ["alice"]);
+  assert.deepEqual(v.unknown, []);
+});
+
 test("bare URL with empty default group shows nobody", () => {
   const v = P.composeView({ user: null, follow: null }, ALL, []);
   assert.equal(v.state, "bare");
@@ -185,7 +192,7 @@ function run(search, players, opts) {
   };
   global.window = {
     location: { search },
-    PLAY: { state: opts.state || "live", api_base_url: "https://x.test",
+    PLAY: { year: 2026, state: opts.state || "live", api_base_url: "https://x.test",
             default_group: opts.defaultGroup || ["alice", "bob"],
             catalog: TEN.concat(["M15", "M16", "M17"]).map((t, i) => ({ title: t, projected_rank: i + 1 })),
             actual_top: TEN, projected_top: TEN },
@@ -195,7 +202,7 @@ function run(search, players, opts) {
     calls.push([u, o]);
     if (opts.reject) return Promise.reject(new Error("offline"));
     if (opts.notOk) return Promise.resolve({ ok: false, status: 503 });
-    return Promise.resolve({ ok: true, json: () => Promise.resolve(opts.body || { players }) });
+    return Promise.resolve({ ok: true, json: () => Promise.resolve(opts.body || { year: 2026, players }) });
   };
   new Function(SRC)();                                    // play.js self-starts on window.PLAY
   const cells = (row) => row.children.map((c) => c.textContent);
@@ -278,7 +285,8 @@ test("main: nobody to tabulate falls back to the explainer, not a blank page", a
 });
 
 test("main: a dead API shows the error state, not an empty board", async () => {
-  for (const opts of [{ reject: true }, { notOk: true }, { body: { oops: 1 } }]) {
+  for (const opts of [{ reject: true }, { notOk: true }, { body: { oops: 1 } },
+                      { body: { year: 2025, players: [TEN_PLAYER] } }]) {   // stale season page
     const p = await run("", [TEN_PLAYER], opts);
     assert.equal(p.ids.playError.hidden, false, JSON.stringify(opts));
     assert.equal(p.ids.playLoading.hidden, true, JSON.stringify(opts));

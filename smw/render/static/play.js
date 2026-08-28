@@ -161,7 +161,11 @@ function main() {
   fetch(D.api_base_url + "/api/players", { cache: "no-store" })
     .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
     .then(function (body) {
-      if (!Array.isArray(body.players)) throw new Error("malformed roster payload");
+      // A page left over from a past season would silently tabulate the new
+      // season's roster against last year's films: treat a year mismatch as
+      // malformed rather than render it.
+      if (!Array.isArray(body.players) || body.year !== D.year)
+        throw new Error("malformed roster payload");
       return body.players;                                   // rejects into `failed` below
     })
     .then(function (players) { render(composeView(params, players, D.default_group)); },

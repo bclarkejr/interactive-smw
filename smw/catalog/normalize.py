@@ -169,6 +169,7 @@ def build_films(
     extra_titles: Iterable[str] = (),
 ) -> list[Film]:
     chart_by_title = {r.title: r for r in chart_rows}
+    pre_canon = {canonical(t, overrides): e for t, e in preopening.items()}
 
     # §6.2 candidate set: rosters ∪ estimate keys ∪ top chart contenders ∪ carried
     # ∪ play-along picks (play-along spec §6.3, already canonical).
@@ -176,13 +177,16 @@ def build_films(
     for g in groups:
         for p in g.players.values():
             candidates.update(canonical(t, overrides) for t in p.ranked + p.dark_horses)
-    candidates.update(canonical(t, overrides) for t in preopening)
+    candidates.update(pre_canon)
     top_chart = sorted(chart_rows, key=lambda r: -r.gross)[: season.chart_contenders]
     candidates.update(r.title for r in top_chart)
     candidates.update(carried)
-    candidates.update(extra_titles)
-
-    pre_canon = {canonical(t, overrides): e for t, e in preopening.items()}
+    # Play-along §6.3 admits an extra only to keep a pick from going dark when it
+    # falls out of the top-contenders slice, and §6.5 leaves the friends pages and
+    # data.json untouched by play-along — so an anonymous title that neither the
+    # full chart nor the estimates file knows is dropped silently.
+    known = {r.title for r in chart_rows} | set(pre_canon)
+    candidates.update(t for t in (canonical(x, overrides) for x in extra_titles) if t in known)
 
     films: list[Film] = []
     for title in sorted(candidates):

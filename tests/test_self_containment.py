@@ -63,7 +63,7 @@ def test_play_pages_reference_exactly_the_api_origin(built_site):
         assert html.count("fetch(") == 1, page
         assert "XMLHttpRequest" not in html
 
-def test_play_pages_fail_on_any_other_origin(tmp_path, monkeypatch):
+def test_play_pages_carry_only_the_configured_origin(tmp_path, monkeypatch):
     # The allowance is for the configured origin only; a build against a different
     # origin must not smuggle the old one through a template or script.
     monkeypatch.setattr(build, "fetch",

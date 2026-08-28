@@ -110,7 +110,9 @@ reads it. One-time setup:
 7. Rebuild. `out/<year>/play.html` and `out/<year>/join.html` now exist.
 
 Each new season: bump `SEASON_YEAR` in `wrangler.toml`, `npm run deploy`, add that season's
-`play.yaml`. Old rows stay as history; usernames are free again.
+`play.yaml`, and remove the previous season's `play.yaml` — its play page would otherwise
+keep fetching the API and show the error state, since the roster now comes back for the new
+year. Old rows stay as history; usernames are free again.
 
 Moderation is `npx wrangler d1 execute smw-players --remote --command "DELETE FROM players WHERE username='x' AND year=2026"`.
 If the players API is down at build time the build warns and continues; the friends site never

@@ -308,14 +308,22 @@ def test_production_run_leaves_past_seasons_untouched(data_dir, tmp_path):
 PLAY_YAML = "api_base_url: https://smw-players.example.workers.dev\ndefault_group: [alice]\n"
 
 def test_play_picks_enter_the_catalog(data_dir, tmp_path, monkeypatch):
+    # Play-along §6.3: a pick that fell out of the top-contenders slice is rescued.
+    # §6.5: an anonymous title the build knows nothing about never reaches data.json.
+    (data_dir / "season.yaml").write_text(
+        (data_dir / "season.yaml").read_text() + "chart_contenders: 3\n")
+    (data_dir / "groups" / "g.yaml").write_text(
+        (data_dir / "groups" / "g.yaml").read_text()
+        .replace("[D1, D2, Tiny Tail Film]", "[D1, D2, D3]"))
     (data_dir / "play.yaml").write_text(PLAY_YAML)
     monkeypatch.setattr(build, "fetch_players", lambda url: [
         {"username": "zed", "joined_at": "2026-08-01T00:00:00Z",
          "ranked": ["Big Summer Film"] + [f"P{i}" for i in range(9)],
-         "dark_horses": ["Deep Play Pick", "P9", "P10"]}])
+         "dark_horses": ["Tiny Tail Film", "Deep Play Pick", "P9"]}])
     out = _run(data_dir, tmp_path)
-    d = json.loads((out / "data.json").read_text())
-    assert "Deep Play Pick" in {p["movie_title"] for p in d["projections"]}
+    titles = {p["movie_title"] for p in json.loads((out / "data.json").read_text())["projections"]}
+    assert "Tiny Tail Film" in titles      # on the chart, below the 3 contenders
+    assert "Deep Play Pick" not in titles  # known to neither chart nor estimates
 
 def test_players_api_failure_warns_and_continues(data_dir, tmp_path, monkeypatch, capsys):
     (data_dir / "play.yaml").write_text(PLAY_YAML)

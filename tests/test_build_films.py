@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import date
 import pytest
 from smw.catalog.normalize import Film, Override, PreopeningEstimate, build_films
@@ -92,8 +93,29 @@ def test_alias_collapsing_two_picks_is_rejected():
         canonical_group(g, {"Variant": Override(alias_of="Canonical")})
     assert canonical_group(g, {}) == g
 
-def test_extra_titles_join_the_candidate_set(season):
-    films = _films(season, extra_titles={"Play Pick"})
-    assert list(films) == ["Play Pick"]
-    f = films["Play Pick"]
-    assert f.status == "pre_release" and f.release_date == season.window_end  # no info → defaults
+def test_extra_titles_admit_only_titles_the_build_already_knows(season):
+    # Play-along §6.3: an extra rescues a pick that fell out of the top-contenders
+    # slice. §6.5: the friends pages and data.json stay free of anonymous strings,
+    # so a title known to neither the chart nor the estimates file is dropped.
+    rows = [ChartRow(f"C{i:03d}", 1000.0 - i, date(2026, 5, 8), False) for i in range(40)]
+    films = _films(
+        season,
+        chart_rows=rows,
+        grosses={r.title: r.gross for r in rows},
+        preopening={"Analyst Film": PreopeningEstimate(release_date=date(2026, 8, 1))},
+        extra_titles={"C030", "Analyst Film", "Anonymous Play Pick"},
+    )
+    assert "C030" in films              # on the chart, past the top-25 slice
+    assert "Analyst Film" in films      # known to the estimates file
+    assert "Anonymous Play Pick" not in films
+
+def test_extra_titles_resolve_through_aliases(season):
+    # The extra is compared in canonical form, like every other candidate.
+    films = _films(
+        replace(season, chart_contenders=0),   # only the extra can admit the film
+        chart_rows=[ChartRow("Canonical", 10.0, date(2026, 5, 8), False)],
+        grosses={"Canonical": 10.0},
+        overrides={"Variant Spelling": Override(alias_of="Canonical")},
+        extra_titles={"Variant Spelling"},
+    )
+    assert list(films) == ["Canonical"]
