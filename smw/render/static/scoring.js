@@ -28,5 +28,6 @@ function scorePlayer(ranked, dark, topTitles) {
   return total;
 }
 if (typeof module !== "undefined") {
-  module.exports = { rankedPickPoints: rankedPickPoints, scorePlayer: scorePlayer };
+  module.exports = { rankedPickPoints: rankedPickPoints, scorePlayer: scorePlayer,
+                     pointsFor: pointsFor };
 }
