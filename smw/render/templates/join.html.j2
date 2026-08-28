@@ -1,0 +1,40 @@
+{% extends "play_base.html.j2" %}
+{% block content %}
+{% if season_over -%}
+<div class="locked">Season's over — <a href="play.html">see the final standings</a>.</div>
+{% else -%}
+<h2>✍️ Join the play-along</h2>
+<p class="sub">Rank the ten films you think will gross the most this summer, add three dark horses,
+pick a username, and you're in. Picks are final — no edits — so read them twice.</p>
+<form id="joinForm" novalidate>
+  <div class="join-grid">
+    <label for="username">Username</label>
+    <div>
+      <input id="username" name="username" required autocapitalize="none" autocomplete="off"
+             spellcheck="false" pattern="[a-z0-9][a-z0-9-]{1,22}[a-z0-9]" maxlength="24">
+      <div class="small">3–24 characters: lowercase letters, digits, and hyphens (not at the ends)</div>
+    </div>
+    {% for i in range(1, 11) -%}
+    <label for="ranked{{ i }}">#{{ i }}</label>
+    <input id="ranked{{ i }}" name="ranked" list="films" autocomplete="off" required>
+    {% endfor -%}
+    <div class="div">Dark horses — three films you think will sneak into the top ten (1 pt each, any position)</div>
+    {% for i in range(1, 4) -%}
+    <label for="dark{{ i }}">🐴 {{ i }}</label>
+    <input id="dark{{ i }}" name="dark" list="films" autocomplete="off" required>
+    {% endfor -%}
+  </div>
+  <datalist id="films">{% for f in data.catalog %}<option value="{{ f.title }}">{{ f.release_label }}</option>{% endfor %}</datalist>
+  <p class="small">Type to search; every slot must be a film from the list, and all 13 must be different.</p>
+  <p id="joinError" class="join-error" role="alert" hidden></p>
+  <div class="join-actions"><button type="submit">Submit my picks</button></div>
+</form>
+<section id="joinDone" hidden>
+  <h2>🎉 You're in, <span id="joinName"></span>!</h2>
+  <p>Your standings live at <a id="joinLink"></a> <button id="joinCopy" type="button">Copy link</button></p>
+  <p class="small">Picks are final. Film numbers on the leaderboard update weekly; the player list is live.</p>
+</section>
+{% endif -%}
+<script>window.PLAY={{ data | json_embed }};</script>
+<script>{{ join_js }}</script>
+{% endblock %}

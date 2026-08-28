@@ -142,12 +142,14 @@ test("hostile strings pass through composition verbatim (DOM layer uses textCont
   assert.equal(rows[0].title, evil);
 });
 
-test("play.js never builds HTML from strings", () => {
-  const src = readFileSync(join(STATIC, "play.js"), "utf8");
-  for (const banned of ["insertAdjacentHTML", "outerHTML", "document.write"])
-    assert.ok(!src.includes(banned), `play.js uses ${banned}`);
-  for (const m of src.matchAll(/innerHTML\s*=\s*([^;]+);/g))
-    assert.equal(m[1].trim(), '""', `play.js: innerHTML assigned ${m[1]}`);
+test("the play-along scripts never build HTML from strings", () => {
+  for (const file of ["play.js", "join.js"]) {
+    const src = readFileSync(join(STATIC, file), "utf8");
+    for (const banned of ["insertAdjacentHTML", "outerHTML", "document.write"])
+      assert.ok(!src.includes(banned), `${file} uses ${banned}`);
+    for (const m of src.matchAll(/innerHTML\s*=\s*([^;]+);/g))
+      assert.equal(m[1].trim(), '""', `${file}: innerHTML assigned ${m[1]}`);
+  }
 });
 
 // ---------- main(): the DOM half ----------

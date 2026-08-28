@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Join · Summer Movie Wager 2026</title>
+<script>/* Theme resolution runs in the head, before body paint (spec §13.2). */
+(function(){try{var t=localStorage.getItem('smw-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+document.addEventListener("DOMContentLoaded",function(){
+  var b=document.getElementById("themeToggle"); if(!b) return;
+  b.addEventListener("click",function(){
+    var cur=document.documentElement.getAttribute("data-theme")
+      ||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+    var next=cur==="dark"?"light":"dark";
+    document.documentElement.setAttribute("data-theme",next);
+    try{localStorage.setItem("smw-theme",next);}catch(e){}
+  });
+});
+</script>
+<style>/* ---------- tokens: light on :root; dark via toggle attr AND os pref (spec §13.2) ---------- */
+:root{
+  --bg:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --baseline:#c3c2b7; --border:rgba(11,11,11,.10);
+  --affirm:#006300; --neg:#b3261e; --accent:#2a78d6; --pill:#eceae4; --hl:#fdf6e3;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10);
+  --affirm:#0ca30c; --neg:#e66767; --accent:#3987e5; --pill:#26262a; --hl:#26231a;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d0d0d; --surface:#1a1a19; --ink:#fff; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --baseline:#383835; --border:rgba(255,255,255,.10);
+    --affirm:#0ca30c; --neg:#e66767; --accent:#3987e5; --pill:#26262a; --hl:#26231a;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px 60px}
+a{color:var(--accent)}
+h1{font-size:1.5rem;margin:.2rem 0 0}
+h2{font-size:1.12rem;margin:2.2rem 0 .7rem}
+.sub{color:var(--ink2)}
+.small{font-size:.85rem;color:var(--muted)}
+
+
+header.site{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-top:26px}
+#themeToggle{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:6px 12px;cursor:pointer;color:var(--ink);font-size:.85rem}
+
+/* ---------- nav pills (§11.2) ---------- */
+nav.pills{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px}
+nav.pills a{background:var(--pill);color:var(--ink);text-decoration:none;border-radius:999px;
+  padding:7px 16px;font-size:.9rem;border:1px solid transparent}
+nav.pills a[aria-current="page"]{background:var(--accent);color:#fff;font-weight:600}
+nav.pills a:hover:not([aria-current]){border-color:var(--border)}
+
+/* ---------- tables ---------- */
+.scroller{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:6px 10px;text-align:right;white-space:nowrap;
+  font-variant-numeric:tabular-nums;border-bottom:1px solid var(--grid)}
+th{color:var(--ink2);font-weight:600}
+thead th{position:sticky;top:0;background:var(--surface);z-index:2}
+td.t,th.t{text-align:left}
+tr.divider td{border-bottom:2px dashed var(--baseline);color:var(--muted);
+  text-align:center;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;padding:3px}
+tfoot td{font-weight:700;border-top:2px solid var(--baseline);border-bottom:none}
+tfoot tr.odds td{font-weight:400;color:var(--ink2)}
+.pos{color:var(--affirm);font-weight:600}
+.zero{color:var(--muted)}
+.dash{color:var(--muted)}
+.up{color:var(--affirm)} .down{color:var(--neg)}
+.badge{display:inline-block;font-size:.72rem;border:1px solid var(--border);border-radius:999px;
+  padding:1px 8px;color:var(--ink2);background:var(--pill)}
+.hlcol{background:var(--hl)}
+.crown::after{content:" 👑"}
+
+/* ---------- accordions ---------- */
+details.acc{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  margin:8px 0;padding:0 14px}
+details.acc summary{cursor:pointer;padding:10px 0;font-weight:600}
+details.acc summary .stats{font-weight:400;color:var(--ink2);font-size:.86rem}
+details.acc[open]{padding-bottom:12px}
+
+/* ---------- what-if (§12.2) ---------- */
+.wi{display:grid;grid-template-columns:minmax(340px,1fr) minmax(280px,340px);gap:22px;align-items:start}
+ol.wi-list{list-style:none;counter-reset:slot;margin:0;padding:0}
+ol.wi-list li{counter-increment:slot;display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);border-radius:8px;
+  padding:6px 10px;margin:5px 0;cursor:grab}
+ol.wi-list li::before{content:counter(slot);min-width:1.7em;text-align:right;
+  color:var(--ink2);font-variant-numeric:tabular-nums;font-weight:600}
+ol.wi-list li:nth-child(10){border-bottom:3px dashed var(--baseline);position:relative;margin-bottom:22px}
+ol.wi-list li:nth-child(10)::after{content:"— top-10 cutoff —";position:absolute;left:0;right:0;
+  bottom:-20px;text-align:center;font-size:.72rem;color:var(--muted);letter-spacing:.08em}
+ol.wi-list li:nth-child(n+11){opacity:.55}
+ol.wi-list li .film{flex:1}
+ol.wi-list li.dragging{opacity:.4}
+.mv{display:flex;gap:4px}
+.mv button{background:var(--pill);color:var(--ink);border:1px solid var(--border);border-radius:6px;
+  width:26px;height:24px;cursor:pointer;line-height:1}
+.wi-panel{position:sticky;top:14px;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px}
+.wi-panel h3{margin:0 0 8px;font-size:1rem}
+.wi-panel table{font-size:.86rem}
+#wiReset{margin-top:10px;background:var(--pill);color:var(--ink);border:1px solid var(--border);
+  border-radius:8px;padding:6px 14px;cursor:pointer}
+
+/* ---------- scenarios (§12.3) ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.tabs button{background:var(--pill);color:var(--ink);border:1px solid var(--border);
+  border-radius:999px;padding:7px 14px;cursor:pointer;font-size:.88rem}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:600}
+.tabs button:disabled{opacity:.45;cursor:not-allowed}
+.caption{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  padding:10px 14px;margin:10px 0;font-size:.92rem}
+td.mid{color:var(--muted)}
+
+/* ---------- history chart (§12.4) ---------- */
+.chartbox{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px}
+svg text{font:11px system-ui,-apple-system,"Segoe UI",sans-serif;fill:var(--muted)}
+svg text.dl{font-size:12px;font-weight:600;fill:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:.86rem;color:var(--ink2)}
+.legend .sw,.dlsw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:baseline}
+#tipbox{position:fixed;pointer-events:none;background:var(--surface);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;font-size:.8rem;display:none;z-index:9;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+
+/* ---------- locked / rules ---------- */
+.locked{text-align:center;color:var(--ink2);padding:70px 20px;background:var(--surface);
+  border:1px solid var(--border);border-radius:10px}
+footer.site{margin-top:48px;border-top:1px solid var(--grid);padding-top:14px;font-size:.85rem;color:var(--ink2)}
+@media(max-width:700px){
+  body{font-size:14px}
+  th,td{padding:4px 7px}
+  .wi{grid-template-columns:1fr}
+  .wi-panel{position:static}
+}
+/* ---------- site additions ---------- */
+/* Series palette: bound to players ALPHABETICALLY, never by rank (rebuild §12.4).
+   0–5 are the mockup's six colours in the mockup's order; 6–7 are the site's extras. */
+.series-0{--series:#2a78d6} .series-1{--series:#eb6834} .series-2{--series:#1baf7a}
+.series-3{--series:#eda100} .series-4{--series:#e87ba4} .series-5{--series:#008300}
+.series-6{--series:#a16207} .series-7{--series:#be185d}
+:root[data-theme="dark"] .series-0{--series:#3987e5}
+:root[data-theme="dark"] .series-1{--series:#d95926}
+:root[data-theme="dark"] .series-2{--series:#199e70}
+:root[data-theme="dark"] .series-3{--series:#c98500}
+:root[data-theme="dark"] .series-4{--series:#d55181}
+:root[data-theme="dark"] .series-5{--series:#008300}
+:root[data-theme="dark"] .series-6{--series:#facc15}
+:root[data-theme="dark"] .series-7{--series:#f472b6}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .series-0{--series:#3987e5}
+  :root:not([data-theme="light"]) .series-1{--series:#d95926}
+  :root:not([data-theme="light"]) .series-2{--series:#199e70}
+  :root:not([data-theme="light"]) .series-3{--series:#c98500}
+  :root:not([data-theme="light"]) .series-4{--series:#d55181}
+  :root:not([data-theme="light"]) .series-5{--series:#008300}
+  :root:not([data-theme="light"]) .series-6{--series:#facc15}
+  :root:not([data-theme="light"]) .series-7{--series:#f472b6}
+}
+/* Masthead selectors (spec §4): the #themeToggle recipe on a native select element. */
+.sel{background:var(--surface);border:1px solid var(--border);border-radius:999px;
+  padding:4px 10px;color:var(--ink);font-size:.85rem;margin-left:6px;cursor:pointer}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Play-along pages only (play-along spec §5); inlined after site.css.
+   No section[hidden] rule: the UA sheet's [hidden] beats its section display. */
+tr.me td{background:var(--hl)}
+code{background:var(--pill);border-radius:4px;padding:1px 5px;font-size:.9em}
+.join-grid{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;max-width:640px}
+.join-grid label{text-align:right;color:var(--ink2)}
+.join-grid input{background:var(--surface);color:var(--ink);border:1px solid var(--border);
+  border-radius:8px;padding:8px 10px;font:inherit;width:100%}
+.join-grid .div{grid-column:1/-1;border-bottom:2px dashed var(--baseline);color:var(--muted);
+  padding:8px 0 4px;font-size:.85rem}
+.join-actions{margin:16px 0}
+.join-actions button,#joinCopy{background:var(--accent);color:#fff;border:0;border-radius:999px;
+  padding:8px 18px;font:inherit;cursor:pointer}
+.join-error{color:var(--neg);margin:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <div>
+    <h1>🍿 Summer Movie Wager</h1>
+    <div class="sub">Play along &nbsp;·&nbsp; Wager window: May 1 – Sep 7, 2026</div>
+  </div>
+  <button id="themeToggle" type="button" aria-label="Toggle color theme">◐ Theme</button>
+</header>
+
+<nav class="pills" aria-label="Play along">
+  <a href="play.html">🎟 Play Along</a>
+  <a href="join.html" aria-current="page">✍️ Join</a>
+</nav>
+
+
+<h2>✍️ Join the play-along</h2>
+<p class="sub">Rank the ten films you think will gross the most this summer, add three dark horses,
+pick a username, and you're in. Picks are final — no edits — so read them twice.</p>
+<form id="joinForm" novalidate>
+  <div class="join-grid">
+    <label for="username">Username</label>
+    <div>
+      <input id="username" name="username" required autocapitalize="none" autocomplete="off"
+             spellcheck="false" pattern="[a-z0-9][a-z0-9-]{1,22}[a-z0-9]" maxlength="24">
+      <div class="small">3–24 characters: lowercase letters, digits, and hyphens (not at the ends)</div>
+    </div>
+    <label for="ranked1">#1</label>
+    <input id="ranked1" name="ranked" list="films" autocomplete="off" required>
+    <label for="ranked2">#2</label>
+    <input id="ranked2" name="ranked" list="films" autocomplete="off" required>
+    <label for="ranked3">#3</label>
+    <input id="ranked3" name="ranked" list="films" autocomplete="off" required>
+    <label for="ranked4">#4</label>
+    <input id="ranked4" name="ranked" list="films" autocomplete="off" required>
+    <label for="ranked5">#5</label>
+    <input id="ranked5" name="ranked" list="films" autocomplete="off" required>
+    <label for="ranked6">#6</label>
+    <input id="ranked6" name="ranked" list="films" autocomplete="off" required>
+    <label for="ranked7">#7</label>
+    <input id="ranked7" name="ranked" list="films" autocomplete="off" required>
+    <label for="ranked8">#8</label>
+    <input id="ranked8" name="ranked" list="films" autocomplete="off" required>
+    <label for="ranked9">#9</label>
+    <input id="ranked9" name="ranked" list="films" autocomplete="off" required>
+    <label for="ranked10">#10</label>
+    <input id="ranked10" name="ranked" list="films" autocomplete="off" required>
+    <div class="div">Dark horses — three films you think will sneak into the top ten (1 pt each, any position)</div>
+    <label for="dark1">🐴 1</label>
+    <input id="dark1" name="dark" list="films" autocomplete="off" required>
+    <label for="dark2">🐴 2</label>
+    <input id="dark2" name="dark" list="films" autocomplete="off" required>
+    <label for="dark3">🐴 3</label>
+    <input id="dark3" name="dark" list="films" autocomplete="off" required>
+    </div>
+  <datalist id="films"><option value="M01">May 1</option><option value="M02">May 1</option><option value="M03">May 1</option><option value="M04">May 1</option><option value="M05">May 1</option><option value="M06">May 1</option><option value="M07">May 1</option><option value="M08">May 1</option><option value="M09">May 1</option><option value="M10">May 1</option><option value="M11">May 1</option><option value="M12">May 1</option><option value="M13">May 1</option><option value="M14">May 1</option><option value="M15">May 1</option><option value="M16">May 1</option><option value="M17">May 1</option><option value="M18">May 1</option></datalist>
+  <p class="small">Type to search; every slot must be a film from the list, and all 13 must be different.</p>
+  <p id="joinError" class="join-error" role="alert" hidden></p>
+  <div class="join-actions"><button type="submit">Submit my picks</button></div>
+</form>
+<section id="joinDone" hidden>
+  <h2>🎉 You're in, <span id="joinName"></span>!</h2>
+  <p>Your standings live at <a id="joinLink"></a> <button id="joinCopy" type="button">Copy link</button></p>
+  <p class="small">Picks are final. Film numbers on the leaderboard update weekly; the player list is live.</p>
+</section>
+<script>window.PLAY={"actual_top":["M01","M02","M03","M04","M05","M06","M07","M08","M09","M10"],"api_base_url":"https://smw-players.example.workers.dev","build_date":"2026-08-15","catalog":[{"projected_median":400000000.0,"projected_rank":1,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M01"},{"projected_median":200000000.0,"projected_rank":2,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M02"},{"projected_median":133333333.33333333,"projected_rank":3,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M03"},{"projected_median":100000000.0,"projected_rank":4,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M04"},{"projected_median":80000000.0,"projected_rank":5,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M05"},{"projected_median":66666666.666666664,"projected_rank":6,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M06"},{"projected_median":57142857.14285714,"projected_rank":7,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M07"},{"projected_median":50000000.0,"projected_rank":8,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M08"},{"projected_median":44444444.44444445,"projected_rank":9,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M09"},{"projected_median":40000000.0,"projected_rank":10,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M10"},{"projected_median":36363636.36363637,"projected_rank":11,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M11"},{"projected_median":33333333.333333332,"projected_rank":12,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M12"},{"projected_median":30769230.769230768,"projected_rank":13,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M13"},{"projected_median":28571428.57142857,"projected_rank":14,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M14"},{"projected_median":26666666.666666668,"projected_rank":15,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M15"},{"projected_median":25000000.0,"projected_rank":16,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M16"},{"projected_median":23529411.76470588,"projected_rank":17,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M17"},{"projected_median":22222222.222222224,"projected_rank":18,"release_date":"2026-05-01","release_label":"May 1","status":"in_theaters","title":"M18"}],"default_group":[],"projected_top":["M01","M02","M03","M04","M05","M06","M07","M08","M09","M10"],"reason":null,"state":"live","year":2026};</script>
+<script>"use strict";
+// Play-along signup (play-along spec §5.2). Pure validation first (Node-tested), DOM last.
+var USERNAME_RE = /^[a-z0-9][a-z0-9-]{1,22}[a-z0-9]$/;
+var USERNAME_RULE = "3–24 characters: lowercase letters, digits, and hyphens (not at the ends)";
+
+function validateSubmission(username, ranked, dark, titles) {
+  var has = titles instanceof Set ? function (t) { return titles.has(t); }
+                                  : function (t) { return titles.indexOf(t) >= 0; };
+  var u = String(username).trim().toLowerCase();
+  if (!USERNAME_RE.test(u)) return { ok: false, error: "Username must be " + USERNAME_RULE + "." };
+  var r = ranked.map(function (t) { return String(t).trim(); });
+  var d = dark.map(function (t) { return String(t).trim(); });
+  var labels = r.map(function (_, i) { return "pick " + (i + 1); })
+    .concat(d.map(function (_, i) { return "dark horse " + (i + 1); }));
+  var all = r.concat(d), seen = Object.create(null);   // null proto: a film named "constructor" is not a dupe
+  for (var i = 0; i < all.length; i++) {
+    var t = all[i];
+    if (!t) return { ok: false, error: "Choose a film for " + labels[i] + "." };
+    if (!has(t)) return { ok: false, error: "“" + t + "” (" + labels[i] + ") isn't on the list — pick a film from the list." };
+    if (seen[t] !== undefined)
+      return { ok: false, error: "“" + t + "” is picked twice (" + labels[seen[t]] + " and " + labels[i] + ") — all 13 must be distinct." };
+    seen[t] = i;
+  }
+  return { ok: true, body: { username: u, ranked: r, dark_horses: d } };
+}
+
+function main() {
+  var D = window.PLAY;
+  var form = document.getElementById("joinForm");
+  if (!form) return;   // season over: no form rendered
+  var titles = new Set(D.catalog.map(function (f) { return f.title; }));
+  var err = document.getElementById("joinError");
+  var user = document.getElementById("username");
+  function fail(msg) { err.textContent = msg; err.hidden = false; }
+  function values(name) {
+    return Array.prototype.map.call(form.querySelectorAll('input[name="' + name + '"]'),
+                                    function (el) { return el.value; });
+  }
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    err.hidden = true;
+    var v = validateSubmission(user.value, values("ranked"), values("dark"), titles);
+    if (!v.ok) { fail(v.error); return; }
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    fetch(D.api_base_url + "/api/players", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(v.body),
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (body) {
+        if (r.status === 201) return done(body.username || v.body.username);
+        if (r.status === 409) { fail("That username is taken — pick another."); user.focus(); return; }
+        fail("Couldn't submit (" + r.status + "): " + (body.error || "unknown error") + ". Nothing was cleared — fix and try again.");
+      });
+    }).catch(function () {
+      fail("Couldn't reach the players API — check your connection and try again. Your picks are still here.");
+    }).then(function () { btn.disabled = false; });
+  });
+  function done(username) {
+    var link = new URL("play.html?user=" + encodeURIComponent(username), window.location.href).href;
+    document.getElementById("joinName").textContent = username;
+    var a = document.getElementById("joinLink");
+    a.textContent = link;
+    a.href = link;
+    document.getElementById("joinCopy").addEventListener("click", function () {
+      if (navigator.clipboard) navigator.clipboard.writeText(link);
+    });
+    form.hidden = true;
+    document.getElementById("joinDone").hidden = false;
+  }
+}
+
+if (typeof module !== "undefined") {
+  module.exports = { USERNAME_RE: USERNAME_RE, validateSubmission: validateSubmission };
+}
+if (typeof window !== "undefined" && window.PLAY) main();
+</script>
+
+
+<footer class="site">
+  <a href="g/rules.html">Scoring rules</a> &nbsp;·&nbsp;
+  <span class="small">Films &amp; projections as of Aug 15, 2026 · players live.</span>
+</footer>
+
+</div>
+</body>
+</html>
