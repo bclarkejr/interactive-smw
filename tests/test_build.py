@@ -361,3 +361,29 @@ def test_production_run_appends_forecast_per_group_and_box_office_once(data_dir,
     assert not (data_dir / "forecast_history.jsonl").exists()
     bo = (data_dir / "box_office_history.jsonl").read_text().splitlines()
     assert len(bo) == len({json.loads(l)["movie"] for l in bo})  # once per season, not per group
+
+def test_play_pages_built_only_with_play_yaml(data_dir, tmp_path, monkeypatch):
+    monkeypatch.setattr(build, "fetch_players", lambda url: [])
+    out = _run(data_dir, tmp_path).parent
+    assert not (out / "play.html").exists() and not (out / "join.html").exists()
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    out = _run(data_dir, tmp_path).parent
+    assert (out / "play.html").exists() and (out / "join.html").exists()
+    html = (out / "play.html").read_text()
+    assert 'href="g/rules.html"' in html                     # season's default group's rules
+    assert '"default_group":["alice"]' in html
+    assert '"build_date":"2026-08-15"' in html
+
+def test_play_page_state_follows_the_forecast_gate(data_dir, tmp_path, monkeypatch):
+    monkeypatch.setattr(build, "fetch_players", lambda url: [])
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    out = _run(data_dir, tmp_path).parent                    # 3 projections < 25 → early
+    assert '"state":"early"' in (out / "play.html").read_text()
+
+def test_join_page_locks_after_the_season(data_dir, tmp_path, monkeypatch):
+    monkeypatch.setattr(build, "fetch_players", lambda url: [])
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    out = _run(data_dir, tmp_path, today=date(2026, 9, 9)).parent   # window_end + 2 → Final
+    html = (out / "join.html").read_text()
+    assert "Season's over" in html and 'id="joinForm"' not in html
+    assert '"state":"final"' in (out / "play.html").read_text()

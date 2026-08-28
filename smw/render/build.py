@@ -19,6 +19,7 @@ from smw.render.page import (Site, base_context, build_scenarios_view, build_wha
                              make_env, render_history, render_leaderboard,
                              render_redirect, render_rules, render_scenarios,
                              render_whatif)
+from smw.render.play import build_play_data, play_context, render_join, render_play
 from smw.render.views import build_leaderboard_view
 from smw.score.rules import score_player
 
@@ -238,6 +239,15 @@ def _build_season(env, season_dir: Path, out_dir: Path, season: Season,
             build_data_json(season, group, catalog, sim, current_points,
                             non_zero, reason, today),
             indent=2, sort_keys=True))
+
+    if play_cfg is not None:
+        # Play-along pages are season-scoped (play-along spec §4.1, decision 2): one pair per
+        # year, next to the group directories. Never scored server-side (§6.5).
+        play_data = build_play_data(season, catalog, actual_top, forecastable, reason,
+                                    today, play_cfg, season_over=final)
+        pctx = play_context(season, today, f"{season.default_group}/rules.html")
+        render_play(env, out_dir, pctx, play_data)
+        render_join(env, out_dir, pctx, play_data, season_over=final)
 
     if persist:
         # Roster-independent: appended once per season, never once per group.

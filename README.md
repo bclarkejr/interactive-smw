@@ -88,3 +88,30 @@ to lock. A snapshot regenerated without inspection tests nothing.
 
 `smw/render/static/sortable.min.js` is SortableJS 1.15.6, © 2019 Lebedev Konstantin and
 contributors, MIT licence, vendored and inlined into `whatif.html`.
+
+## Play-along (public signups)
+
+The play-along backend is a Cloudflare Worker + D1 database in `worker/`; the pipeline only
+reads it. One-time setup:
+
+1. `cd worker && npm ci`
+2. `npx wrangler login`
+3. `npx wrangler d1 create smw-players` → paste the printed `database_id` into `wrangler.toml`.
+4. `npx wrangler d1 execute smw-players --remote --file=schema.sql`
+5. `npm run deploy` → note the `*.workers.dev` URL. (Needs Node ≥ 22: `wrangler` 4 refuses to
+   run on older runtimes. `npm test` is happy on anything the toolchain supports.)
+6. Create `data/seasons/<year>/play.yaml`:
+
+   ```yaml
+   api_base_url: https://smw-players.<account>.workers.dev
+   default_group: []     # usernames to show on the bare play.html; edit + rebuild any time
+   ```
+
+7. Rebuild. `out/<year>/play.html` and `out/<year>/join.html` now exist.
+
+Each new season: bump `SEASON_YEAR` in `wrangler.toml`, `npm run deploy`, add that season's
+`play.yaml`. Old rows stay as history; usernames are free again.
+
+Moderation is `npx wrangler d1 execute smw-players --remote --command "DELETE FROM players WHERE username='x' AND year=2026"`.
+If the players API is down at build time the build warns and continues; the friends site never
+depends on it. Tests: `.venv/bin/pytest` (pipeline + client JS via node) and `cd worker && npm test`.
