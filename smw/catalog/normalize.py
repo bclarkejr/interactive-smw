@@ -3,6 +3,7 @@ import math
 from dataclasses import dataclass, fields, replace
 from datetime import date
 from pathlib import Path
+from typing import Iterable
 
 import yaml
 
@@ -165,10 +166,12 @@ def build_films(
     overrides: dict[str, Override],
     preopening: dict[str, PreopeningEstimate],
     today: date,
+    extra_titles: Iterable[str] = (),
 ) -> list[Film]:
     chart_by_title = {r.title: r for r in chart_rows}
 
-    # §6.2 candidate set: rosters ∪ estimate keys ∪ top chart contenders ∪ carried.
+    # §6.2 candidate set: rosters ∪ estimate keys ∪ top chart contenders ∪ carried
+    # ∪ play-along picks (play-along spec §6.3, already canonical).
     candidates: set[str] = set()
     for g in groups:
         for p in g.players.values():
@@ -177,6 +180,7 @@ def build_films(
     top_chart = sorted(chart_rows, key=lambda r: -r.gross)[: season.chart_contenders]
     candidates.update(r.title for r in top_chart)
     candidates.update(carried)
+    candidates.update(extra_titles)
 
     pre_canon = {canonical(t, overrides): e for t, e in preopening.items()}
 

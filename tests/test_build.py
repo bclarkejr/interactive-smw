@@ -305,6 +305,33 @@ def test_production_run_leaves_past_seasons_untouched(data_dir, tmp_path):
     html = (tmp_path / "out" / "2025" / "g" / "history.html").read_text()
     assert "2026-08-15" not in html                            # and no phantom refresh date
 
+PLAY_YAML = "api_base_url: https://smw-players.example.workers.dev\ndefault_group: [alice]\n"
+
+def test_play_picks_enter_the_catalog(data_dir, tmp_path, monkeypatch):
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    monkeypatch.setattr(build, "fetch_players", lambda url: [
+        {"username": "zed", "joined_at": "2026-08-01T00:00:00Z",
+         "ranked": ["Big Summer Film"] + [f"P{i}" for i in range(9)],
+         "dark_horses": ["Deep Play Pick", "P9", "P10"]}])
+    out = _run(data_dir, tmp_path)
+    d = json.loads((out / "data.json").read_text())
+    assert "Deep Play Pick" in {p["movie_title"] for p in d["projections"]}
+
+def test_players_api_failure_warns_and_continues(data_dir, tmp_path, monkeypatch, capsys):
+    (data_dir / "play.yaml").write_text(PLAY_YAML)
+    def boom(url):
+        raise ConnectionError("dns")
+    monkeypatch.setattr(build, "fetch_players", boom)
+    out = _run(data_dir, tmp_path)
+    assert (out / "index.html").exists()          # friends site still publishes (§6.3)
+    assert "players API unreachable" in capsys.readouterr().out
+
+def test_no_play_yaml_means_no_players_fetch(data_dir, tmp_path, monkeypatch):
+    def boom(url):
+        raise AssertionError("must not be called")
+    monkeypatch.setattr(build, "fetch_players", boom)
+    _run(data_dir, tmp_path)
+
 def test_missing_seasons_dir_is_a_build_error(tmp_path):
     (tmp_path / "data").mkdir()
     with pytest.raises(ValueError, match="seasons"):

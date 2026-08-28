@@ -91,3 +91,9 @@ def test_alias_collapsing_two_picks_is_rejected():
     with pytest.raises(ValueError, match="u.*Canonical"):
         canonical_group(g, {"Variant": Override(alias_of="Canonical")})
     assert canonical_group(g, {}) == g
+
+def test_extra_titles_join_the_candidate_set(season):
+    films = _films(season, extra_titles={"Play Pick"})
+    assert list(films) == ["Play Pick"]
+    f = films["Play Pick"]
+    assert f.status == "pre_release" and f.release_date == season.window_end  # no info → defaults
