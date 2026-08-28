@@ -149,3 +149,138 @@ test("play.js never builds HTML from strings", () => {
   for (const m of src.matchAll(/innerHTML\s*=\s*([^;]+);/g))
     assert.equal(m[1].trim(), '""', `play.js: innerHTML assigned ${m[1]}`);
 });
+
+// ---------- main(): the DOM half ----------
+// No jsdom in this project, so main() runs against a stub with just the surface
+// play.js touches. scoring.js + play.js are concatenated and run through
+// `new Function`, where `typeof module === "undefined"`, i.e. the browser path.
+const SRC = readFileSync(join(STATIC, "scoring.js"), "utf8")
+          + readFileSync(join(STATIC, "play.js"), "utf8");
+const SECTIONS = ["playLoading", "playError", "playNotFound", "playMissingName", "playExplainer",
+                  "playBoard", "playHeading", "playUnknown", "playTable", "playDetail",
+                  "playDetailHeading", "playJoined", "playPicks"];
+
+function el(tag) {
+  return { tag, children: [], className: "", hidden: false, _text: "",
+           get textContent() { return this._text; },
+           set textContent(v) { this._text = String(v); },   // the real DOM stringifies
+           appendChild(c) { this.children.push(c); return c; } };
+}
+
+// Runs main() once against a fresh stub page; resolves with { ids, head, body, calls }.
+function run(search, players, opts) {
+  opts = opts || {};
+  const ids = {}, tbl = {};
+  SECTIONS.forEach((id) => { ids[id] = el("section"); ids[id].hidden = id !== "playLoading"; });
+  ["#playTable", "#playPicks"].forEach((t) => { tbl[t] = { head: el("tr"), body: el("tbody") }; });
+  global.document = {
+    createElement: el,
+    getElementById: (id) => ids[id],
+    querySelector: (sel) => {
+      const [table, part] = sel.split(" thead tr");
+      return part === "" ? tbl[table].head : tbl[sel.split(" ")[0]].body;
+    },
+  };
+  global.window = {
+    location: { search },
+    PLAY: { state: opts.state || "live", api_base_url: "https://x.test",
+            default_group: opts.defaultGroup || ["alice", "bob"],
+            catalog: TEN.concat(["M15", "M16", "M17"]).map((t, i) => ({ title: t, projected_rank: i + 1 })),
+            actual_top: TEN, projected_top: TEN },
+  };
+  const calls = [];
+  global.fetch = (u, o) => {
+    calls.push([u, o]);
+    if (opts.reject) return Promise.reject(new Error("offline"));
+    if (opts.notOk) return Promise.resolve({ ok: false, status: 503 });
+    return Promise.resolve({ ok: true, json: () => Promise.resolve(opts.body || { players }) });
+  };
+  new Function(SRC)();                                    // play.js self-starts on window.PLAY
+  const cells = (row) => row.children.map((c) => c.textContent);
+  return new Promise((r) => setImmediate(() => r({
+    ids, calls, cells,
+    head: (t) => tbl[t].head.children.map((c) => c.textContent),
+    rows: (t) => tbl[t].body.children,
+  })));
+}
+
+const TEN_PLAYER = player("alice");
+const BOB = player("bob", TEN.slice().reverse(), ["M15", "M18", "M14"], "2026-08-01T00:00:00Z");
+
+test("main: live user view fetches the roster and fills both tables", async () => {
+  const p = await run("?user=alice", [TEN_PLAYER, BOB]);
+  assert.deepEqual(p.calls, [["https://x.test/api/players", { cache: "no-store" }]]);
+  assert.equal(p.ids.playLoading.hidden, true);
+  assert.equal(p.ids.playError.hidden, true);
+  assert.equal(p.ids.playBoard.hidden, false);
+  assert.equal(p.ids.playDetail.hidden, false);
+  assert.deepEqual(p.head("#playTable"), ["Place", "Player", "Joined", "Current pts", "Projected pts"]);
+  assert.deepEqual(p.rows("#playTable").map(p.cells),
+                   [["1", "alice", "2026-08-15", "106", "106"],
+                    ["2", "bob", "2026-08-01", "38", "38"]]);
+  assert.equal(p.rows("#playTable")[0].className, "me");          // the user's own row
+  assert.equal(p.rows("#playTable")[0].children[1].className, "t crown");
+  assert.equal(p.rows("#playTable")[1].className, "");
+  assert.equal(p.ids.playDetailHeading.textContent, "\u{1F464} alice's picks");
+  assert.equal(p.ids.playJoined.textContent, "Joined 2026-08-15 (UTC)");
+});
+
+test("main: detail table has 13 picks and a spanning dark-horse divider", async () => {
+  const p = await run("?user=alice", [TEN_PLAYER]);
+  const rows = p.rows("#playPicks");
+  assert.equal(rows.length, 14);                                  // 13 picks + 1 divider
+  assert.equal(rows[10].className, "divider");
+  assert.equal(rows[10].children[0].colSpan, 5);                  // spans the live column count
+  assert.equal(rows[10].children[0].textContent, "Dark horses");
+  assert.deepEqual(p.cells(rows[0]), ["1", "M01", "#1", "13", "13"]);
+  assert.deepEqual(p.cells(rows[11]), ["\u{1F434}", "M15", "#11", "0", "0"]);
+});
+
+test("main: the early state has no Projected column in either table", async () => {
+  const p = await run("?user=alice", [TEN_PLAYER], { state: "early" });
+  assert.deepEqual(p.head("#playTable"), ["Place", "Player", "Joined", "Current pts"]);
+  assert.deepEqual(p.head("#playPicks"), ["#", "Movie", "Current pts"]);
+  p.rows("#playTable").forEach((r) => assert.equal(r.children.length, 4));
+  p.rows("#playPicks").forEach((r) => assert.equal(r.children.length, r.className === "divider" ? 1 : 3));
+  assert.equal(p.rows("#playPicks")[10].children[0].colSpan, 3);
+  assert.deepEqual(p.cells(p.rows("#playPicks")[0]), ["1", "M01", "13"]);
+});
+
+test("main: unknown user shows not-found, never an empty board", async () => {
+  const p = await run("?user=ghost", [TEN_PLAYER]);
+  assert.equal(p.ids.playNotFound.hidden, false);
+  assert.equal(p.ids.playMissingName.textContent, "ghost");
+  assert.equal(p.ids.playBoard.hidden, true);
+  assert.equal(p.ids.playDetail.hidden, true);
+});
+
+test("main: unknown follow names are listed above the board", async () => {
+  const p = await run("?follow=alice,ghost,zed", [TEN_PLAYER]);
+  assert.equal(p.ids.playUnknown.hidden, false);
+  assert.equal(p.ids.playUnknown.textContent, "Unknown players skipped: ghost, zed");
+  assert.equal(p.ids.playBoard.hidden, false);
+});
+
+test("main: bare URL shows the explainer alongside the default-group board", async () => {
+  const p = await run("", [TEN_PLAYER, BOB]);
+  assert.equal(p.ids.playExplainer.hidden, false);
+  assert.equal(p.ids.playBoard.hidden, false);
+  assert.equal(p.rows("#playTable")[0].className, "");            // nobody highlighted
+});
+
+test("main: nobody to tabulate falls back to the explainer, not a blank page", async () => {
+  const p = await run("?follow=", [TEN_PLAYER], { defaultGroup: [] });
+  assert.equal(p.ids.playExplainer.hidden, false);
+  assert.equal(p.ids.playBoard.hidden, true);
+  assert.equal(p.ids.playLoading.hidden, true);
+});
+
+test("main: a dead API shows the error state, not an empty board", async () => {
+  for (const opts of [{ reject: true }, { notOk: true }, { body: { oops: 1 } }]) {
+    const p = await run("", [TEN_PLAYER], opts);
+    assert.equal(p.ids.playError.hidden, false, JSON.stringify(opts));
+    assert.equal(p.ids.playLoading.hidden, true, JSON.stringify(opts));
+    assert.equal(p.ids.playBoard.hidden, true, JSON.stringify(opts));
+    assert.equal(p.ids.playExplainer.hidden, true, JSON.stringify(opts));
+  }
+});

@@ -110,7 +110,9 @@ function main() {
     $("playDetailHeading").textContent = "👤 " + p.username + "'s picks";
     $("playJoined").textContent = "Joined " + String(p.joined_at).slice(0, 10) + " (UTC)";
     var head = document.querySelector("#playPicks thead tr");
-    var cols = ["#", "Movie", "Projected rank", "Current pts"];
+    var cols = ["#", "Movie"];
+    if (D.state !== "early") cols.push("Projected rank");   // §5.3: absent, not dashed
+    cols.push("Current pts");
     if (D.state !== "early") cols.push("Projected pts");
     cols.forEach(function (c, i) { cell(head, c, i === 1 ? "t" : "", "th"); });
     var tbody = document.querySelector("#playPicks tbody");
@@ -127,8 +129,9 @@ function main() {
       var tr = document.createElement("tr");
       cell(tr, r.label);
       cell(tr, r.title, "t");
-      if (r.missing) cell(tr, "not tracked", "dash");                    // base §10.2 placeholder
-      else cell(tr, r.projected_rank ? "#" + r.projected_rank : "—", r.projected_rank ? "" : "dash");
+      if (D.state !== "early")                                         // "not tracked" is base §10.2
+        cell(tr, r.missing ? "not tracked" : (r.projected_rank ? "#" + r.projected_rank : "—"),
+             r.missing || !r.projected_rank ? "dash" : "");
       cell(tr, r.current, r.current > 0 ? "pos" : "zero");
       if (D.state !== "early") cell(tr, r.projected, r.projected > 0 ? "pos" : "zero");
       tbody.appendChild(tr);
@@ -157,7 +160,11 @@ function main() {
   // failed fetch (§5.3 — an empty roster and a dead API are different facts).
   fetch(D.api_base_url + "/api/players", { cache: "no-store" })
     .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-    .then(function (body) { render(composeView(params, body.players, D.default_group)); },
+    .then(function (body) {
+      if (!Array.isArray(body.players)) throw new Error("malformed roster payload");
+      return body.players;                                   // rejects into `failed` below
+    })
+    .then(function (players) { render(composeView(params, players, D.default_group)); },
           failed);
 }
 
