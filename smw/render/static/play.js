@@ -23,7 +23,7 @@ function composeView(params, players, defaultGroup) {
     return { state: "notfound", user: params.user, players: [], unknown: [] };
   var wanted = params.follow !== null ? params.follow : defaultGroup;
   var names = (params.user ? [params.user] : []).concat(wanted);
-  var seen = {}, out = [], unknown = [];
+  var seen = Object.create(null), out = [], unknown = [];
   names.forEach(function (n) {
     if (seen[n]) return;
     seen[n] = true;

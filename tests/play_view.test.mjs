@@ -77,6 +77,19 @@ test("bare URL with empty default group shows nobody", () => {
   assert.deepEqual(v.players, []);
 });
 
+test("dedup survives Object.prototype-named users (constructor, toString)", () => {
+  const ctor = player("constructor");
+  const v1 = P.composeView({ user: "constructor", follow: null }, [ctor], []);
+  assert.equal(v1.state, "user");
+  assert.deepEqual(v1.players.map((p) => p.username), ["constructor"]);
+
+  const ts = player("toString");
+  const v2 = P.composeView({ user: null, follow: ["toString"] }, [ts], []);
+  assert.equal(v2.state, "spectator");
+  assert.deepEqual(v2.players.map((p) => p.username), ["toString"]);
+  assert.deepEqual(v2.unknown, []);
+});
+
 test("standings: current desc, competition rank, joined date only", () => {
   const actual = TEN;                       // alice perfect
   const rows = P.standings([bob, alice, carol], actual, actual);
