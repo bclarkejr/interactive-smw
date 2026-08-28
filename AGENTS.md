@@ -16,7 +16,7 @@ Summer Movie Wager — Python ≥3.11 static-site generator (batch pipeline, sta
 - No type may carry film data and roster data together. `score`, `simulate`, `render` take `(Season, Group, MovieCatalog)` and never read global state; `render()` takes an output directory parameter.
 - `smw/score/rules.py` depends on nothing but the roster type.
 - No network in tests. The chart HTML is a committed fixture.
-- Persisted data is exactly the files in spec §5 laid out per season as `data/seasons/<year>/` (`season.yaml`, `groups/*.yaml`, `preopening_projections.yaml`, `movies_overrides.yaml`, `box_office_history.jsonl`, `forecast_history/<group_id>.jsonl`). There is deliberately **no persisted refresh/run-date record**: a degraded production refresh appends nothing (§5.6), and a refresh date that is consequently absent from the odds-over-time axis is accepted behaviour, not a defect. Reviewers must not request refresh-date persistence.
+- Persisted data is exactly the files in spec §5 laid out per season as `data/seasons/<year>/` (`season.yaml`, `play.yaml` [optional, play-along spec §6.1], `groups/*.yaml`, `preopening_projections.yaml`, `movies_overrides.yaml`, `box_office_history.jsonl`, `forecast_history/<group_id>.jsonl`). There is deliberately **no persisted refresh/run-date record**: a degraded production refresh appends nothing (§5.6), and a refresh date that is consequently absent from the odds-over-time axis is accepted behaviour, not a defect. Reviewers must not request refresh-date persistence.
 - Autoescaping is forced on unconditionally in Jinja2; embedded JSON escapes `<` as `\u003c`.
 
 ## Review protocol
